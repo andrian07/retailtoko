@@ -1,0 +1,281 @@
+<?php 
+define('DOC_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
+require DOC_ROOT_PATH . $this->config->item('header');
+?>
+</div>
+
+<div class="container">
+  <div class="page-inner">
+    <div
+    class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+    >
+    <div>
+      <h3 class="fw-bold mb-3">Dashboard</h3>
+    </div>
+    <div class="ms-md-auto py-2 py-md-0">
+      <a href="#" class="btn btn-primary btn-round">Pionir <?php echo $_SESSION['user_branch']; ?></a>
+    </div>
+  </div>
+  <div class="row row-card-no-pd">
+    <div class="col-12 col-sm-6 col-md-6 col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6><b>Penjualan Hari Ini</b></h6>
+            </div>
+            <h4 class="text-info fw-bold" style="margin-top:-5px;"><?php echo number_format($data['get_transaction_today'][0]['total_today']); ?></h4>
+          </div>
+          <div class="d-flex justify-content-between mt-2">
+            <p class="text-muted mb-0">Jumlah Transaksi</p>
+            <p class="text-muted mb-0"><?php echo number_format($data['get_transaction_today'][0]['total_transaction']); ?> kali</p>
+          </div>
+          <div class="d-flex justify-content-between mt-2">
+            <p class="text-muted mb-0">Jumlah Barang</p>
+            <p class="text-muted mb-0"><?php echo number_format($data['get_transaction_today_item'][0]['total_item']); ?>  Item</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-6 col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6><b>Penjualan Bulan Ini</b></h6>
+            </div>
+            <h4 class="text-success fw-bold" style="margin-top:-5px;"><?php echo number_format($data['get_transaction_month'][0]['total_month']); ?></h4>
+          </div>
+          <div class="d-flex justify-content-between mt-2">
+            <p class="text-muted mb-0">Jumlah Transaksi</p>
+            <p class="text-muted mb-0"><?php echo number_format($data['get_transaction_month'][0]['total_transaction']); ?> kali</p>
+          </div>
+          <div class="d-flex justify-content-between mt-2">
+            <p class="text-muted mb-0">Jumlah Barang</p>
+            <p class="text-muted mb-0"><?php echo number_format($data['get_transaction_month_item'][0]['total_item']); ?>  Item</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-6 col-xl-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6><b>Total Aset</b></h6>
+            </div>
+            <h4 class="text-danger fw-bold" style="margin-top:-5px;"><?php echo number_format($data['get_total_asset'][0]['total_omzet']); ?> </h4>
+          </div>
+          <div class="d-flex justify-content-between mt-2">
+            <p class="text-muted mb-0">Jumlah Item</p>
+            <p class="text-muted mb-0"><?php echo number_format($data['get_total_asset_item'][0]['total_item']); ?> Item</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+   <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Catatan: </div>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <textarea class="form-control" id="comment" rows="10"><?php echo $data['get_note'][0]['ms_note_text']; ?></textarea>
+          <button class="btn btn-primary" style="margin-top:20px;" id="save_note">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-head-row card-tools-still-right">
+            <div class="card-title">Aktifitas Terakhir</div>
+            <div class="card-tools"><h4 class="text-info fw-bold"><?php echo date('M j'); ?></h4> </div>
+          </div>
+        </div>
+        <div class="card-body activity">
+          <ol class="activity-feed">
+            <?php foreach($data['get_last_activity'] as $row_last_asctivity){ ?>
+            <li class="feed-item feed-item-danger">
+              <time class="date"><?php echo date('M d, H:i', strtotime($row_last_asctivity['created_at'])) ?></time>
+              <span class="text"
+              ><?php 
+              $string = $row_last_asctivity['activity_table_desc'];
+              $result = explode('Ref:', $string)[0];
+              echo trim($result);
+              ?>
+              Ref: 
+              <a href="#">"<?php echo $row_last_asctivity['activity_table_ref'] ?>"</a></span
+              >
+            </li>
+            <?php } ?>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-head-row card-tools-still-right">
+            <div class="card-title">Aktifitas Mendatang</div>
+            <div class="card-tools"><h4 class="text-info fw-bold"><?php echo date('M j', strtotime('+1 day')); ?></h4> </div>
+          </div>
+        </div>
+        <div class="card-body activity">
+          <ol class="activity-feed">
+            <?php foreach($data['get_next_activity'] as $row_next_activity){ ?>
+            <li class="feed-item feed-item-primary">
+              <time class="date"><?php echo date('M d', strtotime($row_next_activity['due_date'])) ?></time>
+              <?php if($row_next_activity['keterangan'] == 'purchase'){ ?>
+              <span class="text"><?php echo 'Jatuh Tempo Pembelian'; ?> <br /><a href="#">"<?php echo $row_next_activity['inv']; ?>"</a></span>
+              <?php }else{ ?>
+              <span class="text"><?php echo 'Jatuh Tempo Penjualan'; ?> <br /><a href="#">"<?php echo $row_next_activity['inv']; ?>"</a></span>
+              <?php } ?>
+            </li>
+            <?php } ?>
+          </ol>
+        </div>
+      </div>
+    </div>
+   
+</div>
+<div class="row">
+   <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-head-row">
+            <div class="card-title">History Transfer Stok</div>
+            <div class="card-tools">
+              <ul
+              class="nav nav-pills nav-secondary nav-pills-no-bd nav-sm"
+              id="pills-tab"
+              role="tablist"
+              >
+              <li class="nav-item">
+                <a
+                class="nav-link active"
+                id="pills-week"
+                href="<?php echo base_url(); ?>Transferstock"
+                role="tab"
+                aria-selected="false"
+                >See More..</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="card-body activity">
+        <?php foreach($data['transfer_stock'] as $row_trf_stock){ ?>
+        <div class="d-flex">
+          <div class="flex-1 ms-3 pt-1">
+            <h6 class="text-uppercase fw-bold mb-1"><?php echo $row_trf_stock['warehouse_from_name']; ?> - <?php echo $row_trf_stock['warehouse_to_name']; ?></h6>
+            <span class="text-muted">Transfer Dari <?php echo $row_trf_stock['warehouse_from_name']; ?> Ke Cabang <?php echo $row_trf_stock['warehouse_to_name']; ?></span>
+          </div>
+          <div class="float-end pt-1">
+            <small class="text-muted"><?php echo date('M d, H:i', strtotime($row_trf_stock['created_at'])) ?> <br /> <a href="#"><?php echo $row_trf_stock['hd_transfer_stock_code']; ?></a></small>
+          </div>
+        </div>
+        <div class="separator-dashed"></div>
+        <?php } ?>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card" style="height: 400px;"> 
+      <div class="card-header">
+        <div class="card-title">Penjualan Top Products 3 Bulan</div>
+      </div>
+      <div class="card-body pb-0">
+        <?php foreach($data['top_product_3_month'] as $row_3){ ?>
+        <div class="d-flex">
+          <div class="flex-1 pt-1 ms-2">
+            <p class="fw-bold mb-1" style="font-size:12px;"><?php echo $row_3['product_name']; ?></p>
+            <small class="text-muted"><?php echo $row_3['product_code']; ?></small>
+          </div>
+          <div class="d-flex ms-auto align-items-center">
+            <h4 class="text-info fw-bold"><?php echo $row_3['total_transaction']; ?> Item</h4>
+          </div>
+        </div>
+        <div class="separator-dashed"></div>
+        <?php } ?>
+
+        <div class="pull-in">
+          <canvas id="topProductsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-head-row">
+          <div class="card-title">Faktur Terlewat</div>
+          <div class="card-tools">
+            <ul
+            class="nav nav-pills nav-secondary nav-pills-no-bd nav-sm"
+            id="pills-tab"
+            role="tablist"
+            >
+            <li class="nav-item">
+              
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="card-body activity">
+      <?php foreach($data['lost_faktur'] as $row_lost_faktur){?>
+      <div class="d-flex">
+        <div class="flex-1 ms-3 pt-1">
+          <h6 class="fw-bold mb-1" style="font-size: 12px;"><?php echo $row_lost_faktur['hd_sales_inv']; ?></h6>
+          <span class="text-muted">Total: Rp. <?php echo number_format($row_lost_faktur['hd_sales_remaining_debt']); ?></span>
+        </div>
+        <div class="float-end pt-1">
+          <small class="text-muted"><?php echo date('d-m-Y', strtotime($row_lost_faktur['hd_sales_due_date'])) ?></small>
+        </div>
+      </div>
+      <div class="separator-dashed"></div>
+      <?php } ?>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+</div>
+</div>
+<?php 
+require DOC_ROOT_PATH . $this->config->item('footer');
+?>
+<script>
+ $('#save_note').click(function(e){
+    e.preventDefault();
+    var comment  = $("#comment").val();
+    $.ajax({
+      type: "POST",
+      url: "<?php echo base_url(); ?>Dashboard/save_comment",
+      dataType: "json",
+      data: {comment:comment},
+      success : function(data){
+        if (data.code == "200"){
+          window.location.href = "<?php echo base_url(); ?>/Dashboard/Admin";
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: data.result,
+          })
+        }
+      }
+    });
+  });
+  </script>
