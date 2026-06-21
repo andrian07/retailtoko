@@ -858,20 +858,63 @@ class Purchase extends CI_Controller {
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
 		}
 	}
+	
+	public function add_temp_purchase()
+	{
+		$modul = 'Purchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$product_id 				= $this->input->post('product_id');
+			$temp_price_val 			= $this->input->post('temp_price_val');
+			$temp_qty 					= $this->input->post('temp_qty');
+			$temp_total_val 			= $this->input->post('temp_total_val');
+			$user_id 					= $_SESSION['user_id'];
+
+			$check_temp_purchase_input = $this->purchase_model->check_temp_purchase_input($product_id, $user_id);
+			$data_insert = array(
+				'temp_product_id'				=> $product_id,
+				'temp_purchase_price'			=> $temp_price_val,
+				'temp_purchase_qty'				=> $temp_qty,
+				'temp_purchase_total'			=> $temp_total_val,
+				'temp_user_id'					=> $user_id,
+			);	
+			$msg = 'Success Tambah';
+			if($check_temp_purchase_input != null){
+				$this->purchase_model->edit_temp_purchase($product_id, $user_id, $data_insert);
+			}else{
+				$this->purchase_model->insert_temp_purchase($data_insert);
+			}
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
 
 	public function check_temp_purchase()
 	{
 		$user_id 		= $_SESSION['user_id'];
 		$check_temp_po  = $this->purchase_model->check_temp_purchase($user_id)->result_array();
-		if($check_temp_po[0]['hd_po_top'] == 'CBD'){
-			$hd_po_top_val = 0;
-		}else{
-			$hd_po_top_val = trim($check_temp_po[0]['hd_po_top'],"JT");
-		}
-		echo json_encode(['code'=>200, 'data'=>$check_temp_po, 'hd_po_top_val'=>$hd_po_top_val]);
+		echo json_encode(['code'=>200, 'data'=>$check_temp_po]);
 		die();
 	}
-	
+
+	public function delete_temp_purchase()
+	{
+		$modul = 'Purchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$product_id  = $this->input->post('id');
+			$user_id 	 = $_SESSION['user_id'];
+			$this->purchase_model->delete_temp_purchase($product_id, $user_id);
+			$msg = 'Success Delete';
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+			die();
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);
+		}
+	}
 
 	// end purchase
 

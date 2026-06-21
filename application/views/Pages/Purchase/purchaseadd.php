@@ -227,7 +227,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
               </div>
               <div class="col-md-4 po-field-group">
                 <label>Jatuh Tempo</label>
-                <input id="purchase_due_date" name="purchase_due_date" type="date" class="form-control" value="" readonly="">
+                <input id="purchase_due_date" name="purchase_due_date" type="date" class="form-control" value="">
               </div>
             </div>
 
@@ -441,7 +441,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 <script>
 
   $('#purchase_tax').prop('disabled', true);
-  $('#purchase_due_date').prop('disabled', true);
   $('#po_user_id').prop('disabled', true);
   
 
@@ -670,16 +669,23 @@ require DOC_ROOT_PATH . $this->config->item('footer');
   $('#product_name').autocomplete({ 
     minLength: 2,
     source: function(req, add) {
+      let supplier = $('#purchase_supplier').val();
+      if (!supplier) {
+        Swal.fire({
+					icon: 'error',
+					title: 'Oops...',
+					text: 'Silahkan Isi Supplier Terlebih Dahulu',
+				})
+        $('#product_name').val('');
+      }
       $.ajax({
-        url: '<?php echo base_url(); ?>/Purchase/search_product_po?sup_id='+$('#po_supplier').val(),
+        url: '<?php echo base_url(); ?>Globalext/search_product_purchase?supid='+$('#purchase_supplier').val(),
         dataType: 'json',
         type: 'GET',
         data: req,
         success: function(res) {
           if (res.success == true) {
             add(res.data);
-          }else{
-            $('#submission_inv').val('');
           }
         },
       });
@@ -689,11 +695,10 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       let product_name = ui.item.product_name;
       let product_id = ui.item.product_id;
       let product_price = ui.item.product_price;
-      let product_weight = ui.item.product_weight;
-      $('#product_name').val(product_name);
-      $('#product_id').val(product_id);
+      $('#product_id').val(id);
+      $('#temp_qty').val(1);
       temp_price.set(product_price);
-      $('#temp_weight').val(product_weight);
+      temp_total.set(product_price);
     },
   });
 
@@ -842,15 +847,9 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           footer_sub_total.set(row.sub_total);
           $('#po_inv').val(row.hd_po_invoice);
           $('#po_id').val(row.hd_po_id);
-          $('#purchase_top').val(data.hd_po_top_val);
-          $('#purchase_top').trigger('change');
           $('#purchase_payment_method').val(row.hd_po_payment);
-          $('#purchase_payment_method').trigger('change');
-          $('#purchase_ekspedisi').val(row.hd_po_ekspedisi);
-          $('#purchase_ekspedisi').trigger('change');
+          $('#purchase_payment_method').trigger('change');;
           $('#purchase_tax').val(row.hd_po_tax);
-          $('#purchase_warehouse').val(row.hd_po_warehouse);
-          $('#purchase_warehouse').trigger('change');
           $('#purchase_supplier').val(row.hd_po_supplier);
           $('#purchase_supplier').trigger('change');
           edit_footer_discount_percentage1.set(row.hd_po_disc_percentage1);
@@ -862,7 +861,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           footer_total_discount.set(row.hd_po_total_discount);
           footer_dpp.set(row.hd_po_dpp);
           footer_total_ppn.set(row.hd_po_ppn);
-          footer_total_ongkir.set(row.hd_po_ongkir);
           footer_total_invoice.set(row.hd_po_grand_total);
         }
       }
@@ -891,19 +889,13 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     var product_id              = $("#product_id").val();
     var temp_price_val          = parseInt(temp_price.get());
     var temp_qty                = $("#temp_qty").val();
-    var temp_weight             = $("#temp_weight").val();
-    var temp_delivery_price_val = parseInt(temp_delivery_price.get());
-    var temp_total_weight       = $("#temp_total_weight").val();
-    var temp_ongkir_val         = parseInt(temp_ongkir.get());
     var temp_total_val          = parseInt(temp_total.get());
-    var temp_note               = $("#temp_note").val();
-
     if($('#formaddtemp').parsley().validate({force: true})){
       $.ajax({
         type: "POST",
         url: "<?php echo base_url(); ?>Purchase/add_temp_purchase",
         dataType: "json",
-        data: {product_id:product_id, temp_price_val:temp_price_val, temp_qty:temp_qty, temp_weight:temp_weight, temp_delivery_price_val:temp_delivery_price_val, temp_total_weight:temp_total_weight, temp_ongkir_val:temp_ongkir_val, temp_total_val:temp_total_val, temp_note:temp_note},
+        data: {product_id:product_id, temp_price_val:temp_price_val, temp_qty:temp_qty, temp_total_val:temp_total_val},
         success : function(data){
           if (data.code == "200"){
             let title = 'Tambah Data';

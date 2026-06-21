@@ -353,12 +353,36 @@ class purchase_model extends CI_Model {
 
     public function check_temp_purchase($user_id)
     {
-        $this->db->select('*, sum(temp_purchase_total) as sub_total, sum(temp_purchase_total_ongkir) as ongkir');
+        $this->db->select('*, sum(temp_purchase_total) as sub_total');
         $this->db->from('temp_purchase');
         $this->db->join('hd_po', 'temp_purchase.temp_purchase_po_id  = hd_po.hd_po_id ');
         $this->db->where('temp_user_id', $user_id);
         $query = $this->db->get();
         return $query;
+    }
+    public function check_temp_purchase_input($product_id, $user_id)
+    {
+        $query = $this->db->query("select * from temp_purchase where temp_product_id = '".$product_id."' and temp_user_id = '".$user_id."'");
+        $result = $query->result();
+        return $result;
+    }
+    public function edit_temp_purchase($product_id, $user_id, $data_insert)
+    {
+        $this->db->set($data_insert);
+        $this->db->where('temp_product_id ', $product_id);
+        $this->db->where('temp_user_id ', $user_id);
+        $this->db->update('temp_purchase');
+    }
+    public function insert_temp_purchase($data_insert)
+    {
+        $this->db->insert('temp_purchase', $data_insert);
+    }
+
+    public function delete_temp_purchase($product_id, $user_id)
+    {
+        $this->db->where('temp_product_id', $product_id);
+        $this->db->where('temp_user_id', $user_id);
+        $this->db->delete('temp_purchase');
     }
     
     // end purchase
