@@ -4,307 +4,363 @@ require DOC_ROOT_PATH . $this->config->item('header');
 ?>
 </div>
 
+<style>
+  .po-section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6c757d;
+    padding: 0 0 6px 0;
+    margin-bottom: 14px;
+    border-bottom: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .po-section-title i {
+    color: #fd7e14;
+    font-size: 0.9rem;
+  }
+  .card.po-header-card {
+    border: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border-radius: 12px;
+  }
+  .card.po-header-card .card-body {
+    padding: 24px 28px;
+  }
+  .po-field-group {
+    margin-bottom: 18px;
+  }
+  .po-field-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .po-field-group .form-control {
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+  .po-field-group .form-control[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+  }
+  .card.po-detail-card {
+    border: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border-radius: 12px;
+    margin-top: 8px;
+  }
+  .card.po-detail-card .card-body {
+    padding: 24px 28px;
+  }
+  .input-temp-wrapper-po {
+    background: linear-gradient(135deg, #fff8f0 0%, #fffaf5 100%);
+    border: 1.5px dashed #ffc078;
+    border-radius: 10px;
+    padding: 18px 20px 8px 20px;
+    margin-bottom: 20px;
+  }
+  .btn-add-temp-po {
+    height: 38px;
+    width: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1rem;
+    box-shadow: 0 3px 8px rgba(253,126,20,0.3);
+  }
+  .po-summary-card {
+    background: linear-gradient(135deg, #f4f6f9 0%, #eaecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 20px 24px;
+    color: #343a40;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .po-summary-card .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.875rem;
+  }
+  .po-summary-card .summary-row:last-child {
+    border-bottom: none;
+  }
+  .po-summary-card .summary-row .summary-label {
+    color: #6c757d;
+    font-weight: 600;
+  }
+  .po-summary-card .summary-row .summary-input {
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    color: #343a40;
+    text-align: right;
+    font-weight: 600;
+    width: 170px;
+    padding: 4px 10px;
+    font-size: 0.875rem;
+  }
+  .po-summary-card .summary-row .summary-input[readonly] {
+    cursor: default;
+    background: #f8f9fa;
+  }
+  .po-summary-card .summary-row.ppn-row {
+    align-items: center;
+    gap: 8px;
+  }
+  .po-summary-card .summary-row.ppn-row .ppn-check {
+    width: 20px;
+    height: 20px;
+    accent-color: #fd7e14;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .po-summary-card .summary-row.grand-total-row {
+    padding-top: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-top: 2px solid #adb5bd;
+  }
+  .po-summary-card .summary-row.grand-total-row .summary-label {
+    color: #212529;
+  }
+  .po-summary-card .summary-row.grand-total-row .summary-input {
+    font-size: 1rem;
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #fd7e14;
+  }
+  .po-page-title-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .po-page-title-bar .title-icon {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #fd7e14, #e8650a);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .po-page-title-bar h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+  .po-page-title-bar small {
+    color: #6c757d;
+    font-size: 0.8rem;
+  }
+  .supplier-highlight-po {
+    border-left: 4px solid #fd7e14;
+    padding-left: 12px;
+  }
+  #temp-po-list thead th {
+    background: #fd7e14;
+    color: #fff;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: none;
+    white-space: nowrap;
+  }
+  #temp-po-list {
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.86rem;
+  }
+</style>
+
 <div class="container">
   <div class="page-inner">
-    <div class="page-header">
-
-    </div>
+    <div class="page-header"></div>
     <div class="row">
-      <h3 class="fw-bold mb-3">Edit PO </h3>
+
+      <!-- Page Title -->
+      <div class="col-md-12 mb-2">
+        <div class="po-page-title-bar">
+          <div class="title-icon"><i class="fas fa-edit"></i></div>
+          <div>
+            <h3>Edit Purchase Order</h3>
+            <small>Ubah data PO pembelian ke supplier</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CARD 1: Informasi PO ===== -->
       <div class="col-md-12">
-        <div class="card">
+        <div class="card po-header-card">
           <div class="card-body">
-            <div class="form-group row">
-              <label for="noinvoice" class="col-sm-1 col-form-label text-right">No Invoice :</label>
-              <div class="col-sm-3">
+
+            <!-- Section: Dokumen -->
+            <div class="po-section-title"><i class="fas fa-file-invoice"></i> Informasi Dokumen</div>
+            <div class="row">
+              <div class="col-md-4 po-field-group">
+                <label>No Invoice PO</label>
                 <input id="purchase_order_invoice" name="purchase_order_invoice" type="text" class="form-control" value="AUTO" readonly="">
-                <input id="purchase_order_id" name="purchase_order_id" type="hidden" class="form-control" value="<?php echo $_GET['id']; ?>">
-              </div> 
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">T.O.P :</label>
-              <div class="col-sm-3">
-                <select class="form-control input-full js-example-basic-single" onchange="duedate_cal()" id="po_top" name="po_top">
-                  <option value="">-- Pilih T.O.P --</option>
-                  <option value="0">CBD</option>
-                  <option value="7">JT7</option>
-                  <option value="15">JT15</option>
-                  <option value="30">JT30</option>
-                  <option value="45">JT45</option>
-                  <option value="60">JT60</option>
-                  <option value="90">JT90</option>
-                </select>
+                <input id="purchase_order_id" name="purchase_order_id" type="hidden" value="<?php echo $_GET['id']; ?>">
               </div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">Tanggal :</label>
-              <div class="col-sm-3">
+              <div class="col-md-4 po-field-group">
+                <label>Tanggal PO</label>
                 <input id="po_date" name="po_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>" readonly="">
+              </div>
+              <div class="col-md-4 po-field-group">
+                <label>Jatuh Tempo</label>
+                <input id="purchase_order_due_date" name="purchase_order_due_date" type="date" class="form-control" value="" readonly="">
               </div>
             </div>
 
-            <div class="form-group row">
-              <label for="noinvoice" class="col-sm-1 col-form-label text-right">Supplier Baru:</label>
-              <div class="col-sm-3">
+            <!-- Section: Supplier & Pembayaran -->
+            <div class="po-section-title mt-2"><i class="fas fa-truck"></i> Supplier & Pembayaran</div>
+            <div class="row">
+              <div class="col-md-5 po-field-group supplier-highlight-po">
+                <label>Supplier</label>
                 <select class="form-control input-full js-example-basic-single" id="po_supplier" name="po_supplier">
                   <option value="">-- Pilih Supplier --</option>
                   <?php foreach ($data['supplier_list'] as $row) { ?>
-                    <option value="<?php echo $row->supplier_id; ?>"><?php echo $row->supplier_name; ?></option>  
+                    <option value="<?php echo $row->supplier_id; ?>"><?php echo $row->supplier_name; ?></option>
                   <?php } ?>
                 </select>
-                <input id="po_supplier_code" name="po_supplier_code" type="hidden" class="form-control" value="" readonly="">
+                <input id="po_supplier_code" name="po_supplier_code" type="hidden" value="" readonly="">
               </div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">Jatuh Tempo :</label>
-              <div class="col-sm-3">
-                <input id="purchase_order_due_date" name="purchase_order_due_date" type="date" class="form-control" value="" readonly="">
-              </div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">Gudang :</label>
-              <div class="col-sm-3">
-                <select class="form-control input-full js-example-basic-single" id="po_warehouse" name="po_warehouse">
-                  <option value="">-- Pilih Gudang --</option>
-                  <?php foreach ($data['warehouse_list'] as $row) { ?>
-                    <option value="<?php echo $row->warehouse_id; ?>"><?php echo $row->warehouse_name; ?></option>  
+              <div class="col-md-3 po-field-group">
+                <label>Metode Bayar</label>
+                <select class="form-control input-full js-example-basic-single" id="po_payment_method" name="po_payment_method">
+                  <option value="">-- Pilih Metode Bayar --</option>
+                  <?php foreach ($data['payment_list'] as $row) { ?>
+                    <option value="<?php echo $row->payment_id; ?>"><?php echo $row->payment_name; ?></option>
                   <?php } ?>
                 </select>
               </div>
-            </div>
-
-            <div class="form-group row">
-              <label for="noinvoice" class="col-sm-1 col-form-label text-right">Golongan :</label>
-              <div class="col-sm-3">
+              <div class="col-md-2 po-field-group">
+                <label>Golongan Pajak</label>
                 <select class="form-control" id="po_tax" name="po_tax">
                   <option value="PPN">BKP</option>
                   <option value="NON PPN">NON BKP</option>
                 </select>
               </div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">Metode Bayar :</label>
-              <div class="col-sm-3">
-                <select class="form-control input-full js-example-basic-single" id="po_payment_method" name="po_payment_method">
-                  <option value="">-- Pilih Metode Bayar --</option>
-                  <?php foreach ($data['payment_list'] as $row) { ?>
-                    <option value="<?php echo $row->payment_id; ?>"><?php echo $row->payment_name; ?></option>  
-                  <?php } ?>
-                </select>
-              </div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">User :</label>
-              <div class="col-sm-3">
+              <div class="col-md-2 po-field-group">
+                <label>User</label>
                 <input id="po_user_id" name="po_user_id" type="text" class="form-control" value="<?php echo $_SESSION['user_name']; ?>" readonly="">
               </div>
             </div>
-
-            <div class="form-group row">
-              <label for="noinvoice" class="col-sm-1 col-form-label text-right">Ekspedisi :</label>
-              <div class="col-sm-3">
-                <select class="form-control input-full js-example-basic-single" id="po_ekspedisi" name="po_ekspedisi">
-                  <option value="">-- Pilih Ekspedisi --</option>
-                  <?php foreach ($data['ekspedisi_list'] as $row) { ?>
-                    <option value="<?php echo $row->ekspedisi_id; ?>"><?php echo $row->ekspedisi_name; ?></option>  
-                  <?php } ?>
-                </select>
-              </div>
-              <div class="col-sm-8"></div>
-            </div>
-
 
           </div>
         </div>
       </div>
 
+      <!-- ===== CARD 2: Detail Produk ===== -->
       <div class="col-md-12">
-        <div class="card">
+        <div class="card po-detail-card">
           <div class="card-body">
+
+            <div class="po-section-title"><i class="fas fa-boxes"></i> Detail Produk</div>
+
             <form id="formaddtemp">
-              <div class="row well well-sm input-temp">
-                <input id="temp_po_id" name="temp_po_id" type="hidden" value="">
-                <input id="item_id" name="item_id" type="hidden" value="">
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label>No Pengajuan:</label>
-                    <input id="submission_inv" name="submission_inv" type="text" class="form-control ui-autocomplete-input" placeholder="Pilih Pengajuan">
-                    <input id="submission_id" type="hidden" name="submission_id">
-                    <input id="submission_code" type="hidden" name="submission_code">
-                  </div>
-                </div>
-
-
-                <div class="col-sm-4">
-                  <div class="form-group">
+              <input id="item_id" name="item_id" type="hidden" value="">
+              <div class="input-temp-wrapper-po">
+                <div class="row align-items-end">
+                  <div class="col-sm-5 po-field-group mb-2">
                     <label>Produk</label>
-                    <input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="ketikkan nama produk" value="" required="" autocomplete="off"  data-parsley-required data-parsley-required-message="*Masukan Nama Produk"required="">
+                    <input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="Ketikkan nama produk..." value="" required="" autocomplete="off" data-parsley-required data-parsley-required-message="*Masukan Nama Produk">
                     <input id="product_id" type="hidden" name="product_id">
                   </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Harga Beli Per Unit</label>
+                  <div class="col-sm-2 po-field-group mb-2">
+                    <label>Harga Beli / Unit</label>
                     <input id="temp_price" name="temp_price" class="form-control text-right" value="0" required="">
-                    <input id="temp_dpp" name="temp_dpp" type="hidden" class="form-control text-right" value="Rp 0.00" required="">
-                    <input id="temp_tax" name="temp_tax" type="hidden" class="form-control text-right" value="Rp 0.00" readonly="" required="">
                   </div>
-                </div>
-
-
-                <div class="col-sm-2">
-                  <div class="form-group">
+                  <div class="col-sm-2 po-field-group mb-2">
                     <label>Qty</label>
                     <input id="temp_qty" name="temp_qty" type="text" class="form-control text-right" value="0" data-parsley-min="1" data-parsley-min-message="*qty harus lebih besar dari 0" required="">
                   </div>
-                </div>
-
-
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Berat</label>
-                    <input id="temp_weight" name="temp_weight" type="text" class="form-control text-right" value="0">
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Ongkir</label>
-                    <input id="temp_delivery_price" name="temp_delivery_price" type="text" class="form-control text-right" value="0">
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Total Berat</label>
-                    <input id="temp_total_weight" name="temp_total_weight" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Total Ongkir</label>
-                    <input id="temp_ongkir" name="temp_ongkir" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-
-                <div class="col-sm-3">
-
-                  <!-- text input -->
-
-                  <div class="form-group">
-
+                  <div class="col-sm-2 po-field-group mb-2">
                     <label>Total</label>
-
                     <input id="temp_total" name="temp_total" type="text" class="form-control text-right" value="0" readonly="">
-
                   </div>
-
-                </div>
-
-                  <div class="col-sm-11">
-
-                  <!-- text input -->
-
-                  <div class="form-group">
-
-                    <label>Catatan</label>
-
-                    <input id="temp_note" name="temp_note" type="text" class="form-control">
-
+                  <div class="col-sm-1 mb-2 d-flex flex-column align-items-center">
+                    <label>&nbsp;</label>
+                    <button id="btnadd_temp" class="btn btn-warning btn-add-temp btn-add-temp-po" title="Tambah Item"><i class="fas fa-plus"></i></button>
                   </div>
-
                 </div>
-
-                <div class="col-sm-1" style="padding-right: 62px;">
-
-                  <!-- text input -->
-
-                  <label>&nbsp;</label>
-
-                  <div class="form-group">
-
-                    <button id="btnadd_temp" class="btn btn-md btn-primary rounded-circle float-right btn-add-temp"><i class="fas fa-plus"></i></button>
-
-                  </div>
-
-                </div>
-
               </div>
             </form>
 
             <div class="table-responsive">
-              <table id="temp-po-list" class="display table table-striped table-hover" >
+              <table id="temp-po-list" class="display table table-striped table-hover">
                 <thead>
                   <tr>
-                    <th>No Pengajuan</th>
-                    <th>SKU</th>
+                    <th>Kode Produk</th>
                     <th>Produk</th>
                     <th>Satuan</th>
                     <th>Harga Beli</th>
                     <th>Qty</th>
-                    <th>Ongkir per pcs</th>
                     <th>Total</th>
-                    <th>Catatan</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
               </table>
             </div>
 
-            <div class="row form-space">
+            <!-- Footer: Catatan & Ringkasan -->
+            <div class="row mt-4">
               <div class="col-lg-6">
-                <div class="form-group">
-                  <div class="col-sm-12">
-                    <textarea id="purchase_remark" name="purchase_remark" class="form-control" placeholder="Catatan" maxlength="500" rows="8"></textarea>
-                  </div>
-                </div>
+                <div class="po-section-title"><i class="fas fa-sticky-note"></i> Catatan PO</div>
+                <textarea id="purchase_remark" name="purchase_remark" class="form-control" placeholder="Tuliskan catatan PO di sini..." maxlength="500" rows="9" style="border-radius:8px; resize:none;"></textarea>
               </div>
 
-              <div class="col-lg-6 text-right">
-                <div class="form-group row">
-                  <label for="footer_sub_total" class="col-sm-7 col-form-label text-right:">Sub Total:</label>
-                  <div class="col-sm-5">
-                    <input id="footer_sub_total" name="footer_sub_total" type="text" class="form-control text-right" value="0" readonly="">
+              <div class="col-lg-6">
+                <div class="po-section-title"><i class="fas fa-calculator"></i> Ringkasan Pembayaran</div>
+                <div class="po-summary-card">
+                  <div class="summary-row">
+                    <span class="summary-label">Sub Total</span>
+                    <input id="footer_sub_total" name="footer_sub_total" type="text" class="summary-input" value="0" readonly="">
                   </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_discount" class="col-sm-7 col-form-label text-right:">Discount :</label>
-                  <div class="col-sm-5">
+                  <div class="summary-row">
+                    <span class="summary-label">Discount</span>
                     <input id="footer_discount1" name="footer_discount1" type="hidden" class="form-control text-right" value="Rp 0.00" readonly="">
                     <input id="footer_discount2" name="footer_discount2" type="hidden" class="form-control text-right" value="Rp 0.00" readonly="">
                     <input id="footer_discount3" name="footer_discount3" type="hidden" class="form-control text-right" value="Rp 0.00" readonly="">
                     <input id="footer_discount_percentage1" name="footer_discount_percentage1" type="hidden" class="form-control text-right" value="0.00%" readonly="">
                     <input id="footer_discount_percentage2" name="footer_discount_percentage2" type="hidden" class="form-control text-right" value="0.00%" readonly="">
                     <input id="footer_discount_percentage3" name="footer_discount_percentage3" type="hidden" class="form-control text-right" value="0.00%" readonly="">
-                    <input id="footer_total_discount" name="footer_total_discount" data-bs-toggle="modal" data-bs-target="#footerdiscount" type="text" class="form-control text-right" value="0" readonly="">
+                    <input id="footer_total_discount" name="footer_total_discount" data-bs-toggle="modal" data-bs-target="#footerdiscount" type="text" class="summary-input" value="0" readonly="" style="cursor:pointer;" title="Klik untuk ubah diskon">
+                  </div>
+                  <div class="summary-row">
+                    <span class="summary-label">DPP</span>
+                    <input id="footer_dpp" name="footer_dpp" type="text" class="summary-input" value="0" readonly="">
+                  </div>
+                  <div class="summary-row ppn-row">
+                    <span class="summary-label">PPN 11%</span>
+                    <div class="d-flex align-items-center" style="gap:8px;">
+                      <input id="footer_total_ppn" name="footer_total_ppn" type="text" class="summary-input" value="0" readonly="" style="width:140px;">
+                      <input class="form-check-input ppn-check" type="checkbox" value="" id="ppn_cheked" title="Aktifkan PPN">
+                    </div>
+                  </div>
+                  <div class="summary-row grand-total-row">
+                    <span class="summary-label">Grand Total</span>
+                    <input id="footer_total_invoice" name="footer_total_invoice" type="text" class="summary-input" value="0" readonly="">
                   </div>
                 </div>
-                <div class="form-group row">
-                  <label for="footer_dpp" class="col-sm-7 col-form-label text-right:">DPP :</label>
-                  <div class="col-sm-5">
-                    <input id="footer_dpp" name="footer_dpp" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_ppn" class="col-sm-7 col-form-label text-right:">PPN 11% :</label>
-                  <div class="col-sm-4">
-                    <input id="footer_total_ppn" name="footer_total_ppn" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                   <div class="col-sm-1">
-                    <input class="form-check-input" type="checkbox" value="" id="ppn_cheked" style="height: 38px; width: 80%;">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_ongkir" class="col-sm-7 col-form-label text-right:">Ongkir:</label>
-                  <div class="col-sm-5">
-                    <input id="footer_total_ongkir" name="footer_total_ongkir" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_invoice" class="col-sm-7 col-form-label text-right:">Grand Total :</label>
-                  <div class="col-sm-5">
-                    <input id="footer_total_invoice" name="footer_total_invoice" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <div class="col-sm-12">
-                    <button id="btncancel" class="btn btn-danger"><i class="fas fa-times-circle"></i> Batal</button>
-                    <button id="btnsave" class="btn btn-success button-header-custom-save"><i class="fas fa-save"></i> Simpan</button>
-                  </div>
+                <div class="mt-3 d-flex justify-content-end" style="gap:10px;">
+                  <button id="btncancel" class="btn btn-danger px-4" style="border-radius:8px;"><i class="fas fa-times-circle"></i> Batal</button>
+                  <button id="btnsave" class="btn btn-success button-header-custom-save px-4" style="border-radius:8px;"><i class="fas fa-save"></i> Simpan</button>
                 </div>
               </div>
             </div>
@@ -355,7 +411,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times-circle"></i> Batal</button>
-                      <button type="button" id="btneditdisc"  class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                      <button type="button" id="btneditdisc" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
                     </div>
                   </form>
                 </div>
@@ -394,22 +450,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     digitGroupSeparator : '.',
   });
 
-  let temp_delivery_price = new AutoNumeric('#temp_delivery_price', {
-    currencySymbol : 'Rp. ',
-    decimalCharacter : ',',
-    decimalPlaces: 0,
-    decimalPlacesShownOnFocus: 0,
-    digitGroupSeparator : '.',
-  });
-
-  let temp_ongkir = new AutoNumeric('#temp_ongkir', {
-    currencySymbol : 'Rp. ',
-    decimalCharacter : ',',
-    decimalPlaces: 0,
-    decimalPlacesShownOnFocus: 0,
-    digitGroupSeparator : '.',
-  });
-
   let footer_sub_total = new AutoNumeric('#footer_sub_total', {
     currencySymbol : 'Rp. ',
     decimalCharacter : ',',
@@ -435,14 +475,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
   });
 
   let footer_total_ppn = new AutoNumeric('#footer_total_ppn', {
-    currencySymbol : 'Rp. ',
-    decimalCharacter : ',',
-    decimalPlaces: 0,
-    decimalPlacesShownOnFocus: 0,
-    digitGroupSeparator : '.',
-  });
-
-  let footer_total_ongkir = new AutoNumeric('#footer_total_ongkir', {
     currencySymbol : 'Rp. ',
     decimalCharacter : ',',
     decimalPlaces: 0,
@@ -527,70 +559,33 @@ require DOC_ROOT_PATH . $this->config->item('footer');
         {data: 3},
         {data: 4},
         {data: 5},
-        {data: 6},
-        {data: 7},
-        {data: 8},
-        {data: 9},
+        {data: 6}
       ]
     });
     check_tempt_data();
   }
 
-  $('#submission_inv').autocomplete({ 
-    minLength: 2,
-    source: function(req, add) {
-      $.ajax({
-        url: '<?php echo base_url(); ?>/Purchase/search_submission',
-        dataType: 'json',
-        type: 'GET',
-        data: req,
-        success: function(res) {
-          if (res.success == true) {
-            add(res.data);
-          }else{
-            $('#submission_inv').val('');
-          }
-        },
-      });
-    },
-    select: function(event, ui) {
-      let id = ui.item.id;
-      let product_name = ui.item.product_name;
-      let product_id = ui.item.product_id;
-      let product_price = ui.item.product_price;
-      let product_weight = ui.item.product_weight;
-      let qty = ui.item.qty;
-      let code = ui.item.code;
-      $('#submission_id').val(id);
-      $('#submission_code').val(code);
-      $('#product_name').val(product_name);
-      $('#product_id').val(product_id);
-      $('#temp_qty').val(qty);
-      temp_price.set(product_price);
-      $('#temp_weight').val(product_weight);
-      let temp_qty_val = $('#temp_qty').val();
-      let temp_weight_val = $('#temp_weight').val();
-      let temp_total_weight_val = temp_qty_val * temp_weight_val;
-      $('#temp_total_weight').val(temp_total_weight_val);
-      let temp_total_val = product_price * qty;
-      temp_total.set(temp_total_val);
-    },
-  });
-
 
   $('#product_name').autocomplete({ 
     minLength: 2,
     source: function(req, add) {
+      let supplier = $('#po_supplier').val();
+      if (!supplier) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Silahkan Isi Supplier Terlebih Dahulu',
+        })
+        $('#product_name').val('');
+      }
       $.ajax({
-        url: '<?php echo base_url(); ?>/Purchase/search_product',
+        url: '<?php echo base_url(); ?>Globalext/search_product_purchase?supid='+$('#po_supplier').val(),
         dataType: 'json',
         type: 'GET',
         data: req,
         success: function(res) {
           if (res.success == true) {
             add(res.data);
-          }else{
-            $('#submission_inv').val('');
           }
         },
       });
@@ -600,61 +595,28 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       let product_name = ui.item.product_name;
       let product_id = ui.item.product_id;
       let product_price = ui.item.product_price;
-      let product_weight = ui.item.product_weight;
-      //$('#submission_id').val(id);
-      //$('#submission_code').val('');
-      //$('#product_name').val(product_name);
       $('#product_id').val(id);
+      $('#temp_qty').val(1);
       temp_price.set(product_price);
-      $('#temp_weight').val(product_weight);
+      temp_total.set(product_price);
     },
   });
 
-  
+  $('#temp_qty').on('input', function() {
+    let qty = $(this).val();
+    let temp_price_val = temp_price.get();
+    let temp_total_Val = qty * temp_price_val;
+    temp_total.set(temp_total_Val);
+  });
 
   $('#temp_price').on('input', function (event) {
-    let temp_price_val = parseInt(temp_price.get());
-    let temp_qty_val = $('#temp_qty').val();
-    let temp_weight_val = $('#temp_weight').val();
-    let temp_total_weight_val = temp_qty_val * temp_weight_val;
-    $('#temp_total_weight').val(temp_total_weight_val);
-    let temp_ongkir_val = parseInt(temp_ongkir.get());
-    let temp_total_val = temp_price_val * temp_qty_val + temp_ongkir_val;
-    temp_total.set(temp_total_val);
+    let temp_price_val = temp_price.get();
+    let qty =  $('#temp_qty').val();
+    let temp_total_Val = qty * temp_price_val;
+    console.log(temp_total_Val);
+    temp_total.set(temp_total_Val);
   })
 
-  $('#temp_qty').on('input', function (event) {
-    let temp_price_val = parseInt(temp_price.get());
-    let temp_qty_val = $('#temp_qty').val();
-    let temp_weight_val = $('#temp_weight').val();
-    let temp_total_weight_val = temp_qty_val * temp_weight_val;
-    $('#temp_total_weight').val(temp_total_weight_val);
-    let temp_ongkir_val = parseInt(temp_ongkir.get());
-    let temp_total_val = temp_price_val * temp_qty_val + temp_ongkir_val;
-    temp_total.set(temp_total_val);
-  })
-
-
-
-  $('#temp_delivery_price').on('input', function (event) {
-    let temp_qty_val = $('#temp_qty').val();
-    if(temp_qty_val == 0){
-      temp_delivery_price.set(0);
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: "Silahakn Isi Qty Terlebih Dahulu",
-      })
-    }else{
-      let temp_price_val = parseInt(temp_price.get());
-      let temp_delivery_price_val = parseInt(temp_delivery_price.get());
-      let temp_total_weight_val = $('#temp_total_weight').val();
-      let temp_ongkir_val = temp_delivery_price_val * temp_total_weight_val;
-      temp_ongkir.set(temp_ongkir_val);
-      let temp_total_val = temp_price_val * temp_qty_val + temp_ongkir_val;
-      temp_total.set(temp_total_val);
-    }
-  })
 
   $('#edit_footer_discount_percentage1').on('input', function (event) {
     let footer_sub_total_val = parseInt(footer_sub_total.get());
@@ -680,28 +642,21 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     edit_footer_discount3.set(edit_footer_discount3_val);
   })
   
-
+  
   $('#btnadd_temp').click(function(e){
     e.preventDefault();
-    var submission_id           = $("#submission_id").val();
-    var submission_code         = $("#submission_code").val();
     var product_id              = $("#product_id").val();
     var po_supplier             = $("#po_supplier").val();
     var temp_price_val          = parseInt(temp_price.get());
     var temp_qty                = $("#temp_qty").val();
-    var temp_weight             = $("#temp_weight").val();
-    var temp_delivery_price_val = parseInt(temp_delivery_price.get());
-    var temp_total_weight       = $("#temp_total_weight").val();
-    var temp_ongkir_val         = parseInt(temp_ongkir.get());
     var temp_total_val          = parseInt(temp_total.get());
-    var temp_po_note            = $("#temp_note").val();
 
     if($('#formaddtemp').parsley().validate({force: true})){
       $.ajax({
         type: "POST",
         url: "<?php echo base_url(); ?>Purchase/add_temp_po",
         dataType: "json",
-        data: {submission_id:submission_id, submission_code:submission_code, product_id:product_id, po_supplier:po_supplier, temp_price_val:temp_price_val, temp_qty:temp_qty, temp_weight:temp_weight, temp_delivery_price_val:temp_delivery_price_val, temp_total_weight:temp_total_weight, temp_ongkir_val:temp_ongkir_val, temp_total_val:temp_total_val, temp_note:temp_po_note},
+        data: {product_id:product_id, po_supplier:po_supplier, temp_price_val:temp_price_val, temp_qty:temp_qty, temp_total_val:temp_total_val},
         success : function(data){
           if (data.code == "200"){
             let title = 'Tambah Data';
@@ -730,11 +685,8 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     var po_supplier                              = $("#po_supplier").val();
     var po_date                                  = $("#po_date").val();
     var po_tax                                   = $("#po_tax").val();
-    var po_ekspedisi                             = $("#po_ekspedisi").val();
-    var po_top                                   = $("#po_top option:selected" ).text();
     var purchase_order_due_date                  = $("#purchase_order_due_date").val();
     var po_payment_method                        = $("#po_payment_method").val();
-    var po_warehouse                             = $("#po_warehouse").val();
     var footer_sub_total_submit                  = parseInt(footer_sub_total.get());
     var footer_total_discount_submit             = parseInt(footer_total_discount.get());
     var edit_footer_discount_percentage1_submit  = parseInt(edit_footer_discount_percentage1.get());
@@ -745,14 +697,13 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     var edit_footer_discount3_submit             = parseInt(edit_footer_discount3.get());
     var footer_dpp_val                           = parseInt(footer_dpp.get());
     var footer_total_ppn_val                     = parseInt(footer_total_ppn.get());
-    var footer_total_ongkir_val                  = parseInt(footer_total_ongkir.get());
     var footer_total_invoice_val                 = parseInt(footer_total_invoice.get());
     var purchase_order_remark                    = $("#purchase_order_remark").val();
     $.ajax({
       type: "POST",
       url: "<?php echo base_url(); ?>Purchase/save_edit",
       dataType: "json",
-      data: {purchase_order_id:purchase_order_id, purchase_order_invoice:purchase_order_invoice, po_supplier:po_supplier, po_date:po_date, po_tax:po_tax, po_ekspedisi:po_ekspedisi, po_top:po_top, purchase_order_due_date:purchase_order_due_date, po_payment_method:po_payment_method, po_warehouse:po_warehouse, footer_sub_total_submit:footer_sub_total_submit, footer_total_discount_submit:footer_total_discount_submit, edit_footer_discount_percentage1_submit:edit_footer_discount_percentage1_submit, edit_footer_discount_percentage2_submit:edit_footer_discount_percentage2_submit, edit_footer_discount_percentage3_submit:edit_footer_discount_percentage3_submit, edit_footer_discount1_submit:edit_footer_discount1_submit, edit_footer_discount2_submit:edit_footer_discount2_submit, edit_footer_discount3_submit:edit_footer_discount3_submit, footer_dpp_val:footer_dpp_val, footer_total_ppn_val:footer_total_ppn_val, footer_total_ongkir_val:footer_total_ongkir_val, footer_total_invoice_val:footer_total_invoice_val, purchase_order_remark:purchase_order_remark},
+      data: {purchase_order_id:purchase_order_id, purchase_order_invoice:purchase_order_invoice, po_supplier:po_supplier, po_date:po_date, po_tax:po_tax, purchase_order_due_date:purchase_order_due_date, po_payment_method:po_payment_method, footer_sub_total_submit:footer_sub_total_submit, footer_total_discount_submit:footer_total_discount_submit, edit_footer_discount_percentage1_submit:edit_footer_discount_percentage1_submit, edit_footer_discount_percentage2_submit:edit_footer_discount_percentage2_submit, edit_footer_discount_percentage3_submit:edit_footer_discount_percentage3_submit, edit_footer_discount1_submit:edit_footer_discount1_submit, edit_footer_discount2_submit:edit_footer_discount2_submit, edit_footer_discount3_submit:edit_footer_discount3_submit, footer_dpp_val:footer_dpp_val, footer_total_ppn_val:footer_total_ppn_val, footer_total_invoice_val:footer_total_invoice_val, purchase_order_remark:purchase_order_remark},
       success : function(data){
         if (data.code == "200"){
           window.location.href = "<?php echo base_url(); ?>/Purchase/po";
@@ -809,7 +760,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 
   function get_header_edit()
   {
-
     let purchase_order_id =  $("#purchase_order_id").val();
     $.ajax({
       type: "POST",
@@ -819,39 +769,29 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       success : function(data){
         if (data.code == "200"){
           var row = data.data[0];
-          
-          console.log(row.hd_po_top);
-          let po_top = row.hd_po_top;
-            if(po_top == 'JT 7'){
-              $('#po_top').val('7');
-            }else if(po_top == 'JT 14'){
-              $('#po_top').val('14');
-            }else if(po_top == 'JT 30'){
-              $('#po_top').val('30');
-            }else if(po_top == 'JT 60'){
-              $('#po_top').val('60');
-            }else if(po_top == 'JT 90'){  
-              $('#po_top').val('90');
-            }else{
-              $('#po_top').val('0');
-            }
           let po_ppn = row.hd_po_ppn;
-            if(po_ppn > 0){
-              $('#ppn_cheked').prop('checked', true);
-            }else{
-              $('#ppn_cheked').prop('checked', false);
-            }
-          $('#po_top').trigger('change');
+          if(po_ppn > 0){
+            $('#ppn_cheked').prop('checked', true);
+            
+          }else{
+            $('#ppn_cheked').prop('checked', false);
+          }
           $("#purchase_order_invoice").val(row.hd_po_invoice);
           $("#purchase_order_id").val(row.hd_po_id);
           $("#po_supplier").val(row.supplier_id);
           $('#po_supplier').trigger('change');
-          $("#po_ekspedisi").val(row.ekspedisi_id);  
-          $('#po_ekspedisi').trigger('change');  
           $("#po_payment_method").val(row.hd_po_payment); 
           $('#po_payment_method').trigger('change');
-          $("#po_warehouse").val(row.hd_po_warehouse); 
-          $('#po_warehouse').trigger('change');
+          $("#purchase_order_due_date").val(row.hd_po_due_date);
+          edit_footer_discount_percentage1.set(row.hd_po_disc_percentage1); 
+          edit_footer_discount1.set(row.hd_po_disc_1); 
+          edit_footer_discount_percentage2.set(row.hd_po_disc_percentage2); 
+          edit_footer_discount2.set(row.hd_po_disc_2); 
+          edit_footer_discount_percentage3.set(row.hd_po_disc_percentage3); 
+          edit_footer_discount3.set(row.hd_po_disc_3); 
+          footer_dpp.set(row.hd_po_dpp);
+          footer_total_discount.set(row.hd_po_total_discount); 
+          footer_total_invoice.set(row.hd_po_grand_total);
         }
       }
     });  
@@ -867,24 +807,10 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       success : function(data){
         if (data.code == "200"){
           var row = data.result[0];
-          if(row.temp_submission_id != 0){
-            $("#submission_inv").val(row.product_name+'('+row.submission_invoice +')');
-            $("#submission_code").val(row.submission_invoice );
-            $("#submission_id").val(row.submission_id);
-          }else{
-            $("#submission_inv").val("");
-            $("#submission_code").val("");
-            $("#submission_id").val(0);
-          }
           $("#product_name").val(row.product_name);
           $("#product_id").val(row.product_id);
           temp_price.set(row.temp_po_price);
           $("#temp_qty").val(row.temp_po_qty);
-          $("#temp_weight").val(row.temp_po_weight);
-          temp_delivery_price.set(row.temp_po_ongkir);
-          $("#temp_total_weight").val(row.temp_po_total_weight);
-           $("#temp_note").val(row.temp_po_note);
-          temp_ongkir.set(row.temp_po_total_ongkir);
           temp_total.set(row.temp_po_total);
         }
       }
@@ -907,7 +833,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
             footer_sub_total.set(0);
             footer_dpp.set(0); 
             footer_total_ppn.set(0);
-            footer_total_ongkir.set(0);
             footer_total_invoice.set(0);
           }else{
             $("#po_supplier").val(data.supplier_id);
@@ -915,18 +840,18 @@ require DOC_ROOT_PATH . $this->config->item('footer');
             $("#po_supplier_code").val(data.supplier_code);
             $('#po_tax').val(data.product_tax);
             $('#po_tax').prop('disabled', true);
+         
             footer_sub_total.set(data.sub_total);
-            footer_dpp.set(data.sub_total); 
+            let footer_dpp_val = parseInt(data.sub_total - footer_total_discount.get());
+            footer_dpp.set(footer_dpp_val); 
             var ppn_cal = 0;
-            if(data.product_tax == 'PPN' && $('#ppn_cheked').is(':checked')){
-              ppn_cal = (data.sub_total - 0) * 11 / 100;
+            if(footer_dpp_val > 0){
+              ppn_cal = footer_dpp_val * 11 / 100;
             }
             footer_total_ppn.set(ppn_cal);
-            footer_total_ongkir.set(data.ongkir);
-            var data_ongkir = parseInt(data.ongkir, 0);
             var data_sub_total = parseInt(data.sub_total, 0);
             var data_ppn_cal = parseInt(ppn_cal, 0);
-            var footer_total_invoice_cal = (data_ongkir + data_sub_total + data_ppn_cal);
+            var footer_total_invoice_cal = (data_sub_total + data_ppn_cal);
             footer_total_invoice.set(footer_total_invoice_cal);
           }
         }
@@ -936,37 +861,20 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 
   function clear_input()
   {
-    $('#submission_inv').val('');
-    $("#submission_code").val('');
-    $('#submission_id').val('');
+
     $('#product_name').val('');
     $('#product_id').val('');
     temp_price.set(0);
-    $('#temp_qty').val('');
-    $('#temp_weight').val('');
-    temp_delivery_price.set(0);
-    $('#temp_total_weight').val(0);
-    $('#temp_note').val('');
-    temp_ongkir.set(0);
+    $('#temp_qty').val(0);
     temp_total.set(0);
+    footer_total_discount.set(0);
+    edit_footer_discount_percentage1.set(0);
+    edit_footer_discount1.set(0);
+     edit_footer_discount_percentage2.set(0);
+    edit_footer_discount2.set(0);
+     edit_footer_discount_percentage3.set(0);
+    edit_footer_discount3.set(0);
   }
-
-  function duedate_cal()
-  {
-    var po_top = document.getElementById("po_top").value;
-    $.ajax({
-      type: "POST",
-      url: "<?php echo base_url(); ?>Purchase/cal_due_date",
-      dataType: "json",
-      data: {po_top:po_top},
-      success : function(data){
-        if (data.code == "200"){
-          $('#purchase_order_due_date').val(data.result);
-        }
-      }
-    });
-  }
-
 
   $('#btneditdisc').click(function(e){
     e.preventDefault();
@@ -977,7 +885,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     var edit_footer_discount2_pop             = parseInt(edit_footer_discount2.get());
     var edit_footer_discount3_pop             = parseInt(edit_footer_discount3.get());
     var footer_sub_total_val                  = parseInt(footer_sub_total.get());
-    var footer_total_ongkir_val               = parseInt(footer_total_ongkir.get());
     var po_tax                                = $('#po_tax').val();
     var total_disc = parseInt(edit_footer_discount1_pop + edit_footer_discount2_pop + edit_footer_discount3_pop);
     footer_total_discount.set(total_disc);
@@ -987,14 +894,13 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       ppn_val = (footer_sub_total_val - total_disc) * 11 / 100;
     }
     footer_total_ppn.set(ppn_val);
-    footer_total_invoice.set(((footer_sub_total_val - total_disc) + ppn_val) + footer_total_ongkir_val);
+    footer_total_invoice.set(((footer_sub_total_val - total_disc) + ppn_val));
     $('#footerdiscount').modal('hide')
   });
 
   $('#ppn_cheked').change(function() {
     var footer_sub_total_val = parseInt(footer_sub_total.get());
     var total_disc = parseInt(footer_total_discount.get());
-    var footer_total_ongkir_val = parseInt(footer_total_ongkir.get());
     var ppn_val = 0;
     if($(this).is(':checked')){
       ppn_val = (footer_sub_total_val - total_disc) * 11 / 100;
@@ -1007,8 +913,9 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     }
 
     footer_total_ppn.set(ppn_val);
-    footer_total_invoice.set(((footer_sub_total_val - total_disc) + ppn_val) + footer_total_ongkir_val);
+    footer_total_invoice.set(((footer_sub_total_val - total_disc) + ppn_val));
   });
+
 
   new bootstrap.Modal(document.getElementById('footerdiscount'), {backdrop: 'static', keyboard: false})  
   

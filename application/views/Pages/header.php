@@ -175,7 +175,7 @@
                   <?php } ?>
                   <?php if($data['check_auth']['check_auth_nav'][8]->nav_bar == 'Y'){ ?>
                   <li>
-                    <a href="<?php echo base_url(); ?>Purchase">
+                    <a href="<?php echo base_url(); ?>Purchase/purchases">
                       <span class="sub-item">Pembelian</span>
                     </a>
                   </li>

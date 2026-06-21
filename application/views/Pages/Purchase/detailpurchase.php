@@ -51,12 +51,12 @@
         <p><?php echo company_phone ?></p>
       </div>
       <div class="col-md-4">
-        <p class="detail-invoice"><?php echo $row->hd_purchase_invoice; ?></p>
-        <p>Supplier: <b><?php echo $row->supplier_name; ?></b></p>
+        <p class="detail-invoice"><?php echo $row['hd_purchase_invoice']; ?></p>
+        <p>Supplier: <b><?php echo $row['supplier_name']; ?></b></p>
         <p>Golongan: 
           <b>
             <?php 
-            if($row->hd_purchase_tax == 'Y'){
+            if($row['hd_purchase_tax'] == 'Y'){
               echo '<span class="badge badge-success">BKP</span>';
             }else{
               echo '<span class="badge badge-danger">NON BKP</span>';
@@ -64,16 +64,15 @@
             ?>
           </b>
         </p>
-        <p>Ekspedisi: <b><?php echo $row->ekspedisi_name; ?></b></p>
-        <p>Metode Bayar: <b><?php echo $row->payment_name; ?></b></p>
+        <p>Metode Bayar: <b><?php echo $row['payment_name']; ?></b></p>
       </div>
       <div class="col-md-4">
         <p>Status: 
           <b>
             <?php 
-            if($row->hd_purchase_status == 'Pending'){
+            if($row['hd_purchase_status'] == 'Pending'){
               echo '<span class="badge badge-primary">Pending</span>';
-            }else if($row->hd_purchase_status == 'Success'){
+            }else if($row['hd_purchase_status'] == 'Success'){
               echo '<span class="badge badge-success">Success</span>';
             }else{
               echo '<span class="badge badge-danfer">Cancel</span>';
@@ -81,10 +80,9 @@
             ?>
           </b>
         </p>
-        <p>Tanggal: <b><?php $date = date_create($row->hd_purchase_date);  echo date_format($date,"d-M-Y"); ?></b></p>
-        <p>T.O.P: <b><?php echo $row->hd_purchase_top; ?></b></p>
-        <p>Jth Tempo: <b><?php $date = date_create($row->hd_purchase_due_date);  echo date_format($date,"d-M-Y"); ?></b></p>
-        <p>Gudang: <b><?php echo $row->warehouse_name; ?></b></p>
+        <p>Tanggal: <b><?php $date = date_create($row['hd_purchase_date']);  echo date_format($date,"d-M-Y"); ?></b></p>
+        <p>Jth Tempo: <b><?php $date = date_create($row['hd_purchase_due_date']);  echo date_format($date,"d-M-Y"); ?></b></p>
+        <p>Gudang: <b><?php echo $row['warehouse_name']; ?></b></p>
       </div>
     </div>
   <?php } ?>
@@ -99,22 +97,18 @@
             <th scope="col">Satuan</th>
             <th scope="col">Harga Beli</th>
             <th scope="col">Qty</th>
-            <th scope="col">Ongkir / PCS</th>
             <th scope="col">Total</th>
-            <th scope="col">Catatan</th>
           </tr>
         </thead>
         <tbody>
           <?php foreach($data['detail_purchase'] as $row){ ?>
             <tr>
-              <td><?php echo $row->product_code; ?></td>
-              <td><?php echo $row->product_name; ?></td>
-              <td><?php echo $row->unit_name; ?></td>
-              <td><?php echo 'Rp. '.number_format($row->dt_purchase_price); ?></td>
-              <td><?php echo $row->dt_purchase_qty; ?></td>
-              <td><?php echo 'Rp. '.number_format($row->dt_purchase_ongkir); ?></td>
-              <td><?php echo number_format($row->dt_purchase_total); ?></td>
-              <td><?php echo $row->dt_purchase_note; ?></td>
+              <td><?php echo $row['product_code']; ?></td>
+              <td><?php echo $row['product_name']; ?></td>
+              <td><?php echo $row['unit_name']; ?></td>
+              <td><?php echo 'Rp. '.number_format($row['dt_purchase_price']); ?></td>
+              <td><?php echo $row['dt_purchase_qty']; ?></td>
+              <td><?php echo number_format($row['dt_purchase_total']); ?></td>
             </tr>
           <?php } ?>
         </tbody>
@@ -134,12 +128,12 @@
             </tr>
             <tr>
               <td scope="col"><b>Dibuat</b></td>
-              <td scope="col"><b><?php echo $row->user_name; ?></b></td>
-              <td scope="col"><b><?php $date = date_create($row->tanggal_purchase);  echo date_format($date,"d-M-Y"); ?></b></td>
+              <td scope="col"><b><?php echo $row['user_name']; ?></b></td>
+              <td scope="col"><b><?php $date = date_create($row['tanggal_purchase']);  echo date_format($date,"d-M-Y"); ?></b></td>
             </tr>
             <tr>
               <td style="border-bottom: none;"><b>Catatan:</b></td>
-              <td style="border-bottom: none;"><?php echo $row->hd_purchase_note; ?></td>
+              <td style="border-bottom: none;"><?php echo $row['hd_purchase_note']; ?></td>
             </tr>
           <?php } ?>
         </tbody>
@@ -156,35 +150,31 @@
           <?php foreach($data['header_purchase'] as $row){ ?>
             <tr>
               <td scope="col"><b>Sub Total: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_sub_total); ?></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_sub_total']); ?></td>
             </tr>
              <tr>
-              <td scope="col"><b>Diskon 1: (<?php echo $row->hd_purchase_disc_percentage1; ?> %)</b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_disc_1); ?></td>
+              <td scope="col"><b>Diskon 1: (<?php echo $row['hd_purchase_disc_percentage1']; ?> %)</b></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_disc_1']); ?></td>
             </tr>
             <tr>
-              <td scope="col"><b>Diskon 2: (<?php echo $row->hd_purchase_disc_percentage2; ?> %)</b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_disc_2); ?></td>
+              <td scope="col"><b>Diskon 2: (<?php echo $row['hd_purchase_disc_percentage2']; ?> %)</b></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_disc_2']); ?></td>
             </tr>
             <tr>
-              <td scope="col"><b>Diskon 3: (<?php echo $row->hd_purchase_disc_percentage3; ?> %)</b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_disc_3); ?></td>
+              <td scope="col"><b>Diskon 3: (<?php echo $row['hd_purchase_disc_percentage3']; ?> %)</b></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_disc_3']); ?></td>
             </tr>
             <tr>
               <td scope="col"><b>DPP: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_dpp); ?></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_dpp']); ?></td>
             </tr>
             <tr>
               <td scope="col"><b>PPN 11%: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_ppn); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Ongkir: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_ongkir); ?></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_ppn']); ?></td>
             </tr>
             <tr>
               <td scope="col"><b>Grand Total: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->hd_purchase_grand_total); ?></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_grand_total']); ?></td>
             </tr>
           <?php } ?>
         </tbody>

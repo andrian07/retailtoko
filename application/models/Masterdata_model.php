@@ -226,78 +226,7 @@ class masterdata_model extends CI_Model {
 
     //end customer
 
-    // ekspedisi 
-    public function ekspedisi_list()
-    {
-        $query = $this->db->query("select * from ms_ekspedisi where is_active = 'Y'");
-        $result = $query->result();
-        return $result;
-    }
-
-    public function get_ekspedisi_name($purchase_ekspedisi)
-    {
-        $query = $this->db->query("select ekspedisi_name from ms_ekspedisi where ekspedisi_id = '".$purchase_ekspedisi."'");
-        $result = $query->result();
-        return $result;
-    }
-
-    public function save_ekspedisi($data_insert)
-    {
-        $this->db->insert('ms_ekspedisi', $data_insert);
-    }
-
-    public function edit_ekspedisi($data_edit, $expedisi_id)
-    {
-        $this->db->set($data_edit);
-        $this->db->where('ekspedisi_id', $expedisi_id);
-        $this->db->update('ms_ekspedisi');
-    }
-
-    public function delete_ekspedisi($expedisi_id)
-    {
-        $this->db->set('is_active', 'N');
-        $this->db->where('ekspedisi_id ', $expedisi_id);
-        $this->db->update('ms_ekspedisi');
-    }
-    //end ekspedisi
-
-
-    //warehouse
-
-    public function save_warehouse($data_insert)
-    {
-        $this->db->insert('ms_warehouse', $data_insert);
-    }
-
-    public function warehouse_list()
-    {
-        $query = $this->db->query("select * from ms_warehouse where is_active = 'Y'");
-        $result = $query->result();
-        return $result;
-    }
-
-    public function edit_warehouse($data_edit, $warehouse_id)
-    {
-        $this->db->set($data_edit);
-        $this->db->where('warehouse_id', $warehouse_id);
-        $this->db->update('ms_warehouse');
-    }
-
-    public function delete_warehouse($warehouse_id)
-    {
-        $this->db->set('is_active', 'N');
-        $this->db->where('warehouse_id ', $warehouse_id);
-        $this->db->update('ms_warehouse');
-    }
-
-    public function get_warehouse_code($warehouse_id)
-    {
-        $query = $this->db->query("select warehouse_code, warehouse_name from ms_warehouse where warehouse_id = '".$warehouse_id."'");
-        $result = $query->result();
-        return $result;
-    }
-    //end warehouse
-
+   
 
 
     //category
@@ -329,40 +258,6 @@ class masterdata_model extends CI_Model {
     }
     //end warehouse
 
-    //salesman
-    public function save_salesman($data_insert)
-    {
-        $this->db->insert('ms_salesman', $data_insert);
-    }
-
-    public function salesman_list()
-    {
-        $query = $this->db->query("select * from ms_salesman a, ms_warehouse b where a.salesman_branch = b.warehouse_id and a.is_active = 'Y'");
-        $result = $query->result();
-        return $result;
-    }
-
-    public function edit_salesman($data_edit, $salesman_id)
-    {
-        $this->db->set($data_edit);
-        $this->db->where('salesman_id', $salesman_id);
-        $this->db->update('ms_salesman');
-    }
-
-    public function delete_salesman($salesman_id)
-    {
-        $this->db->set('is_active', 'N');
-        $this->db->where('salesman_id ', $salesman_id);
-        $this->db->update('ms_salesman');
-    }
-
-    public function salesman_detail($id)
-    {
-        $query = $this->db->query("select * from ms_salesman a, ms_warehouse b where a.salesman_branch = b.warehouse_id and a.is_active = 'Y' and salesman_id = '".$id."'");
-        $result = $query->result();
-        return $result;
-    }
-    //end warehouse
 
 
     //unit

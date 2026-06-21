@@ -24,10 +24,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
-$config['base_url']    = 'http://localhost/retail/';
-$config['header'] = "retail/application/views/Pages/header.php";
-$config['headerdetail'] = "retail/application/views/Pages/headerdetail.php";
-$config['footer'] = "retail/application/views/Pages/footer.php";
+$config['base_url']    = 'http://localhost/retailtoko/';
+$config['header'] = "retailtoko/application/views/Pages/header.php";
+$config['headerdetail'] = "retailtoko/application/views/Pages/headerdetail.php";
+$config['footer'] = "retailtoko/application/views/Pages/footer.php";
 
 /*
 |--------------------------------------------------------------------------
