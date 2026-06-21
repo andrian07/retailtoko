@@ -702,31 +702,20 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     },
   });
 
+  $('#temp_qty').on('input', function() {
+    let qty = $(this).val();
+    let temp_price_val = temp_price.get();
+    let temp_total_Val = qty * temp_price_val;
+    temp_total.set(temp_total_Val);
+  });
 
   $('#temp_price').on('input', function (event) {
-    let temp_price_val = parseInt(temp_price.get());
-    let temp_qty_val = $('#temp_qty').val();
-    let temp_weight_val = $('#temp_weight').val();
-    let temp_total_weight_val = temp_qty_val * temp_weight_val;
-    $('#temp_total_weight').val(temp_total_weight_val);
-    let temp_ongkir_val = parseInt(temp_ongkir.get());
-    let temp_total_val = temp_price_val * temp_qty_val + temp_ongkir_val;
-    temp_total.set(temp_total_val);
+    let temp_price_val = temp_price.get();
+    let qty =  $('#temp_qty').val();
+    let temp_total_Val = qty * temp_price_val;
+    console.log(temp_total_Val);
+    temp_total.set(temp_total_Val);
   })
-
-  $('#temp_qty').on('input', function (event) {
-    let temp_price_val = parseInt(temp_price.get());
-    let temp_qty_val = $('#temp_qty').val();
-    let temp_weight_val = $('#temp_weight').val();
-    let temp_total_weight_val = temp_qty_val * temp_weight_val;
-    $('#temp_total_weight').val(temp_total_weight_val);
-    let temp_ongkir_val = parseInt(temp_ongkir.get());
-    let temp_total_val = temp_price_val * temp_qty_val + temp_ongkir_val;
-    temp_total.set(temp_total_val);
-  })
-
-
-
 
   $('#edit_footer_discount_percentage1').on('input', function (event) {
     let footer_sub_total_val = parseInt(footer_sub_total.get());
@@ -823,12 +812,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           $("#product_id").val(row.temp_product_id);
           temp_price.set(row.temp_purchase_price);
           $("#temp_qty").val(row.temp_purchase_qty);
-          $("#temp_weight").val(row.temp_purchase_weight);
-          temp_delivery_price.set(row.temp_purchase_ongkir);
-          $("#temp_total_weight").val(row.temp_purchase_total_weight);
-          temp_ongkir.set(row.temp_purchase_total_ongkir);
           temp_total.set(row.temp_purchase_total);
-          $("#temp_note").val(row.temp_purchase_note);
         }
       }
     });  

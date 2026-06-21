@@ -915,6 +915,15 @@ class Purchase extends CI_Controller {
 			echo json_encode(['code'=>0, 'result'=>$msg]);
 		}
 	}
+	
+	public function get_edit_temp_purchase()
+	{
+		$temp_product_id  = $this->input->post('id');
+		$temp_user_id  	  = $_SESSION['user_id'];
+		$check_edit_temp_purchase = $this->purchase_model->check_edit_temp_purchase($temp_product_id, $temp_user_id)->result_array();
+		echo json_encode(['code'=>200, 'result'=>$check_edit_temp_purchase]);
+		die();
+	}
 
 	// end purchase
 

@@ -384,6 +384,17 @@ class purchase_model extends CI_Model {
         $this->db->where('temp_user_id', $user_id);
         $this->db->delete('temp_purchase');
     }
+
+    public function check_edit_temp_purchase($temp_product_id, $temp_user_id)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_purchase');
+        $this->db->join('ms_product', 'temp_purchase.temp_product_id = ms_product.product_id');
+        $this->db->where('temp_product_id', $temp_product_id);
+        $this->db->where('temp_user_id', $temp_user_id);
+        $query = $this->db->get();
+        return $query;
+    }
     
     // end purchase
 
