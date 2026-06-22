@@ -701,7 +701,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     var purchase_order_remark                    = $("#purchase_order_remark").val();
     $.ajax({
       type: "POST",
-      url: "<?php echo base_url(); ?>Purchase/save_edit",
+      url: "<?php echo base_url(); ?>Purchase/save_edit_po",
       dataType: "json",
       data: {purchase_order_id:purchase_order_id, purchase_order_invoice:purchase_order_invoice, po_supplier:po_supplier, po_date:po_date, po_tax:po_tax, purchase_order_due_date:purchase_order_due_date, po_payment_method:po_payment_method, footer_sub_total_submit:footer_sub_total_submit, footer_total_discount_submit:footer_total_discount_submit, edit_footer_discount_percentage1_submit:edit_footer_discount_percentage1_submit, edit_footer_discount_percentage2_submit:edit_footer_discount_percentage2_submit, edit_footer_discount_percentage3_submit:edit_footer_discount_percentage3_submit, edit_footer_discount1_submit:edit_footer_discount1_submit, edit_footer_discount2_submit:edit_footer_discount2_submit, edit_footer_discount3_submit:edit_footer_discount3_submit, footer_dpp_val:footer_dpp_val, footer_total_ppn_val:footer_total_ppn_val, footer_total_invoice_val:footer_total_invoice_val, purchase_order_remark:purchase_order_remark},
       success : function(data){

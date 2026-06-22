@@ -396,6 +396,23 @@ class purchase_model extends CI_Model {
         return $query;
     }
     
+    public function copy_temp_purchase($data_copy_temp)
+    {
+        $this->db->insert('temp_purchase', $data_copy_temp);
+    }
+
+    public function detail_po_purchase($po_id)
+    {
+        $query = $this->db->query("select * from dt_po a, hd_po b, ms_product c, ms_unit d, ms_user e, hd_input_stock f, dt_input_stock g where a.hd_po_id = b.hd_po_id and a.dt_product_id = c.product_id and c.product_unit = d.unit_id and b.hd_po_id = f.hd_po_id and f.hd_input_stock_id  = g.hd_is_id and b.created_by = e.user_id and a.hd_po_id  = '".$po_id."' and hd_input_stock_status = 'Pending' group by dt_po_id");
+        $result = $query->result();
+        return $result;
+    }
+
+    public function clear_temp_purchase($user_id)
+    {
+        $this->db->where('temp_user_id', $user_id);
+        $this->db->delete('temp_purchase');
+    }
     // end purchase
 
 

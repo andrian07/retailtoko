@@ -489,7 +489,7 @@ class Purchase extends CI_Controller {
 		die();
 	}
 	
-	public function save_edit()
+	public function save_edit_po()
 	{
 
 		$modul = 'PO';
@@ -925,6 +925,37 @@ class Purchase extends CI_Controller {
 		die();
 	}
 
+	
+	public function copy_po_to_temp_purchase()
+	{
+		$modul = 'Purchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$po_id 		= $this->input->post('po_id');
+			$user_id 	= $_SESSION['user_id'];
+			$get_detail_po = $this->purchase_model->detail_po_purchase($po_id);
+			$this->purchase_model->clear_temp_purchase($user_id);
+			foreach($get_detail_po as $row)
+			{
+				$data_copy_temp = array(
+					'temp_product_id'			 => $row->dt_product_id,
+					'temp_purchase_supplier_id'  => $row->hd_po_id,
+					'temp_purchase_price'		 => $row->dt_po_price,
+					'temp_purchase_qty_order'	 => $row->dt_is_qty_order,
+					'temp_purchase_total'		 => $row->dt_po_total,
+					'temp_purchase_po_id' 		 => $po_id,
+					'temp_user_id'				 => $user_id
+				);	
+
+				$copy_temp_purchase = $this->purchase_model->copy_temp_purchase($data_copy_temp);
+			}
+			$msg = "Success Copy";
+			echo json_encode(['code'=>200, 'result'=>$msg]);die();
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
 	// end purchase
 
     }
