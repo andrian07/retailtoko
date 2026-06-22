@@ -355,7 +355,6 @@ class purchase_model extends CI_Model {
     {
         $this->db->select('*, sum(temp_purchase_total) as sub_total');
         $this->db->from('temp_purchase');
-        $this->db->join('hd_po', 'temp_purchase.temp_purchase_po_id  = hd_po.hd_po_id ');
         $this->db->where('temp_user_id', $user_id);
         $query = $this->db->get();
         return $query;
@@ -395,6 +394,49 @@ class purchase_model extends CI_Model {
         $query = $this->db->get();
         return $query;
     }
+    public function last_purchase()
+    {  
+        $query = $this->db->query("select hd_purchase_invoice from hd_purchase  order by hd_purchase_id desc limit 1");
+        $result = $query->result();
+        return $result;
+    }
+    public function save_purchase($data_insert)
+    {
+        $this->db->trans_start();
+        $this->db->insert('hd_purchase', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
+    }
+
+
+    public function get_temp_purchase($user_id)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_purchase');
+        $this->db->join('ms_product', 'temp_purchase.temp_product_id = ms_product.product_id');
+        $this->db->join('ms_user', 'temp_purchase.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id ', $user_id);
+        $query = $this->db->get();
+        return $query;
+    }
+    public function save_detail_purchase($data_insert_detail)
+    {
+        $this->db->insert('dt_purchase', $data_insert_detail);
+    }
+
+    public function update_purchase_po($po_id)
+    {
+        $this->db->set('hd_po_status', 'Success');
+        $this->db->where('hd_po_id ', $po_id);
+        $this->db->update('hd_po');
+    }
+    public function clear_temp_purchase($user_id)
+    {
+        $this->db->where('temp_user_id', $user_id);
+        $this->db->delete('temp_purchase');
+    }
+    
     
     public function copy_temp_purchase($data_copy_temp)
     {

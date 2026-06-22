@@ -864,7 +864,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     let temp_price_val = temp_price.get();
     let qty =  $('#temp_qty').val();
     let temp_total_Val = qty * temp_price_val;
-    console.log(temp_total_Val);
     temp_total.set(temp_total_Val);
   })
 
