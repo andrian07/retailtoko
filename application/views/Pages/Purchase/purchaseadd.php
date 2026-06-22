@@ -462,6 +462,8 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 
   $('#purchase_tax').prop('disabled', true);
   $('#po_user_id').prop('disabled', true);
+
+  let isNavigatingAway = false;
   
 
   let temp_price = new AutoNumeric('#temp_price', {
@@ -588,6 +590,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     temppurchase_table();
   });
 
+
   function temppurchase_table(){
     $('#temp-purchase-list').DataTable( {
       serverSide: true,
@@ -646,7 +649,31 @@ require DOC_ROOT_PATH . $this->config->item('footer');
             let state = 'info';
             notif_success(title, message, state);
             $('#temp-purchase-list').DataTable().ajax.reload();
-            check_tempt_data();
+
+            if(data.header.length > 0){
+              console.log(data.header[0]);
+              $('#purchase_payment_method').val(data.header[0].hd_po_payment).trigger('change');
+              $('#purchase_due_date').val(data.header[0].hd_po_due_date);
+              $('#purchase_supplier').val(data.header[0].hd_po_supplier).trigger('change');
+              footer_sub_total.set(data.header[0].hd_po_sub_total);
+              footer_total_discount.set(data.header[0].hd_po_total_discount);
+              edit_footer_discount_percentage1.set(data.header[0].hd_po_disc_percentage1);
+              edit_footer_discount_percentage2.set(data.header[0].hd_po_disc_percentage2);
+              edit_footer_discount_percentage3.set(data.header[0].hd_po_disc_percentage3);
+              edit_footer_discount1.set(data.header[0].hd_po_disc_1);
+              edit_footer_discount2.set(data.header[0].hd_po_disc_2);
+              edit_footer_discount3.set(data.header[0].hd_po_disc_3);
+              footer_dpp.set(data.header[0].hd_po_dpp);
+              footer_total_ppn.set(data.header[0].hd_po_ppn);
+              if(data.header[0].hd_po_ppn > 0){
+                $('#ppn_cheked').prop('checked', true);
+              }else{
+                $('#ppn_cheked').prop('checked', false);
+              }
+              footer_total_invoice.set(data.header[0].hd_po_grand_total);
+              footer_remaining_payment.set(data.header[0].hd_po_grand_total);
+            }
+            //check_tempt_data();
           } else {
             Swal.fire({
               icon: 'error',
@@ -855,6 +882,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
         if (data.code == "200"){
           let row = data.data[0];
           if(row.temp_purchase_total != null){
+            $('#po_id').val(row.temp_purchase_po_id);
             footer_sub_total.set(row.sub_total);
             $('#purchase_supplier').val(row.temp_purchase_supplier_id);
             $('#purchase_supplier').trigger('change');
@@ -897,6 +925,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     edit_footer_discount_percentage3.set(0);
     edit_footer_discount3.set(0);
   }
+  
 
 
   $('#btnadd_temp').click(function(e){
@@ -966,6 +995,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       data: {po_inv:po_inv, po_id:po_id, purchase_payment_method:purchase_payment_method, purchase_supplier:purchase_supplier, no_faktur_supplier:no_faktur_supplier, faktur_date:faktur_date, purchase_tax:purchase_tax, purchase_date:purchase_date, purchase_warehouse:purchase_warehouse, purchase_due_date:purchase_due_date, footer_sub_total_submit:footer_sub_total_submit, footer_total_discount_submit:footer_total_discount_submit, edit_footer_discount_percentage1_submit:edit_footer_discount_percentage1_submit, edit_footer_discount_percentage2_submit:edit_footer_discount_percentage2_submit, edit_footer_discount_percentage3_submit:edit_footer_discount_percentage3_submit, edit_footer_discount1_submit:edit_footer_discount1_submit, edit_footer_discount2_submit:edit_footer_discount2_submit, edit_footer_discount3_submit:edit_footer_discount3_submit, footer_dpp_val:footer_dpp_val, footer_total_ppn_val:footer_total_ppn_val, footer_total_invoice_val:footer_total_invoice_val, footer_dp_val:footer_dp_val, footer_remaining_payment_val:footer_remaining_payment_val, purchase_remark:purchase_remark},
       success : function(data){
         if (data.code == "200"){
+          isNavigatingAway = true;
           window.location.href = "<?php echo base_url(); ?>/Purchase/purchases";
         } else {
           Swal.fire({
@@ -997,6 +1027,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
         data: {},
         success : function(data){
           if (data.code == "200"){
+           isNavigatingAway = true;
            window.location.href = "<?php echo base_url(); ?>/Purchase";
          }else {
           Swal.fire({
@@ -1011,6 +1042,69 @@ require DOC_ROOT_PATH . $this->config->item('footer');
    })
   });
 
-  new bootstrap.Modal(document.getElementById('footerdiscount'), {backdrop: 'static', keyboard: false})  
-  
+  new bootstrap.Modal(document.getElementById('footerdiscount'), {backdrop: 'static', keyboard: false})
+
+  // Intercept keyboard refresh (F5 / Ctrl+R) with custom modal
+  $(document).on('keydown', function(e) {
+    if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
+      e.preventDefault();
+      showRefreshConfirm();
+    }
+  });
+
+  function showRefreshConfirm(targetUrl) {
+    var isRefresh = !targetUrl;
+    Swal.fire({
+      title: isRefresh ? 'Refresh Halaman?' : 'Tinggalkan Halaman?',
+      text: 'Semua data inputan yang belum disimpan akan dihapus. Lanjutkan?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: isRefresh
+        ? '<i class="fas fa-sync-alt"></i> Ya, Hapus & Refresh'
+        : '<i class="fas fa-sign-out-alt"></i> Ya, Hapus & Lanjutkan',
+      cancelButtonText: '<i class="fas fa-times"></i> Batal',
+    }).then(function(result) {
+      if (result.isConfirmed) {
+        isNavigatingAway = true;
+        $.ajax({
+          type: 'POST',
+          url: '<?php echo base_url(); ?>Purchase/clear_temp_purchase',
+          dataType: 'json',
+          data: {},
+          complete: function() {
+            if (targetUrl) {
+              window.location.href = targetUrl;
+            } else {
+              window.location.reload();
+            }
+          }
+        });
+      }
+    });
+  }
+
+  // Intercept link navigation (sidebar, navbar, etc.)
+  $(document).on('click', 'a', function(e) {
+    if (isNavigatingAway) return;
+    var href = $(this).attr('href');
+    var bsToggle = $(this).attr('data-bs-toggle');
+    var target = $(this).attr('target');
+    if (!href || href === '#' || href.startsWith('javascript:')) return;
+    if (bsToggle) return;
+    if (target === '_blank') return;
+    e.preventDefault();
+    showRefreshConfirm(href);
+  });
+
+  // Intercept browser back/forward button and address bar navigation
+  window.addEventListener('beforeunload', function(e) {
+    if (!isNavigatingAway) {
+      e.preventDefault();
+      e.returnValue = 'Data inputan yang belum disimpan akan dihapus. Apakah Anda yakin ingin meninggalkan halaman ini?';
+      return e.returnValue;
+    }
+  });
+
 </script>

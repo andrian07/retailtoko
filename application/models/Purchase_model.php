@@ -450,12 +450,48 @@ class purchase_model extends CI_Model {
         return $result;
     }
 
-    public function clear_temp_purchase($user_id)
+    public function header_po_purchase($po_id)
     {
-        $this->db->where('temp_user_id', $user_id);
-        $this->db->delete('temp_purchase');
+        $query = $this->db->query("select * from hd_po a, ms_warehouse b, ms_supplier c, ms_payment f, ms_user d where a.hd_po_warehouse = b.warehouse_id and a.hd_po_supplier = c.supplier_id and a.hd_po_payment = f.payment_id and a.created_by = d.user_id and a.hd_po_id  = '".$po_id."'");
+        $result = $query->result();
+        return $result;
     }
+
     // end purchase
+
+    // start retur purchase
+    public function returpurchase_list($search, $length, $start)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_retur_purchase');
+        $this->db->join('ms_supplier', 'hd_retur_purchase.hd_retur_purchase_supplier_id = ms_supplier.supplier_id');
+        $this->db->join('ms_user', 'hd_retur_purchase.created_by = ms_user.user_id');
+        if($search != null){
+            $this->db->where('hd_retur_purchase.hd_retur_purchase_inv like "%'.$search.'%"');
+            $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+        }
+        $this->db->order_by('hd_retur_purchase.created_at', 'desc');
+        $this->db->limit($length);
+        $this->db->offset($start);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function returpurchase_list_count($search)
+    {
+        $this->db->select('count(*) as total_row');
+        $this->db->from('hd_retur_purchase');
+        $this->db->join('ms_supplier', 'hd_retur_purchase.hd_retur_purchase_supplier_id = ms_supplier.supplier_id');
+        $this->db->join('ms_user', 'hd_retur_purchase.created_by = ms_user.user_id');
+        if($search != null){
+            $this->db->where('hd_retur_purchase.hd_retur_purchase_inv like "%'.$search.'%"');
+            $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+        }
+        $query = $this->db->get();
+        return $query;
+    }
+
+    // end retur purchase
 
 
 }

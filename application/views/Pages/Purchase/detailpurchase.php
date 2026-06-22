@@ -176,6 +176,14 @@
               <td scope="col"><b>Grand Total: </b></td>
               <td scope="col">Rp. <?php echo number_format($row['hd_purchase_grand_total']); ?></td>
             </tr>
+            <tr>
+              <td scope="col"><b>DP: </b></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_dp']); ?></td>
+            </tr>
+            <tr>
+              <td scope="col"><b>Sisa Pembayaran: </b></td>
+              <td scope="col">Rp. <?php echo number_format($row['hd_purchase_remaining_debt']); ?></td>
+            </tr>
           <?php } ?>
         </tbody>
       </table>

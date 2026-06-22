@@ -980,6 +980,11 @@ class Purchase extends CI_Controller {
 				echo json_encode(['code'=>0, 'result'=>$msg]);die();
 			}
 
+			if($no_faktur_supplier == null){
+				$msg = 'Silahkan Masukan No Faktur Supplier';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
 			$warehouse_id 		= $purchase_warehouse;
 			$get_warehouse_code = $this->masterdata_model->get_warehouse_code($warehouse_id);
 			$warehouse_code 	= $get_warehouse_code[0]->warehouse_code;
@@ -1083,7 +1088,14 @@ class Purchase extends CI_Controller {
 	}
 
 
-	
+	public function clear_temp_purchase()
+	{
+		$user_id = $_SESSION['user_id'];
+		$this->purchase_model->clear_temp_purchase($user_id);
+		echo json_encode(['code'=>200, 'result'=>'Success']);
+		die();
+	}
+
 	public function copy_po_to_temp_purchase()
 	{
 		$modul = 'Purchase';
@@ -1092,6 +1104,7 @@ class Purchase extends CI_Controller {
 			$po_id 		= $this->input->post('po_id');
 			$user_id 	= $_SESSION['user_id'];
 			$get_detail_po = $this->purchase_model->detail_po_purchase($po_id);
+			$get_header_po = $this->purchase_model->header_po_purchase($po_id);
 			$this->purchase_model->clear_temp_purchase($user_id);
 			foreach($get_detail_po as $row)
 			{
@@ -1100,21 +1113,137 @@ class Purchase extends CI_Controller {
 					'temp_purchase_supplier_id'  => $row->hd_po_id,
 					'temp_purchase_price'		 => $row->dt_po_price,
 					'temp_purchase_qty_order'	 => $row->dt_is_qty_order,
+					'temp_purchase_qty'			 => $row->dt_po_qty,
 					'temp_purchase_total'		 => $row->dt_po_total,
 					'temp_purchase_po_id' 		 => $po_id,
+					'temp_purchase_po_inv' 		 => $get_header_po[0]->hd_po_invoice,
 					'temp_user_id'				 => $user_id
 				);	
 
 				$copy_temp_purchase = $this->purchase_model->copy_temp_purchase($data_copy_temp);
 			}
 			$msg = "Success Copy";
-			echo json_encode(['code'=>200, 'result'=>$msg]);die();
+			echo json_encode(['code'=>200, 'result'=>$msg, 'header'=>$get_header_po]);die();
 		}else{
 			$msg = "No Access";
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
 		}
 	}
 	// end purchase
+
+
+	// start retur purchase
+
+	public function returpurchase()
+	{
+		$modul = 'ReturPurchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$supplier_list['supplier_list'] = $this->masterdata_model->supplier_list();
+			$check_auth['check_auth'] = $check_auth;
+			$data['data'] = array_merge($supplier_list, $check_auth);
+			$this->load->view('Pages/Purchase/returpurchase', $data);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function retur_purchase_list()
+	{
+
+		$modul = 'ReturPurchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$search 			= $this->input->post('search');
+			$length 			= $this->input->post('length');
+			$start 			  	= $this->input->post('start');
+			if($search != null){
+				$search = $search['value'];
+			}
+
+			$list = $this->purchase_model->returpurchase_list($search, $length, $start)->result_array();
+			$count_list = $this->purchase_model->returpurchase_list_count($search)->result_array();
+			$total_row = $count_list[0]['total_row'];
+			$data = array();
+			$no = $_POST['start'];
+			foreach ($list as $field) {
+
+				if($field['hd_retur_purchase_status'] == 'Success'){
+					$hd_retur_purchase_status = '<span class="badge badge-success">Success</span>';
+				}else if($field['hd_retur_purchase_status'] == 'Pending'){
+					$hd_retur_purchase_status = '<span class="badge badge-primary">Pending</span>';
+				}else{
+					$hd_retur_purchase_status = '<span class="badge badge-danger multi-badge">Cancel</span>';
+				}
+
+				if($field['hd_retur_purchase_payment_type'] == 'PN'){
+					$payment_type = 'POTONG NOTA';
+				}else if($field['hd_retur_purchase_payment_type'] == 'Cash'){
+					$payment_type = 'CASH';
+				}else{
+					$payment_type = 'GARANSI';
+				}
+
+				if($check_auth['check_access'][0]->view == 'Y'){
+					$url = base_url();
+					$detail = '<a href="'.base_url().'Purchase/detailreturpurchase?id='.$field['hd_retur_purchase_id'].'" data-fancybox="" data-type="iframe"><button type="button" class="btn btn-icon btn-primary btn-sm mb-2-btn" data-id="'.$field['hd_retur_purchase_id'].'"><i class="fas fa-eye sizing-fa"></i></button></a> ';
+				}else{
+					$detail = '<a href="'.base_url().'Purchase/detailreturpurchase?id='.$field['hd_retur_purchase_id'].'" data-fancybox="" data-type="iframe"><button type="button" class="btn btn-icon btn-primary btn-sm mb-2-btn" disabled="disabled"><i class="fas fa-eye sizing-fa"></i></button></a> ';
+				}
+
+
+				if($check_auth['check_access'][0]->delete == 'Y'){
+					if($field['hd_retur_purchase_status'] == 'Pending'){
+						$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_purchase_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+					}else{
+						$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_purchase_id'].')" disabled><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+					}
+				}else{
+					$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn"  disabled="disabled"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+				}
+
+				if($check_auth['check_access'][0]->edit == 'Y'){
+					if($field['hd_retur_purchase_status'] == 'Pending'){
+						$payment = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="'.$field['hd_retur_purchase_id'].'" data-inv="'.$field['hd_retur_purchase_inv'].'" data-total="'.$field['hd_retur_purchase_total'].'" data-bs-toggle="modal" data-bs-target="#exampleModaledit"><i class="fas fa-money-bill-wave sizing-fa"></i></button>';
+					}else{
+						$payment = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="'.$field['hd_retur_purchase_id'].'" data-inv="'.$field['hd_retur_purchase_inv'].'" data-total="'.$field['hd_retur_purchase_total'].'" data-bs-toggle="modal" data-bs-target="#exampleModaledit" disabled="disabled"><i class="fas fa-money-bill-wave sizing-fa"></i></button>';
+					}
+				}else{
+					$payment = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="'.$field['hd_retur_purchase_id'].'" data-inv="'.$field['hd_retur_purchase_inv'].'" data-total="'.$field['hd_retur_purchase_total'].'" data-bs-toggle="modal" data-bs-target="#exampleModaledit" disabled="disabled"><i class="fas fa-money-bill-wave sizing-fa"></i></button>';
+				}
+
+				$date = date_create($field['hd_retur_purchase_date']); 
+
+				$no++;
+				$row = array();
+				$row[] 	= $field['hd_retur_purchase_inv'];
+				$row[] 	= date_format($date,"d-M-Y");
+				$row[] 	= $field['product_name'];
+				$row[] 	= $field['dt_retur_purchase_qty'];
+				$row[] 	= $field['supplier_name'];
+				$row[] 	= 'Rp. '.number_format($field['hd_retur_purchase_total']);
+				$row[]  = $hd_retur_purchase_status;
+				$row[]  = $payment_type;
+				$row[] 	= $detail.$delete.$payment;
+				$data[] = $row;
+			}
+
+			$output = array(
+				"draw" => $_POST['draw'],
+				"recordsTotal" => $total_row,
+				"recordsFiltered" => $total_row,
+				"data" => $data,
+			);
+			echo json_encode($output);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+
+	}
+
+	// end retur purchase
 
     }
 
