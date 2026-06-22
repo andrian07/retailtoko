@@ -583,6 +583,45 @@ class purchase_model extends CI_Model {
     {
         $this->db->insert('temp_retur_purchase', $data_insert);
     }
+
+    public function check_edit_temp_retur_purchase($temp_product_id, $temp_purchase_id, $temp_user_id)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_retur_purchase');
+        $this->db->join('ms_product', 'temp_retur_purchase.temp_retur_purchase_product_id = ms_product.product_id');
+        $this->db->where('temp_retur_purchase_product_id', $temp_product_id);
+        $this->db->where('temp_retur_purchase_b_id', $temp_purchase_id);
+        $this->db->where('temp_user_id', $temp_user_id);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function last_retur_purchase()
+    {
+        $query = $this->db->query("select hd_retur_purchase_inv from hd_retur_purchase order by hd_retur_purchase_id  desc limit 1");
+        $result = $query->result();
+        return $result;
+    }
+
+    public function save_retur_purchase($data_insert)
+    {
+        $this->db->trans_start();
+        $this->db->insert('hd_retur_purchase', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
+    }
+
+    public function get_temp_retur_purchase($user_id)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_retur_purchase');
+        $this->db->join('ms_product', 'temp_retur_purchase.temp_retur_purchase_product_id = ms_product.product_id');
+        $this->db->join('ms_user', 'temp_retur_purchase.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id ', $user_id);
+        $query = $this->db->get();
+        return $query;
+    }
     // end retur purchase
 
 

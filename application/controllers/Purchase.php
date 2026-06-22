@@ -1349,6 +1349,7 @@ class Purchase extends CI_Controller {
 		echo json_encode(['code'=>200, 'result'=>$msg]);
 		die();
 	}
+
 	public function search_product_retur()
 	{
 		$purchase_id = $this->input->get('id');
@@ -1429,6 +1430,124 @@ class Purchase extends CI_Controller {
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
 		}
 	}
+
+	public function get_edit_temp_retur_purchase()
+	{
+		$temp_product_id  = $this->input->post('id');
+		$temp_purchase_id  = $this->input->post('purchase_id');
+		$temp_user_id  	  = $_SESSION['user_id'];
+		$check_edit_temp_retur_purchase = $this->purchase_model->check_edit_temp_retur_purchase($temp_product_id, $temp_purchase_id, $temp_user_id)->result_array();
+		echo json_encode(['code'=>200, 'result'=>$check_edit_temp_retur_purchase]);
+		die();
+	}
+
+	public function save_retur_purchase()
+	{
+
+		$modul = 'ReturPurchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+
+			$retur_purchase_supplier 	= $this->input->post('retur_purchase_supplier');
+			$retur_purchase_date 		= $this->input->post('retur_purchase_date');
+			$footer_total_invoice_val	= $this->input->post('footer_total_invoice_val');
+			$purchase_retur_remark 		= $this->input->post('purchase_retur_remark');
+			$user_id 					= $_SESSION['user_id'];
+
+			if($retur_purchase_supplier == null){
+				$msg = 'Silahkan Masukan Supplier';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($footer_total_invoice_val <= 0){
+				$msg = 'Silahkan Masukan Data Retur';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$supplier_id = $retur_purchase_supplier;
+			$get_supplier_code = $this->masterdata_model->get_supplier_code($supplier_id);
+			$supplier_code = $get_supplier_code[0]->supplier_code;
+			$supplier_name = $get_supplier_code[0]->supplier_name;
+			
+
+			$maxCode  = $this->purchase_model->last_retur_purchase();
+			$inv_code = 'RP/'.$supplier_code.'/'.date("d/m/Y").'/';
+			if ($maxCode == NULL) {
+				$last_code = $inv_code.'000001';
+			} else {
+				$maxCode   = $maxCode[0]->hd_retur_purchase_inv;
+				$last_code = substr($maxCode, -6);
+				$last_code = $inv_code.substr('000000' . strval(floatval($last_code) + 1), -6);
+			}
+
+			$data_insert = array(
+				'hd_retur_purchase_inv'			=> $last_code,
+				'hd_retur_purchase_supplier_id'	=> $retur_purchase_supplier,
+				'hd_retur_purchase_date'		=> $retur_purchase_date,
+				'hd_retur_purchase_total'		=> $footer_total_invoice_val,
+				'hd_retur_purchase_note'		=> $purchase_retur_remark,
+				'created_by'					=> $user_id
+			);	
+			$save_retur_purchase = $this->purchase_model->save_retur_purchase($data_insert);
+
+			$get_temp_retur_purchase = $this->purchase_model->get_temp_retur_purchase($user_id)->result_array();
+			foreach($get_temp_retur_purchase  as $row){
+				$data_insert_detail = array(
+					'hd_retur_purchase_id'				=> $save_retur_purchase,
+					'dt_retur_purchase_b_id'			=> $row['temp_retur_purchase_b_id'],
+					'dt_retur_warehouse_id'				=> $row['temp_retur_purchase_warehouse_id'],
+					'dt_retur_purchase_product_id'		=> $row['temp_retur_purchase_product_id'],
+					'dt_retur_purchase_price'			=> $row['temp_retur_purchase_price'],
+					'dt_retur_purchase_qty'				=> $row['temp_retur_purchase_qty'],
+					'dt_retur_purchase_total'			=> $row['temp_retur_purchase_total'],
+					'dt_retur_purchase_note'			=> $row['temp_retur_purchase_note'],
+				);
+
+				$save_detail_retur_purchase = $this->purchase_model->save_detail_retur_purchase($data_insert_detail);
+
+				/*$warehouse_id 	= $row['temp_retur_purchase_warehouse_id'];
+				if($warehouse_id != 1){
+					$product_id 	= $row['temp_retur_purchase_product_id'];
+					$qty 			= $row['temp_retur_purchase_qty'];
+					$get_last_stock = $this->purchase_model->get_last_stock($product_id, $warehouse_id);
+					$last_stock 	= $get_last_stock[0]->stock;
+					$new_stock 		= $last_stock - $qty;
+					$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
+
+					$movement_stock = array(
+						'stock_movement_product_id'		=> $product_id,
+						'stock_movement_qty'			=> $qty,
+						'stock_movement_before_stock'	=> $last_stock,
+						'stock_movement_new_stock'		=> $new_stock,
+						'stock_movement_desc'			=> 'Retur Pembelian',
+						'stock_movement_inv'			=> $last_code,
+						'stock_movement_calculate'		=> 'Minus',
+						'stock_movement_date'			=> $sse_date,
+						'stock_movement_creted_by'		=> $user_id,	
+					);	
+					$this->global_model->insert_movement_stock($movement_stock);
+				}
+				*/
+			}
+
+			$data_insert_act = array(
+				'activity_table_desc'	       => 'Tambah Retur Pembelian Ref: '.$last_code,
+				'activity_table_ref'		   => $last_code,
+				'activity_table_user'	       => $user_id,
+			);
+
+			$this->global_model->save($data_insert_act);
+
+			$this->purchase_model->clear_temp_retur_purchase($user_id);
+
+			$msg = 'Success Tambah';
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
 
 	// end retur purchase
 

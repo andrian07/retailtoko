@@ -412,7 +412,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           temp_price.set(row.temp_retur_purchase_price);
           $("#temp_qty").val(row.temp_retur_purchase_qty);
           $("#temp_qty_buy").val(row.temp_retur_purchase_qty_buy);
-          temp_ongkir.set(row.temp_retur_purchase_ongkir);
           temp_total.set(row.temp_retur_purchase_total);
           $("#temp_note").val(row.temp_retur_purchase_note);
         }
