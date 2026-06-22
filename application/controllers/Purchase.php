@@ -1219,8 +1219,6 @@ class Purchase extends CI_Controller {
 				$row = array();
 				$row[] 	= $field['hd_retur_purchase_inv'];
 				$row[] 	= date_format($date,"d-M-Y");
-				$row[] 	= $field['product_name'];
-				$row[] 	= $field['dt_retur_purchase_qty'];
 				$row[] 	= $field['supplier_name'];
 				$row[] 	= 'Rp. '.number_format($field['hd_retur_purchase_total']);
 				$row[]  = $hd_retur_purchase_status;
@@ -1241,6 +1239,195 @@ class Purchase extends CI_Controller {
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
 		}
 
+	}
+
+	public function addreturpurchase()
+	{
+		
+		$modul = 'ReturPurchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$supplier_list['supplier_list'] = $this->masterdata_model->supplier_list();
+			$check_auth['check_auth'] = $check_auth;
+			$data['data'] = array_merge($supplier_list, $check_auth);
+			$this->load->view('Pages/Purchase/addreturpurchase', $data);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function temp_retur_purchase_list()
+	{
+		$modul = 'ReturPurchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$search 			= $this->input->post('search');
+			$length 			= $this->input->post('length');
+			$start 			  	= $this->input->post('start');
+			$user 			  	= $_SESSION['user_id'];
+
+			if($search != null){
+				$search = $search['value'];
+			}
+			$list = $this->purchase_model->temp_retur_purchase_list($search, $length, $start, $user)->result_array();
+			$count_list = $this->purchase_model->temp_retur_purchase_list_count($search, $user)->result_array();
+			$total_row = $count_list[0]['total_row'];
+			$data = array();
+			$no = $_POST['start'];
+			foreach ($list as $field) {
+
+				$edit = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn" onclick="edit_temp('.$field['temp_retur_purchase_product_id'].', '.$field['temp_retur_purchase_b_id'].')"><i class="fas fa-edit sizing-fa"></i></button> ';
+				$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['temp_retur_purchase_product_id'].', '.$field['temp_retur_purchase_b_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+
+				$no++;
+				$row = array();
+				$row[] 	= $field['temp_retur_purchase_b_inv'];
+				$row[] 	= $field['product_code'];
+				$row[] 	= $field['product_name'];
+				$row[] 	= $field['unit_name'];
+				$row[] 	= 'Rp. '.number_format($field['temp_retur_purchase_price']);
+				$row[] 	= $field['temp_retur_purchase_qty'];
+				$row[] 	= 'Rp. '.number_format($field['temp_retur_purchase_total']);
+				$row[] 	= $field['temp_retur_purchase_note'];
+				$row[] 	= $edit.$delete;
+				$data[] = $row;
+			}
+
+			$output = array(
+				"draw" => $_POST['draw'],
+				"recordsTotal" => $total_row,
+				"recordsFiltered" => $total_row,
+				"data" => $data
+			);
+			echo json_encode($output);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function check_temp_retur_purchase()
+	{
+		$user_id 		= $_SESSION['user_id'];
+		$check_temp_retur_purchase  = $this->purchase_model->check_temp_retur_purchase($user_id)->result_array();
+		echo json_encode(['code'=>200, 'data'=>$check_temp_retur_purchase]);
+		die();
+	}
+
+	public function search_purchase_inv()
+	{
+		$supplier_id = $this->input->get('id');
+		if($supplier_id == null){
+			$result = ['success' => False, 'message' => 'Silahkan Isi Supplier Terlebih Dahulu'];
+		}else{
+			$keyword = $this->input->get('term');
+			$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+			if (!($keyword == '' || $keyword == NULL)) {
+				$find = $this->global_model->search_purchase_inv($keyword, $supplier_id)->result_array();
+				$find_result = [];
+				foreach ($find as $row) {
+					$diplay_text = $row['hd_purchase_invoice'];
+					$find_result[] = [
+						'id'                  => $row['hd_purchase_id'],
+						'value'               => $diplay_text
+					];
+				}
+				$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function delete_temp_retur_purchase()
+	{
+		$product_id   = $this->input->post('id');
+		$purchase_id  = $this->input->post('purchase_id');
+		$user_id 	 = $_SESSION['user_id'];
+		$this->purchase_model->delete_temp_retur_purchase($product_id, $purchase_id, $user_id);
+		$msg = 'Success Delete';
+		echo json_encode(['code'=>200, 'result'=>$msg]);
+		die();
+	}
+	public function search_product_retur()
+	{
+		$purchase_id = $this->input->get('id');
+		$keyword = $this->input->get('term');
+		$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+		if (!($keyword == '' || $keyword == NULL)) {
+			$find = $this->purchase_model->search_product_retur($keyword, $purchase_id)->result_array(); 
+			$find_result = [];
+			foreach ($find as $row) {
+				$diplay_text = $row['product_name'];
+				$find_result[] = [
+					'id'                  		=> $row['dt_product_id'],
+					'value'               		=> $diplay_text,
+					'warehouse'           		=> $row['hd_purchase_warehouse'],
+					'purchase_price'      		=> $row['dt_purchase_price'],
+					'purchase_qty'        		=> $row['dt_purchase_qty']
+				];
+			}
+			$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
+		}
+		echo json_encode($result);
+	}
+
+	public function add_temp_retur_purchase()
+	{
+
+		$modul = 'ReturPurchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$purchase_id 				= $this->input->post('purchase_id');
+			$purchase_inv 				= $this->input->post('purchase_inv');
+			$product_id 				= $this->input->post('product_id');
+			$product_name 				= $this->input->post('product_name');
+			$purchase_warehouse 		= 1;
+			$temp_price_submit 			= $this->input->post('temp_price_submit');
+			$temp_qty 					= $this->input->post('temp_qty');
+			$temp_qty_buy 				= $this->input->post('temp_qty_buy');
+			$temp_total_submit 			= $this->input->post('temp_total_submit');
+			$temp_note 					= $this->input->post('temp_note');
+			$supplier_id 				= $this->input->post('supplier_id');
+			$user_id 					= $_SESSION['user_id'];
+
+			$check_total_item_retur = $this->purchase_model->check_total_item_retur($purchase_id, $product_id);
+
+			$total_qty_retur = $check_total_item_retur[0]->total_qty_retur;
+
+			$total_qty_retur_count = $total_qty_retur + $temp_qty;
+
+			if($total_qty_retur_count > $temp_qty_buy){
+				$msg = "Qty Retur Tidak Bisa Lebih Besar Dari Qty Beli";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$check_temp_retur_purchase_input = $this->purchase_model->check_temp_retur_purchase_input($purchase_id, $product_id, $user_id);
+			$data_insert = array(
+				'temp_retur_purchase_b_id'				=> $purchase_id,
+				'temp_retur_purchase_b_inv'				=> $purchase_inv,
+				'temp_retur_purchase_warehouse_id'		=> $purchase_warehouse,
+				'temp_retur_purchase_product_id'		=> $product_id,
+				'temp_retur_purchase_product_name'		=> $product_name,
+				'temp_retur_purchase_price'				=> $temp_price_submit,
+				'temp_retur_purchase_qty'				=> $temp_qty,
+				'temp_retur_purchase_qty_buy'			=> $temp_qty_buy,
+				'temp_retur_purchase_total'				=> $temp_total_submit,
+				'temp_retur_purchase_note'				=> $temp_note,
+				'temp_retur_purchase_supplier'			=> $supplier_id,
+				'temp_user_id'							=> $user_id,
+			);	
+			$msg = 'Success Tambah';
+			if($check_temp_retur_purchase_input != null){
+				$this->purchase_model->edit_temp_retur_purchase($purchase_id, $product_id, $user_id, $data_insert);
+			}else{
+				$this->purchase_model->add_temp_retur_purchase($data_insert);
+			}
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
 	}
 
 	// end retur purchase

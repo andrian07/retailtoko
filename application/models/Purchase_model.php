@@ -124,6 +124,7 @@ class purchase_model extends CI_Model {
         $this->db->select('*');
         $this->db->from('temp_po');
         $this->db->join('ms_product', 'temp_po.temp_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
         $this->db->where('temp_po_id', $temp_po_id);
         $query = $this->db->get();
         return $query;
@@ -389,6 +390,7 @@ class purchase_model extends CI_Model {
         $this->db->select('*');
         $this->db->from('temp_purchase');
         $this->db->join('ms_product', 'temp_purchase.temp_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
         $this->db->where('temp_product_id', $temp_product_id);
         $this->db->where('temp_user_id', $temp_user_id);
         $query = $this->db->get();
@@ -491,9 +493,97 @@ class purchase_model extends CI_Model {
         return $query;
     }
 
+    public function temp_retur_purchase_list($search, $length, $start, $user)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_retur_purchase');
+        $this->db->join('ms_product', 'temp_retur_purchase.temp_retur_purchase_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
+        $this->db->join('ms_user', 'temp_retur_purchase.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id', $user);
+        if($search != null){
+            $this->db->where('ms_product.product_name like "%'.$search.'%"');
+            $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+        }
+        $this->db->order_by('temp_retur_purchase.created_at', 'desc');
+        $this->db->limit($length);
+        $this->db->offset($start);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function temp_retur_purchase_list_count($search, $user)
+    {
+        $this->db->select('count(*) as total_row');
+        $this->db->from('temp_retur_purchase');
+        $this->db->join('ms_product', 'temp_retur_purchase.temp_retur_purchase_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
+        $this->db->join('ms_user', 'temp_retur_purchase.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id', $user);
+        if($search != null){
+            $this->db->where('ms_product.product_name like "%'.$search.'%"');
+            $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+        }
+        $this->db->order_by('temp_retur_purchase.created_at', 'desc');
+        $query = $this->db->get();
+        return $query;
+    }
+    
+     public function check_temp_retur_purchase($user_id)
+    {
+        $this->db->select('sum(temp_retur_purchase_total) as sub_total, temp_retur_purchase_supplier as supplier');
+        $this->db->from('temp_retur_purchase');
+        $this->db->where('temp_user_id', $user_id);
+        $query = $this->db->get();
+        return $query;
+    }
+    public function delete_temp_retur_purchase($product_id, $purchase_id, $user_id)
+    {
+        $this->db->where('temp_retur_purchase_product_id', $product_id);
+        $this->db->where('temp_retur_purchase_b_id', $purchase_id);
+        $this->db->where('temp_user_id', $user_id);
+        $this->db->delete('temp_retur_purchase');
+    }
+    public function search_product_retur($keyword, $purchase_id)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_purchase');
+        $this->db->join('dt_purchase', 'hd_purchase.hd_purchase_id = dt_purchase.hd_purchase_id');
+        $this->db->join('ms_product', 'dt_purchase.dt_product_id = ms_product.product_id');
+        if($keyword != null){
+            $this->db->or_where('(ms_product.product_name like "%'.$keyword.'%" or ms_product.product_code like "%'.$keyword.'%")' );
+        }
+        $this->db->where('hd_purchase.hd_purchase_id', $purchase_id);
+        $this->db->limit(50);
+        $query = $this->db->get();
+        return $query;
+    }
+    public function check_total_item_retur($purchase_id, $product_id)
+    {
+        $query = $this->db->query("select sum(dt_retur_purchase_qty) as total_qty_retur from dt_retur_purchase a, hd_retur_purchase b where a.hd_retur_purchase_id = b.hd_retur_purchase_id  and dt_retur_purchase_b_id = '".$purchase_id."' and dt_retur_purchase_product_id = '".$product_id."' and hd_retur_purchase_status = 'Success'");
+        $result = $query->result();
+        return $result;
+    }
+    public function check_temp_retur_purchase_input($purchase_id, $product_id, $user_id)
+    {
+        $query = $this->db->query("select * from temp_retur_purchase where temp_retur_purchase_product_id = '".$product_id."' and temp_retur_purchase_b_id ='".$purchase_id."' and temp_user_id = '".$user_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+    public function edit_temp_retur_purchase($purchase_id, $product_id, $user_id, $data_insert)
+    {
+        $this->db->set($data_insert);
+        $this->db->where('temp_retur_purchase_b_id ', $purchase_id);
+        $this->db->where('temp_retur_purchase_product_id ', $product_id);
+        $this->db->where('temp_user_id ', $user_id);
+        $this->db->update('temp_retur_purchase');
+    }
+    public function add_temp_retur_purchase($data_insert)
+    {
+        $this->db->insert('temp_retur_purchase', $data_insert);
+    }
     // end retur purchase
 
 
 }
-
-?>

@@ -787,7 +787,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       success : function(data){
         if (data.code == "200"){
           var row = data.result[0];
-          $("#product_name").val(row.product_name);
+          $("#product_name").val(row.product_code + ' - ' + row.product_name + ' - ' + row.unit_name);
           $("#product_id").val(row.product_id);
           temp_price.set(row.temp_po_price);
           $("#temp_qty").val(row.temp_po_qty);

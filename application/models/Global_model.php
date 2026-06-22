@@ -263,6 +263,15 @@ class global_model extends CI_Model {
         $this->db->update('ms_note');
     }
 
-}
+    public function search_purchase_inv($keyword, $supplier_id)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_purchase');
+        $this->db->where('hd_purchase_invoice like "%'.$keyword.'%"');
+        $this->db->where('hd_purchase_supplier', $supplier_id);
+        $this->db->limit(50);
+        $query = $this->db->get();
+        return $query;
+    }
 
-?>
+}

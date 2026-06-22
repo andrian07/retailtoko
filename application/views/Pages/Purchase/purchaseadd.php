@@ -861,7 +861,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       success : function(data){
         if (data.code == "200"){
           var row = data.result[0];
-          $("#product_name").val(row.product_name);
+          $("#product_name").val(row.product_code + ' - ' + row.product_name + ' - ' + row.unit_name);
           $("#product_id").val(row.temp_product_id);
           temp_price.set(row.temp_purchase_price);
           $("#temp_qty").val(row.temp_purchase_qty);
@@ -1045,11 +1045,10 @@ require DOC_ROOT_PATH . $this->config->item('footer');
   new bootstrap.Modal(document.getElementById('footerdiscount'), {backdrop: 'static', keyboard: false})
 
   // Intercept keyboard refresh (F5 / Ctrl+R) with custom modal
-  $(document).on('keydown', function(e) {
-    if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
-      e.preventDefault();
-      showRefreshConfirm();
-    }
+  window.addEventListener('beforeunload', function() {
+      navigator.sendBeacon(
+          '<?php echo base_url(); ?>Purchase/clear_temp_purchase'
+      );
   });
 
   function showRefreshConfirm(targetUrl) {
