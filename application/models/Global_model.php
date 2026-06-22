@@ -32,11 +32,9 @@ class global_model extends CI_Model {
     {
         $this->db->select('*');
         $this->db->from('ms_product');
-        $this->db->join('ms_supplier', 'ms_product.product_id = ms_supplier.supplier_id');
+        $this->db->join('ms_product_supplier', 'ms_product.product_id = ms_product_supplier.product_id');
         $this->db->join('ms_unit', 'ms_product.product_unit = ms_unit.unit_id');
-        $this->db->where('supplier_id', $supplier_id);
-        $this->db->where('ms_product.is_active', 'y');
-        $this->db->where('ms_product.product_status', 'Aktif');
+        $this->db->where('ms_product_supplier.supplier_id', $supplier_id);
         if($keyword != null){
             $this->db->where('(ms_product.product_name like "%'.$keyword.'%" OR ms_product.product_code like "%'.$keyword.'%") ');
         }
@@ -150,6 +148,24 @@ class global_model extends CI_Model {
         $this->db->order_by('activity_table_id', 'desc');
         $query = $this->db->get();
         return $query;
+    }
+    public function get_last_stock($product_id, $warehouse_id)
+    {
+        $query = $this->db->query("select stock from ms_product a, ms_product_stock b where a.product_id = b.product_id and b.warehouse_id = '".$warehouse_id."' and b.product_id = '".$product_id."'");
+        $result = $query->result();
+        return $result;
+    }
+    public function update_stock_plus($product_id, $purchase_warehouse, $new_stock)
+    {
+        $this->db->set('stock', $new_stock);
+        $this->db->where('product_id ', $product_id);
+        $this->db->where('warehouse_id ', $purchase_warehouse);
+        $this->db->update('ms_product_stock');
+    }
+
+    public function save_stock_movement($data_movement_stock)
+    {
+        $this->db->insert('stock_movement', $data_movement_stock);
     }
 
     public function get_next_activity()

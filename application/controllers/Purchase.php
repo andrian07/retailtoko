@@ -868,6 +868,7 @@ class Purchase extends CI_Controller {
 			$temp_price_val 			= $this->input->post('temp_price_val');
 			$temp_qty 					= $this->input->post('temp_qty');
 			$temp_total_val 			= $this->input->post('temp_total_val');
+			$temp_purchase_supplier_id 	= $this->input->post('supplier_id');
 			$user_id 					= $_SESSION['user_id'];
 
 			$check_temp_purchase_input = $this->purchase_model->check_temp_purchase_input($product_id, $user_id);
@@ -876,6 +877,7 @@ class Purchase extends CI_Controller {
 				'temp_purchase_price'			=> $temp_price_val,
 				'temp_purchase_qty'				=> $temp_qty,
 				'temp_purchase_total'			=> $temp_total_val,
+				'temp_purchase_supplier_id'		=> $temp_purchase_supplier_id,
 				'temp_user_id'					=> $user_id,
 			);	
 			$msg = 'Success Tambah';
@@ -924,6 +926,162 @@ class Purchase extends CI_Controller {
 		echo json_encode(['code'=>200, 'result'=>$check_edit_temp_purchase]);
 		die();
 	}
+
+	public function save_purchase()
+	{
+
+		$modul = 'Purchase';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+
+			$po_inv 									= $this->input->post('po_inv');
+			$po_id 										= $this->input->post('po_id');
+			$purchase_payment_method 					= $this->input->post('purchase_payment_method');
+			$purchase_supplier 							= $this->input->post('purchase_supplier');
+			$no_faktur_supplier 						= $this->input->post('no_faktur_supplier');
+			$faktur_date 								= $this->input->post('faktur_date');
+			$purchase_tax 								= $this->input->post('purchase_tax');
+			$purchase_date 					        	= $this->input->post('purchase_date');
+			$purchase_warehouse 						= 1;
+			$purchase_due_date 							= $this->input->post('purchase_due_date');
+			$footer_sub_total_submit 					= $this->input->post('footer_sub_total_submit');
+			$footer_total_discount_submit 				= $this->input->post('footer_total_discount_submit');
+			$edit_footer_discount_percentage1_submit 	= $this->input->post('edit_footer_discount_percentage1_submit');
+			$edit_footer_discount_percentage2_submit 	= $this->input->post('edit_footer_discount_percentage2_submit');
+			$edit_footer_discount_percentage3_submit 	= $this->input->post('edit_footer_discount_percentage3_submit');
+			$edit_footer_discount1_submit 				= $this->input->post('edit_footer_discount1_submit');
+			$edit_footer_discount2_submit 				= $this->input->post('edit_footer_discount2_submit');
+			$edit_footer_discount3_submit 				= $this->input->post('edit_footer_discount3_submit');
+			$footer_dpp_val 							= $this->input->post('footer_dpp_val');
+			$footer_total_ppn_val 					    = $this->input->post('footer_total_ppn_val');
+			$footer_total_invoice_val 					= $this->input->post('footer_total_invoice_val');
+			$footer_dp_val                              = $this->input->post('footer_dp_val');
+			$footer_remaining_payment_val               = $this->input->post('footer_remaining_payment_val');
+			$purchase_remark 							= $this->input->post('purchase_remark');
+			$user_id 									= $_SESSION['user_id'];
+
+			if($purchase_supplier == null){
+				$msg = 'Silahkan Masukan Supplier';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($purchase_payment_method == null){
+				$msg = 'Silahkan Masukan Jenis Pembayaran';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($purchase_warehouse == null){
+				$msg = 'Silahkan Masukan Gudang';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($footer_total_invoice_val <= 0){
+				$msg = 'Silahkan Input Data Terlebih Dahulu';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$warehouse_id 		= $purchase_warehouse;
+			$get_warehouse_code = $this->masterdata_model->get_warehouse_code($warehouse_id);
+			$warehouse_code 	= $get_warehouse_code[0]->warehouse_code;
+			$warehouse_name 	= $get_warehouse_code[0]->warehouse_name;
+
+			$supplier_id = $purchase_supplier;
+			$get_supplier_code = $this->masterdata_model->get_supplier_code($supplier_id);
+			$supplier_code = $get_supplier_code[0]->supplier_code;
+			$supplier_name = $get_supplier_code[0]->supplier_name;
+			
+
+			$maxCode  = $this->purchase_model->last_purchase();
+			$inv_code = 'LBM/'.$supplier_code.'/'.date("d/m/Y").'/';
+			if ($maxCode == NULL) {
+				$last_code = $inv_code.'000001';
+			} else {
+				$maxCode   = $maxCode[0]->hd_purchase_invoice;
+				$last_code = substr($maxCode, -6);
+				$last_code = $inv_code.substr('000000' . strval(floatval($last_code) + 1), -6);
+			}	
+
+			$data_insert = array(
+				'hd_purchase_invoice'			=> $last_code,
+				'hd_po_id'						=> $po_id,
+				'hd_purchase_faktur'			=> $no_faktur_supplier,
+				'hd_purchase_faktur_date'		=> $faktur_date,
+				'hd_purchase_date'				=> $purchase_date,
+				'hd_purchase_warehouse'			=> $purchase_warehouse,
+				'hd_purchase_supplier'			=> $purchase_supplier,
+				'hd_purchase_tax'				=> $purchase_tax,
+				'hd_purchase_due_date'			=> $purchase_due_date,
+				'hd_purchase_payment'			=> $purchase_payment_method,
+				'hd_purchase_sub_total'			=> $footer_sub_total_submit,
+				'hd_purchase_disc_percentage1'	=> $edit_footer_discount_percentage1_submit,
+				'hd_purchase_disc_percentage2'	=> $edit_footer_discount_percentage2_submit,
+				'hd_purchase_disc_percentage3'	=> $edit_footer_discount_percentage3_submit,
+				'hd_purchase_disc_1'			=> $edit_footer_discount1_submit,
+				'hd_purchase_disc_2'			=> $edit_footer_discount2_submit,
+				'hd_purchase_disc_3'			=> $edit_footer_discount3_submit,
+				'hd_purchase_total_discount'	=> $footer_total_discount_submit,
+				'hd_purchase_dpp'				=> $footer_dpp_val,
+				'hd_purchase_ppn'			    => $footer_total_ppn_val,
+				'hd_purchase_dp'				=> $footer_dp_val,
+				'hd_purchase_grand_total'		=> $footer_total_invoice_val,
+				'hd_purchase_remaining_debt'	=> $footer_remaining_payment_val,
+				'hd_purchase_note'				=> $purchase_remark,
+				'created_by'					=> $user_id
+			);	
+			$save_purchase = $this->purchase_model->save_purchase($data_insert);
+
+			$get_temp_purchase = $this->purchase_model->get_temp_purchase($user_id)->result_array();
+			foreach($get_temp_purchase  as $row){
+				$data_insert_detail = array(
+					'hd_purchase_id'			=> $save_purchase,
+					'dt_product_id'				=> $row['temp_product_id'],
+					'dt_purchase_price'			=> $row['temp_purchase_price'],
+					'dt_purchase_qty'			=> $row['temp_purchase_qty'],
+					'dt_purchase_total'			=> $row['temp_purchase_total']
+				);
+
+				$save_detail_purchase = $this->purchase_model->save_detail_purchase($data_insert_detail);
+
+				$product_id = $row['temp_product_id'];
+				$get_product_stock = $this->global_model->get_last_stock($product_id, $purchase_warehouse);
+				$last_stock = $get_product_stock[0]->stock;
+				$new_stock = $last_stock + $row['temp_purchase_qty'];
+				$this->global_model->update_stock_plus($product_id, $purchase_warehouse, $new_stock);
+
+				$data_movement_stock = array(
+					'stock_movement_product_id'		=> $product_id,
+					'stock_movement_qty'			=> $row['temp_purchase_qty'],
+					'stock_movement_before_stock'	=> $last_stock,
+					'stock_movement_new_stock'		=> $new_stock,
+					'stock_movement_desc'			=> 'Pembelian',
+					'stock_movement_inv'			=> $last_code,
+					'stock_movement_calculate'		=> 'Plus',
+					'stock_movement_date'			=> date('Y-m-d'),
+					'stock_movement_creted_by'		=> $user_id,
+				);
+				$this->global_model->save_stock_movement($data_movement_stock);
+			}
+
+			$this->purchase_model->update_purchase_po($po_id);
+
+			$data_insert_act = array(
+				'activity_table_desc'	       => 'Tambah Pembelian Cabang '.$warehouse_name.' Ref: '.$last_code,
+				'activity_table_ref'		   => $last_code,
+				'activity_table_user'	       => $user_id,
+			);
+
+			$this->global_model->save($data_insert_act);
+
+			$this->purchase_model->clear_temp_purchase($user_id);
+
+			$msg = 'Success Tambah';
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
 
 	// end purchase
 

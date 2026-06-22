@@ -27,10 +27,6 @@ class masterdata_model extends CI_Model {
         return $query;
     }
 
-    public function update_acc_product($update, $role_id)
-    {
-        
-    }
 
     public function account_list($search, $length, $start)
     {
@@ -671,6 +667,12 @@ class masterdata_model extends CI_Model {
     }
 
     // end user
+    public function get_warehouse_code($warehouse_id)
+    {
+        $query = $this->db->query("select warehouse_code, warehouse_name from ms_warehouse where warehouse_id = '".$warehouse_id."'");
+        $result = $query->result();
+        return $result;
+    }
 }
 
 ?>
