@@ -83,10 +83,6 @@
                   <td colspan="4"><?php foreach(explode(",",$row->product_supplier_tag) as $rows){ echo '<span class="badge badge-primary " style="margin-right:1px;">'.$rows.'</span>';} ?></td>
                 </tr>
                 <tr>
-                  <th scope="col" class="productinfo-text-right">Item Supplier:</th>
-                  <td colspan="4"><?php echo nl2br($row->product_supplier_name); ?></td>
-                </tr>
-                <tr>
                   <th scope="col" class="productinfo-text-right">Status:</th>
                   <td colspan="4"><?php echo $row->product_status; ?></td>
                 </tr>
@@ -115,19 +111,6 @@
                   <th scope="col" class="productinfo-text-right">Min Stock:</th>
                   <td colspan="4"><?php echo $row->product_min_stock; ?></td>
                 </tr>
-                
-                <tr>
-                  <th scope="col" class="productinfo-text-right">Catatan Penting:</th>
-                  <td colspan="4"><?php echo nl2br($row->product_purchase_record); ?></td>
-                </tr>
-                <tr>
-                  <th scope="col" class="productinfo-text-right">Min Order:</th>
-                  <td colspan="4"><?php echo $row->product_min_order; ?></td>
-                </tr>
-                <tr>
-                  <th scope="col" class="productinfo-text-right">Berat:</th>
-                  <td colspan="4"><?php echo $row->product_weight; ?> Gram</td>
-                </tr>
                 <tr>
                   <th scope="col" class="productinfo-text-right">HPP:</th>
                   <td colspan="4"><span class="badge badge-danger"><?php echo number_format($row->product_hpp); ?></span></td>
@@ -135,10 +118,6 @@
                 <tr>
                   <th scope="col" class="productinfo-text-right">Harga Beli:</th>
                   <td colspan="4"><span class="badge badge-danger"><?php echo number_format($row->product_price); ?></span></td>
-                </tr>
-                <tr>
-                  <th scope="col" class="productinfo-text-right">Lokasi Stok:</th>
-                  <td colspan="4"><?php echo $row->product_location; ?></td>
                 </tr>
                 <tr>
                   <th scope="col" class="productinfo-text-right">Deskripsi:</th>
@@ -220,7 +199,7 @@
             </tr>
             <?php foreach($data['product_stock'] as $rows){ ?>
               <tr>
-                <td><?php echo $rows->warehouse_name; ?></td>
+                <td>Stok Gudang</td>
                 <td><?php echo $rows->stock; ?> <?php echo $rows->unit_name; ?></td>
               </tr>
             <?php } ?>

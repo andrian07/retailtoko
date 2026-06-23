@@ -284,6 +284,7 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_supplier c', 'a.hd_purchase_supplier = c.supplier_id');
         $this->db->join('ms_payment f', 'a.hd_purchase_payment = f.payment_id');
         $this->db->join('ms_user d', 'a.created_by = d.user_id');
+        $this->db->join('hd_po g', 'a.hd_po_id = g.hd_po_id', 'left');
         $this->db->where('a.hd_purchase_id', $purchase_id);
         $query = $this->db->get();
         return $query;
@@ -298,7 +299,6 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_product c', 'a.dt_product_id = c.product_id');
         $this->db->join('ms_unit d', 'c.product_unit = d.unit_id');
         $this->db->join('ms_user e', 'b.created_by = e.user_id');
-        $this->db->join('hd_po f', 'b.hd_po_id = f.hd_po_id', 'left');
         $this->db->where('a.hd_purchase_id', $purchase_id);
         $query = $this->db->get();
         return $query; 
