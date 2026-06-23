@@ -49,6 +49,9 @@
         <p class="detail-company"><b><?php echo company ?> </b></p>
         <p><?php echo company_address ?></p>
         <p><?php echo company_phone ?></p>
+        <?php if($row['hd_po_id'] != null){ ?>
+          <p>PO: <b><?php echo $row['hd_po_invoice']; ?></b></p>
+        <?php } ?>
       </div>
       <div class="col-md-4">
         <p class="detail-invoice"><?php echo $row['hd_purchase_invoice']; ?></p>

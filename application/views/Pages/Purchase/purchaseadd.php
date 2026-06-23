@@ -648,10 +648,9 @@ require DOC_ROOT_PATH . $this->config->item('footer');
             let message = 'Berhasil Pilih PO';
             let state = 'info';
             notif_success(title, message, state);
-            $('#temp-purchase-list').DataTable().ajax.reload();
-
+           
+            $('#po_id').val(po_id);
             if(data.header.length > 0){
-              console.log(data.header[0]);
               $('#purchase_payment_method').val(data.header[0].hd_po_payment).trigger('change');
               $('#purchase_due_date').val(data.header[0].hd_po_due_date);
               $('#purchase_supplier').val(data.header[0].hd_po_supplier).trigger('change');
@@ -673,6 +672,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
               footer_total_invoice.set(data.header[0].hd_po_grand_total);
               footer_remaining_payment.set(data.header[0].hd_po_grand_total);
             }
+             $('#temp-purchase-list').DataTable().ajax.reload();
             //check_tempt_data();
           } else {
             Swal.fire({

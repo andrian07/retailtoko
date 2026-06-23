@@ -82,7 +82,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
               </div>
             </div>
 
-            <div class="po-section-title mt-2"><i class="fas fa-truck"></i> Supplier</div>
+            <div class="po-section-title mt-2"><i class="fas fa-truck"></i> Supplier & Jenis Potongan</div>
             <div class="row">
               <div class="col-md-6 po-field-group supplier-highlight-po">
                 <label>Supplier</label>
@@ -91,6 +91,13 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   <?php foreach ($data['supplier_list'] as $row) { ?>
                     <option value="<?php echo $row->supplier_id; ?>"><?php echo $row->supplier_name; ?></option>
                   <?php } ?>
+                </select>
+              </div>
+              <div class="col-md-6 po-field-group">
+                <label>Jenis Potongan :</label>
+                <select class="form-control" id="payment_type" name="payment_type">
+                  <option value="CASH">Cash</option>
+                  <option value="PN">Potong Nota</option>
                 </select>
               </div>
             </div>
@@ -491,13 +498,14 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     e.preventDefault();
     var retur_purchase_supplier                  = $("#purchase_supplier").val();
     var retur_purchase_date                      = $("#retur_purchase_date").val();
+    var payment_type                             = $("#payment_type").val();
     var footer_total_invoice_val                 = parseInt(footer_total_invoice.get());
     var purchase_retur_remark                    = $("#purchase_retur_remark").val();
     $.ajax({
       type: "POST",
       url: "<?php echo base_url(); ?>Purchase/save_retur_purchase",
       dataType: "json",
-      data: {retur_purchase_supplier:retur_purchase_supplier, retur_purchase_date:retur_purchase_date, footer_total_invoice_val:footer_total_invoice_val, purchase_retur_remark:purchase_retur_remark},
+      data: {retur_purchase_supplier:retur_purchase_supplier, retur_purchase_date:retur_purchase_date, payment_type:payment_type, footer_total_invoice_val:footer_total_invoice_val, purchase_retur_remark:purchase_retur_remark},
       success : function(data){
         if (data.code == "200"){
           window.location.href = "<?php echo base_url(); ?>/Purchase/returpurchase";

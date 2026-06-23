@@ -150,7 +150,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     });
   }
 
-  function deletese(id)
+  function deletes(id)
   {
     Swal.fire({
       title: 'Konfirmasi?',
@@ -178,7 +178,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: data.msg,
+                text: data.result,
               })
             }
           }

@@ -81,7 +81,6 @@
             <th scope="col">produk</th>
             <th scope="col">Satuan</th>
             <th scope="col">Qty</th>
-            <th scope="col">Ongkir</th>
             <th scope="col">Total</th>
             <th scope="col">Catatan</th>
           </tr>
@@ -94,7 +93,6 @@
               <td><?php echo $row->product_name; ?></td>
               <td><?php echo $row->unit_name; ?></td>
               <td><?php echo $row->dt_retur_purchase_qty; ?></td>
-              <td><?php echo number_format($row->dt_retur_purchase_ongkir); ?></td>
               <td><?php echo number_format($row->dt_retur_purchase_total); ?></td>
               <td><?php echo $row->dt_retur_purchase_note; ?></td>
             </tr>

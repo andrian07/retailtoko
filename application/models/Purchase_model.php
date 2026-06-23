@@ -298,6 +298,7 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_product c', 'a.dt_product_id = c.product_id');
         $this->db->join('ms_unit d', 'c.product_unit = d.unit_id');
         $this->db->join('ms_user e', 'b.created_by = e.user_id');
+        $this->db->join('hd_po f', 'b.hd_po_id = f.hd_po_id', 'left');
         $this->db->where('a.hd_purchase_id', $purchase_id);
         $query = $this->db->get();
         return $query; 
@@ -422,6 +423,7 @@ class purchase_model extends CI_Model {
         $query = $this->db->get();
         return $query;
     }
+    
     public function save_detail_purchase($data_insert_detail)
     {
         $this->db->insert('dt_purchase', $data_insert_detail);
@@ -447,7 +449,7 @@ class purchase_model extends CI_Model {
 
     public function detail_po_purchase($po_id)
     {
-        $query = $this->db->query("select * from dt_po a, hd_po b, ms_product c, ms_unit d, ms_user e, hd_input_stock f, dt_input_stock g where a.hd_po_id = b.hd_po_id and a.dt_product_id = c.product_id and c.product_unit = d.unit_id and b.hd_po_id = f.hd_po_id and f.hd_input_stock_id  = g.hd_is_id and b.created_by = e.user_id and a.hd_po_id  = '".$po_id."' and hd_input_stock_status = 'Pending' group by dt_po_id");
+        $query = $this->db->query("select * from dt_po a, hd_po b, ms_product c, ms_unit d, ms_user e where a.hd_po_id = b.hd_po_id and a.dt_product_id = c.product_id and c.product_unit = d.unit_id and b.created_by = e.user_id and a.hd_po_id  = '".$po_id."'");
         $result = $query->result();
         return $result;
     }
@@ -457,6 +459,33 @@ class purchase_model extends CI_Model {
         $query = $this->db->query("select * from hd_po a, ms_warehouse b, ms_supplier c, ms_payment f, ms_user d where a.hd_po_warehouse = b.warehouse_id and a.hd_po_supplier = c.supplier_id and a.hd_po_payment = f.payment_id and a.created_by = d.user_id and a.hd_po_id  = '".$po_id."'");
         $result = $query->result();
         return $result;
+    }
+
+    public function delete_purchase($purchase_id)
+    {
+        $this->db->set('hd_purchase_status', 'cancel');
+        $this->db->where('hd_purchase_id ', $purchase_id);
+        $this->db->update('hd_purchase');
+    }
+
+    public function check_retur_status($purchase_id)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_retur_purchase');
+        $this->db->join('dt_retur_purchase', 'hd_retur_purchase.hd_retur_purchase_id = dt_retur_purchase.dt_retur_purchase_id');
+        $this->db->where('dt_retur_purchase.hd_retur_purchase_id', $purchase_id);
+        $this->db->where('hd_retur_purchase_status', 'Success');
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function get_purchase_code($purchase_id)
+    {
+        $this->db->select('hd_purchase_invoice');
+        $this->db->from('hd_purchase');
+        $this->db->where('hd_purchase_id', $purchase_id);
+        $query = $this->db->get();
+        return $query;
     }
 
     // end purchase
@@ -622,6 +651,48 @@ class purchase_model extends CI_Model {
         $query = $this->db->get();
         return $query;
     }
+
+    public  function save_detail_retur_purchase($data_insert_detail)
+    {
+        $this->db->insert('dt_retur_purchase', $data_insert_detail);
+    }
+    
+    public function clear_temp_retur_purchase($user_id)
+    {
+        $this->db->where('temp_user_id', $user_id);
+        $this->db->delete('temp_retur_purchase');
+    }
+
+    public function header_retur_purchase($retur_purchase_id)
+    {
+        $query = $this->db->query("select * from hd_retur_purchase a, ms_supplier c, ms_user d where a.hd_retur_purchase_supplier_id = c.supplier_id and a.created_by = d.user_id and hd_retur_purchase_id  = '".$retur_purchase_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+
+    public function detail_retur_purchase($retur_purchase_id)
+    {
+        $query = $this->db->query("select * from dt_retur_purchase a, ms_warehouse b, hd_purchase c, ms_product d, ms_unit e where a.dt_retur_warehouse_id = b.warehouse_id and a.dt_retur_purchase_b_id = c.hd_purchase_id and a.dt_retur_purchase_product_id = d.product_id and d.product_unit = e.unit_id and hd_retur_purchase_id = '".$retur_purchase_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+    
+    public function delete_retur_purchase($retur_purchase_id)
+    {
+        $this->db->set('hd_retur_purchase_status', 'Cancel');
+        $this->db->where('hd_retur_purchase_id', $retur_purchase_id);
+        $this->db->update('hd_retur_purchase');
+    }
+
+    public function detail_retur_purchase_delete($retur_purchase_id)
+    {
+        $query = $this->db->query("select * from dt_retur_purchase a, ms_warehouse b, hd_purchase c, ms_product d, ms_unit e, hd_retur_purchase f where a.dt_retur_warehouse_id = b.warehouse_id and a.dt_retur_purchase_b_id = c.hd_purchase_id and a.dt_retur_purchase_product_id = d.product_id and d.product_unit = e.unit_id and a.hd_retur_purchase_id = f.hd_retur_purchase_id and a.hd_retur_purchase_id = '".$retur_purchase_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
     // end retur purchase
 
 
