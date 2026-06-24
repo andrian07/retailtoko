@@ -164,14 +164,9 @@ class Masterdata extends CI_Controller {
 			$customer_address_rw 		= $this->input->post('customer_address_rw');
 			$customer_address_phone 	= $this->input->post('customer_address_phone');
 			$customer_address_email 	= $this->input->post('customer_address_email');
-			$customer_send_address 		= $this->input->post('customer_send_address');
-			$customer_expedisi 			= $this->input->post('customer_expedisi');
 			$customer_npwp 				= $this->input->post('customer_npwp');
 			$customer_nik 				= $this->input->post('customer_nik');
-			$customer_rate 				= $this->input->post('customer_rate');
-			$customer_expedisi_text     = $this->input->post('customer_expedisi_text');
 			$user_id 		   			= $_SESSION['user_id'];
-			$customer_expedisi_tag_id 	= implode(",",$customer_expedisi);
 
 			if($customer_name == null){
 				$msg = "Nama Customer Harus Di isi";
@@ -205,23 +200,11 @@ class Masterdata extends CI_Controller {
 				'customer_rw'	       		=> $customer_address_rw,
 				'customer_phone'	   		=> $customer_address_phone,
 				'customer_email'	    	=> $customer_address_email,
-				'customer_send_address'		=> $customer_send_address,
 				'customer_npwp'	       		=> $customer_npwp,
-				'customer_nik'	       		=> $customer_nik,
-				'customer_rate'	       		=> $customer_rate,
-				'customer_expedisi_tag' 	=> $customer_expedisi_text,
-				'customer_expedisi_tag_id' 	=> $customer_expedisi_tag_id
+				'customer_nik'	       		=> $customer_nik
 
 			);
 			$this->masterdata_model->save_customer($data_insert);
-
-			foreach($customer_expedisi as $row){
-				$insert_exp = array(
-					'customer_code'	       	=> $last_code,
-					'expedisi_id'	       	=> $row,
-				);
-				$this->masterdata_model->save_customer_ekspedisi($insert_exp);
-			}
 
 			$data_insert_act = array(
 				'activity_table_desc'	       => 'Tambah Master Customer',
@@ -255,14 +238,9 @@ class Masterdata extends CI_Controller {
 			$customer_address_rw 		= $this->input->post('customer_address_rw');
 			$customer_address_phone 	= $this->input->post('customer_address_phone');
 			$customer_address_email 	= $this->input->post('customer_address_email');
-			$customer_send_address 		= $this->input->post('customer_send_address');
-			$customer_expedisi 			= $this->input->post('customer_expedisi');
 			$customer_npwp 				= $this->input->post('customer_npwp');
 			$customer_nik 				= $this->input->post('customer_nik');
-			$customer_rate 				= $this->input->post('customer_rate');
-			$customer_expedisi_text     = $this->input->post('customer_expedisi_text');
 			$user_id 		   			= $_SESSION['user_id'];
-			$customer_expedisi_tag_id 	= implode(",",$customer_expedisi);
 
 			if($customer_name == null){
 				$msg = "Nama Customer Harus Di isi";
@@ -285,27 +263,12 @@ class Masterdata extends CI_Controller {
 				'customer_rw'	       		=> $customer_address_rw,
 				'customer_phone'	   		=> $customer_address_phone,
 				'customer_email'	    	=> $customer_address_email,
-				'customer_send_address'		=> $customer_send_address,
 				'customer_npwp'	       		=> $customer_npwp,
-				'customer_nik'	       		=> $customer_nik,
-				'customer_rate'	       		=> $customer_rate,
-				'customer_expedisi_tag' 	=> $customer_expedisi_text,
-				'customer_expedisi_tag_id' 	=> $customer_expedisi_tag_id
+				'customer_nik'	       		=> $customer_nik
 			);
 
 
-			$this->masterdata_model->edit_customer($data_edit, $customer_code);
-
-
-			$this->masterdata_model->delete_customer_expedisi($customer_code);
-
-			foreach($customer_expedisi as $row){
-				$insert_exp = array(
-					'customer_code'	       	=> $customer_code,
-					'expedisi_id'	       	=> $row,
-				);
-				$this->masterdata_model->save_customer_ekspedisi($insert_exp);
-			}
+			$this->masterdata_model->edit_customer($data_edit, $customer_id);
 
 			$data_insert_act = array(
 				'activity_table_desc'	       => 'Ubah Master Customer',
@@ -327,9 +290,8 @@ class Masterdata extends CI_Controller {
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->view == 'Y'){
 			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
-			$ekspedisi_list['ekspedisi_list'] = $this->masterdata_model->ekspedisi_list();
 			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($customer_list, $ekspedisi_list, $check_auth);
+			$data['data'] = array_merge($customer_list, $check_auth);
 			$this->load->view('Pages/Masterdata/customer', $data);
 		}else{
 			$msg = "No Access";

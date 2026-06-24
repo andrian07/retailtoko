@@ -125,13 +125,9 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   <th>No Invoice</th>
                   <th>Tanggal</th>
                   <th>Pelanggan</th>
-                  <th>Rate</th>
-                  <th>Produk</th>
-                  <th>Qty</th>
                   <th>Total Harga</th>
-                  <th>T.O.P</th>
                   <th>Sisa Pembayaran</th>
-                  <th>Ekspedisi</th>
+                  <th>Status Pembayaran</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
@@ -175,8 +171,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           d.start_date             = $('#start_date').val();
           d.end_date               = $('#end_date').val();
           d.customer_filter        = $('#customer_filter').val();
-          d.status_payment_filter  = $('#payment_status_filter').val();
-          d.cat                    = 'Sales';
+          d.payment_status_filter  = $('#payment_status_filter').val();
         }
       },
       columns: 
@@ -188,11 +183,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       {data: 4},
       {data: 5},
       {data: 6},
-      {data: 7},
-      {data: 8},
-      {data: 9},
-      {data: 10},
-      {data: 11}
+      {data: 7}
       ]
     });
   }

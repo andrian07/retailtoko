@@ -57,14 +57,10 @@
 
       </div>
       <div class="col-md-3">
-        <p>Ekspedisi: <b><?php echo $row->ekspedisi_name; ?></b></p>
-        <p>Disiapkan Oleh: <b><?php echo $row->hd_sales_prepare; ?></b></p>
-        <p>Jumlah Colly: <b><?php echo $row->hd_sales_colly; ?></b></p>
         <p>Metode Pembayaran: <b><?php echo $row->payment_name; ?></b></p>
       </div>
       <div class="col-md-3">
         <p class="detail-invoice"><?php echo $row->hd_sales_inv; ?></p>
-        <p>T.O.P: <b><?php echo $row->hd_sales_top; ?></b></p>
         <p>Status: 
           <b>
             <?php 
@@ -88,7 +84,6 @@
           <tr>
             <th scope="col">SKU</th>
             <th scope="col">produk</th>
-            <th scope="col">Rate</th>
             <th scope="col">Qty</th>
             <th scope="col">Price</th>
             <th scope="col">Discount</th>
@@ -101,7 +96,6 @@
             <tr>
               <td><?php echo $row->product_code; ?></td>
               <td><?php echo $row->product_name; ?></td>
-              <td><?php echo $row->dt_sales_rate; ?></td>
               <td><?php echo $row->dt_sales_qty; ?></td>
               <td><?php echo number_format($row->dt_sales_price); ?></td>
               <td><?php echo number_format($row->dt_sales_discount); ?></td>

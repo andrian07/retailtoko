@@ -131,17 +131,6 @@ require DOC_ROOT_PATH . $this->config->item('header');
                             </div>
 
                             <div class="form-group form-inline">
-                              <label for="inlineinput" class="col-md-3 col-form-label">Expedisi</label>
-                              <div class="col-md-12 p-0">
-                                <select class=" form-control input-full js-example-basic-multiple js-states" name="customer_expedisi" id="customer_expedisi" multiple="multiple">
-                                  <?php foreach($data['ekspedisi_list'] as $row){ ?>
-                                    <option value="<?php echo $row->ekspedisi_id; ?>"><?php echo $row->ekspedisi_name; ?></option>
-                                  <?php } ?>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div class="form-group form-inline">
                               <label for="inlineinput" class="col-md-3 col-form-label">NPWP</label>
                               <div class="col-md-12 p-0">
                                 <input type="text" class="form-control input-full" id="customer_npwp" placeholder="NPWP">
@@ -154,19 +143,6 @@ require DOC_ROOT_PATH . $this->config->item('header');
                                 <input type="text" class="form-control input-full" id="customer_nik" placeholder="NIK">
                               </div>
                             </div>
-
-                            <div class="form-group form-inline">
-                              <label for="inlineinput" class="col-md-3 col-form-label">Rate Customer</label>
-                              <div class="col-md-12 p-0">
-                                <select class="form-select form-control" id="customer_rate">
-                                  <option value="Normal">Normal</option>
-                                  <option value="Toko">Toko</option>
-                                  <option value="Sales">Sales</option>
-                                  <option value="Khusus">Khusus</option>
-                                </select>
-                              </div>
-                            </div>
-
                           </div>
                         </div>
                       </div>
@@ -280,17 +256,6 @@ require DOC_ROOT_PATH . $this->config->item('header');
                             </div>
 
                             <div class="form-group form-inline">
-                              <label for="inlineinput" class="col-md-3 col-form-label">Expedisi</label>
-                              <div class="col-md-12 p-0">
-                                <select class=" form-control input-full js-example-basic-multiple js-states" name="customer_expedisi_edit" id="customer_expedisi_edit" multiple="multiple">
-                                  <?php foreach($data['ekspedisi_list'] as $row){ ?>
-                                    <option value="<?php echo $row->ekspedisi_id; ?>"><?php echo $row->ekspedisi_name; ?></option>
-                                  <?php } ?>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div class="form-group form-inline">
                               <label for="inlineinput" class="col-md-3 col-form-label">NPWP</label>
                               <div class="col-md-12 p-0">
                                 <input type="text" class="form-control input-full" id="customer_npwp_edit" placeholder="NPWP">
@@ -341,12 +306,9 @@ require DOC_ROOT_PATH . $this->config->item('header');
               <thead>
                 <tr>
                   <th>Kode</th>
-                  <th>Rate</th>
                   <th>Nama</th>
                   <th>Alamat</th>
                   <th>Telp</th>
-                  <th>Expedisi</th>
-                  <th>Poin</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -355,42 +317,24 @@ require DOC_ROOT_PATH . $this->config->item('header');
                 <?php foreach($data['customer_list'] as $row){ ?>
                   <tr>
                     <td><?php echo $row->customer_code; ?></td>
+                    <td><?php echo $row->customer_name; ?></td>
+                    <td><?php echo $row->customer_address; ?></td>
+                    <td><?php echo $row->customer_phone; ?></td>
                     <td>
-                      <?php if($row->customer_rate == 'Normal'){ ?>
-                        <span class="badge badge-primary">
-                        <?php }else if($row->customer_rate == 'Toko'){ ?>
-                          <span class="badge badge-warning">
-                          <?php }else if($row->customer_rate == 'Sales'){ ?>
-                            <span class="badge badge-info">
-                            <?php }else{ ?>
-                              <span class="badge badge-success">
-                              <?php } ?>
-                              <?php echo $row->customer_rate; ?></span></td>
-                              <td><?php echo $row->customer_name; ?></td>
-                              <td><?php echo $row->customer_address; ?></td>
-                              <td><?php echo $row->customer_phone; ?></td>
-                              <td><?php foreach(explode(",",$row->customer_expedisi_tag) as $rows){ echo '<span class="badge badge-primary" style="margin-right:1px;">'.$rows.'</span>';} ?></td>
-                              <td><?php echo $row->customer_poin; ?></td>
-                              <td>
-                                <?php if($data['check_auth']['check_access'][0]->view == 'N'){ ?>
-                                  <a href="<?php echo base_url();?>Masterdata/detailcustomer?id=<?php echo $row->customer_id; ?>" data-fancybox data-type="iframe"><button type="button" class="btn btn-icon btn-primary btn-sm mb-2-btn"><i class="fas fa-eye sizing-fa" disabled="disabled"></i></button></a>
-                                <?php }else{ ?> 
-                                  <a href="<?php echo base_url();?>Masterdata/detailcustomer?id=<?php echo $row->customer_id; ?>" data-fancybox data-type="iframe"><button type="button" class="btn btn-icon btn-primary btn-sm mb-2-btn"><i class="fas fa-eye sizing-fa"></i></button></a>
-                                <?php } ?>
-                                <?php if($data['check_auth']['check_access'][0]->delete == 'N'){ ?>
-                                  <button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>"><i class="fas fa-trash-alt sizing-fa" disabled="disabled"></i></button>
-                                <?php }else{ ?> 
-                                  <button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>"><i class="fas fa-trash-alt sizing-fa"></i></button>
-                                <?php } ?>
-                                <?php if($data['check_auth']['check_access'][0]->edit == 'N'){ ?>
-                                  <button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>" data-bs-toggle="modal" data-bs-target="#exampleModaledit" disabled="disabled"><i class="far fa-edit sizing-fa"></i></button>
-                                <?php }else{ ?> 
-                                  <button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>" data-bs-toggle="modal" data-bs-target="#exampleModaledit"><i class="far fa-edit sizing-fa"></i></button>
-                                <?php } ?>
-                              </td>
-                            </tr>
-                          <?php } ?>
-                        </tbody>
+                      <?php if($data['check_auth']['check_access'][0]->delete == 'N'){ ?>
+                        <button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn delete" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>" disabled="disabled"><i class="fas fa-trash-alt sizing-fa"></i></button>
+                      <?php }else{ ?>
+                        <button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn delete" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>"><i class="fas fa-trash-alt sizing-fa"></i></button>
+                      <?php } ?>
+                      <?php if($data['check_auth']['check_access'][0]->edit == 'N'){ ?>
+                        <button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>"  data-bs-toggle="modal" data-bs-target="#exampleModaledit" disabled="disabled"><i class="far fa-edit sizing-fa"></i></button>
+                      <?php }else{ ?>
+                       <button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="<?php echo $row->customer_id; ?>" data-name="<?php echo $row->customer_name; ?>"  data-bs-toggle="modal" data-bs-target="#exampleModaledit"><i class="far fa-edit sizing-fa"></i></button>
+                     <?php } ?>
+                   </td>
+                  </tr>
+                <?php } ?>
+              </tbody>
                       </table>
                     </div>
                   </div>
@@ -460,18 +404,14 @@ require DOC_ROOT_PATH . $this->config->item('header');
             var customer_address_rw       = $("#customer_address_rw").val();
             var customer_address_phone    = $("#customer_address_phone").val();
             var customer_address_email    = $("#customer_address_email").val();
-            var customer_send_address     = $("#customer_send_address").val();
-            var customer_expedisi         = $("#customer_expedisi").val();
-            var customer_expedisi_text    = $('#customer_expedisi option:selected').toArray().map(item => item.text).join();
             var customer_npwp             = $("#customer_npwp").val();
             var customer_nik              = $("#customer_nik").val();
-            var customer_rate             = $("#customer_rate").val();
 
             $.ajax({
               type: "POST",
               url: "<?php echo base_url(); ?>Masterdata/save_customer",
               dataType: "json",
-              data: {customer_name:customer_name, customer_dob:customer_dob, customer_gender:customer_gender, customer_address:customer_address, customer_address_blok:customer_address_blok, customer_address_no:customer_address_no, customer_address_rt:customer_address_rt, customer_address_rw:customer_address_rw, customer_address_phone:customer_address_phone, customer_address_email:customer_address_email, customer_send_address:customer_send_address, customer_dob:customer_dob, customer_gender:customer_gender, customer_expedisi:customer_expedisi, customer_npwp:customer_npwp, customer_nik:customer_nik, customer_rate:customer_rate, customer_expedisi_text:customer_expedisi_text},
+              data: {customer_name:customer_name, customer_dob:customer_dob, customer_gender:customer_gender, customer_address:customer_address, customer_address_blok:customer_address_blok, customer_address_no:customer_address_no, customer_address_rt:customer_address_rt, customer_address_rw:customer_address_rw, customer_address_phone:customer_address_phone, customer_address_email:customer_address_email, customer_npwp:customer_npwp, customer_nik:customer_nik},
               success : function(data){
                 if (data.code == "200"){
                   window.location.href = "<?php echo base_url(); ?>Masterdata/customer";
@@ -502,18 +442,14 @@ require DOC_ROOT_PATH . $this->config->item('header');
             var customer_address_rw       = $("#customer_address_rw_edit").val();
             var customer_address_phone    = $("#customer_address_phone_edit").val();
             var customer_address_email    = $("#customer_address_email_edit").val();
-            var customer_send_address     = $("#customer_send_address_edit").val();
-            var customer_expedisi         = $("#customer_expedisi_edit").val();
-            var customer_expedisi_text    = $('#customer_expedisi_edit option:selected').toArray().map(item => item.text).join();
             var customer_npwp             = $("#customer_npwp_edit").val();
             var customer_nik              = $("#customer_nik_edit").val();
-            var customer_rate             = $("#customer_rate_edit").val();
 
             $.ajax({
               type: "POST",
               url: "<?php echo base_url(); ?>Masterdata/edit_customer",
               dataType: "json",
-              data: {customer_id:customer_id, customer_code:customer_code, customer_name:customer_name, customer_dob:customer_dob, customer_gender:customer_gender, customer_address:customer_address, customer_address_blok:customer_address_blok, customer_address_no:customer_address_no, customer_address_rt:customer_address_rt, customer_address_rw:customer_address_rw, customer_address_phone:customer_address_phone, customer_address_email:customer_address_email, customer_send_address:customer_send_address, customer_dob:customer_dob, customer_gender:customer_gender, customer_expedisi:customer_expedisi, customer_npwp:customer_npwp, customer_nik:customer_nik, customer_rate:customer_rate, customer_expedisi_text:customer_expedisi_text},
+              data: {customer_id:customer_id, customer_code:customer_code, customer_name:customer_name, customer_dob:customer_dob, customer_gender:customer_gender, customer_address:customer_address, customer_address_blok:customer_address_blok, customer_address_no:customer_address_no, customer_address_rt:customer_address_rt, customer_address_rw:customer_address_rw, customer_address_phone:customer_address_phone, customer_address_email:customer_address_email, customer_npwp:customer_npwp, customer_nik:customer_nik},
               success : function(data){
                 if (data.code == "200"){
                   window.location.href = "<?php echo base_url(); ?>Masterdata/customer";
@@ -556,12 +492,8 @@ require DOC_ROOT_PATH . $this->config->item('header');
             modal.find('#customer_address_rw_edit').val(customer_data[i].customer_rw)
             modal.find('#customer_address_phone_edit').val(customer_data[i].customer_phone)
             modal.find('#customer_address_email_edit').val(customer_data[i].customer_email)
-            modal.find('#customer_send_address_edit').val(customer_data[i].customer_send_address)
             modal.find('#customer_npwp_edit').val(customer_data[i].customer_npwp)
             modal.find('#customer_nik_edit').val(customer_data[i].customer_nik)
-            modal.find('#customer_rate_edit').val(customer_data[i].customer_rate)
-            const customer_expedisi_tag_array = customer_data[i].customer_expedisi_tag_id.split(",")
-            modal.find('#customer_expedisi_edit').val(customer_expedisi_tag_array)
           }
         } else {
           Swal.fire({

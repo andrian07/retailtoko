@@ -190,17 +190,11 @@ class masterdata_model extends CI_Model {
         $this->db->update('ms_customer');
     }
 
-    public function edit_customer($data_edit, $customer_code)
+    public function edit_customer($data_edit, $customer_id)
     {
         $this->db->set($data_edit);
-        $this->db->where('customer_code ', $customer_code);
+        $this->db->where('customer_id ', $customer_id);
         $this->db->update('ms_customer');
-    }
-
-    public function delete_customer_expedisi($customer_code)
-    {
-        $this->db->where('customer_code ', $customer_code);
-        $this->db->delete('ms_customer_expedisi');
     }
 
     public function save_customer($data_insert)

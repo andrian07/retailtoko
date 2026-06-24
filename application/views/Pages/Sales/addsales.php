@@ -40,11 +40,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
 						</div>
 
 						<div class="form-group row">
-							<label for="noinvoice" class="col-sm-1 col-form-label text-right">Sales Order:</label>
-							<div class="col-sm-3">
-								<input id="sales_inv_order" name="sales_inv_order" type="text" class="form-control ui-autocomplete-input" placeholder="No Sales Order" value="" required="" autocomplete="off">
-								<input id="sales_order_id" type="hidden" name="sales_order_id">
-								<input id="hd_sales_type" name="hd_sales_type" type="hidden" value="SALES">
+							<div class="col-sm-4">
 							</div>
 
 							<label for="tanggal" class="col-sm-1 col-form-label text-right">Jth Tempo :</label>
@@ -72,36 +68,18 @@ require DOC_ROOT_PATH . $this->config->item('header');
 									<?php } ?>
 								</select>
 							</div>
-							<label for="tanggal" class="col-sm-1 col-form-label text-right">Sales :</label>
-							<div class="col-sm-3">
-								<select class="form-control input-full js-example-basic-single" id="sales_salesman" name="sales_salesman">
-									<option value="">-- Pilih Sales --</option>
-									<?php foreach ($data['salesman_list'] as $row) { ?>
-										<option value="<?php echo $row->salesman_id; ?>"><?php echo $row->salesman_name; ?></option>  
-									<?php } ?>
-								</select>
+							<div class="col-sm-4">
 							</div>
 
-							<label for="tanggal" class="col-sm-1 col-form-label text-right">Ekspedisi :</label>
-							<div class="col-sm-3">
-								<select class="form-control input-full js-example-basic-single" id="sales_ekspedisi" name="sales_ekspedisi">
-									<option value="">-- Pilih Ekspedisi --</option>
-									<?php foreach ($data['ekspedisi_list'] as $row) { ?>
-										<option value="<?php echo $row->ekspedisi_id; ?>"><?php echo $row->ekspedisi_name; ?></option>  
-									<?php } ?>
-								</select>
+							<div class="col-sm-4">
 							</div>
 						</div>
 
 						<div class="form-group row">
-							<label for="noinvoice" class="col-sm-1 col-form-label text-right">Rate Customer:</label>
-							<div class="col-sm-3">
-								<input id="sales_rate_customer" name="sales_rate_customer" type="text" class="form-control" readonly="">
+							<div class="col-sm-4">
 							</div>
 
-							<label for="noinvoice" class="col-sm-1 col-form-label text-right">Disiapkan Oleh :</label>
-							<div class="col-sm-3">
-								<input id="sales_order_prepare" name="sales_prepare" type="text" class="form-control">
+							<div class="col-sm-4">
 							</div>
 
 							<label for="tanggal" class="col-sm-1 col-form-label text-right">User :</label>
@@ -120,24 +98,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
 									<?php } ?>
 								</select>
 							</div>
-
-
-							<label for="noinvoice" class="col-sm-1 col-form-label text-right">Jumlah Colly :</label>
-							<div class="col-sm-3">
-								<input id="sales_colly" name="sales_colly" type="text" class="form-control">
-							</div>
 						</div>
-
-						<div class="form-group row">
-							<label for="noinvoice" class="col-sm-1 col-form-label text-right">Dropship :</label>
-							<div class="col-sm-3">
-								<select class="form-control input-full js-example-basic-single" id="drop_ship" name="drop_ship">
-									<option value="N">Tidak</option>
-									<option value="Y">Ya</option>
-								</select>
-							</div>
-						</div>
-
 					</div>
 				</div>
 			</div>
@@ -175,18 +136,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
 									</div>
 								</div>
 
-								<div class="col-sm-2">
-									<div class="form-group">
-										<label>Rate Produk</label>
-										<select class="form-control input-full js-example-basic-single" id="temp_rate" name="temp_rate">
-											<option value="Umum">Umum</option>
-											<option value="Toko">Toko</option>
-											<option value="Sales">Sales</option>
-											<option value="Khusus">Khusus</option>
-										</select>
-									</div>
-								</div>
-
+	
 								<div class="col-sm-2">
 									<div class="form-group">
 										<label>Harga Jual Per Unit</label>
@@ -197,7 +147,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
 
 								<div class="col-sm-2">
 									<div class="form-group">
-										<label>Curent Stock</label>
+										<label>Stock Gudang</label>
 										<input id="curent_stock" name="curent_stock" class="form-control text-right" value="0"  required="" readonly>
 									</div>
 								</div>
@@ -259,11 +209,9 @@ require DOC_ROOT_PATH . $this->config->item('header');
 									<tr>
 										<th>SKU</th>
 										<th>produk</th>
-										<th>Rate</th>
 										<th>Qty</th>
 										<th>Harga Satuan</th>
 										<th>Discount</th>
-										<th>Ket</th>
 										<th>Total</th>
 										<th>Aksi</th>
 									</tr>
@@ -405,16 +353,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 ?>
 
 <script>
-
-	$('#purchase_top').prop('disabled', true);
-	$('#purchase_payment_method').prop('disabled', true);
-	$('#purchase_ekspedisi').prop('disabled', true);
-	$('#purchase_tax').prop('disabled', true);
-	$('#purchase_warehouse').prop('disabled', true);
-	$('#purchase_due_date').prop('disabled', true);
-	$('#po_user_id').prop('disabled', true);
-	$('#purchase_supplier').prop('disabled', true);
-	
 
 	let temp_price = new AutoNumeric('#temp_price', {
 		currencySymbol : 'Rp. ',
@@ -559,9 +497,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 			{data: 3},
 			{data: 4},
 			{data: 5},
-			{data: 6},
-			{data: 7},
-			{data: 8}
+			{data: 6}
 			]
 		});
 		check_tempt_data();
