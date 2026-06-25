@@ -210,6 +210,53 @@ class sales_model extends CI_Model {
     }
 
 
+    public function retursales_list($search, $length, $start)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_retur_sales');
+        $this->db->join('ms_customer', 'hd_retur_sales.hd_retur_sales_customer_id = ms_customer.customer_id');
+        $this->db->join('ms_user', 'hd_retur_sales.created_by = ms_user.user_id');
+        if($search != null){
+            $this->db->where('hd_retur_sales.hd_retur_sales_inv like "%'.$search.'%"');
+            $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+        }
+        $this->db->order_by('hd_retur_sales.created_at', 'desc');
+        $this->db->limit($length);
+        $this->db->offset($start);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function retursales_list_count($search)
+    {
+        $this->db->select('count(*) as total_row');
+        $this->db->from('hd_retur_sales');
+        $this->db->join('ms_customer', 'hd_retur_sales.hd_retur_sales_customer_id = ms_customer.customer_id');
+        $this->db->join('ms_user', 'hd_retur_sales.created_by = ms_user.user_id');
+        if($search != null){
+            $this->db->where('hd_retur_sales.hd_retur_sales_inv like "%'.$search.'%"');
+            $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+        }
+        $query = $this->db->get();
+        return $query;
+    }
+
+     public function header_retur_sales($retur_sales_id)
+    {
+        $query = $this->db->query("select * from hd_retur_sales a, ms_customer c, ms_user d where a.hd_retur_sales_customer_id = c.customer_id and a.created_by = d.user_id and hd_retur_sales_id  = '".$retur_sales_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+
+    public function detail_retur_sales($retur_sales_id)
+    {
+        $query = $this->db->query("select * from dt_retur_sales a,  hd_sales b, ms_product c, ms_unit d, hd_retur_sales e where  a.hd_retur_sales_id = e.hd_retur_sales_id and a.dt_retur_sales_product_id = c.product_id and c.product_unit = d.unit_id where a.hd_retur_sales_id = '".$retur_sales_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+
     
 }   
 

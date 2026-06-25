@@ -25,10 +25,11 @@
             background: #fff;
             width: 9.2in;
             line-height: 1.15;
+            padding: 2px;
         }
 
         .page {
-            width: 9.2in;
+            width: 9.5in;
             min-height: 5.15in;
             display: flex;
             flex-direction: column;
@@ -62,13 +63,13 @@
         }
 
         .hdr-store .sname {
-            font-size: 13px;
+            font-size: 18px;
             font-weight: bold;
             line-height: 1.1;
         }
 
         .hdr-store .sdoc {
-            font-size: 10px;
+            font-size: 14px;
             font-weight: bold;
             margin-top: 2px;
         }
@@ -111,7 +112,7 @@
         .hdr-rows td {
             padding: 1px 2px;
             vertical-align: top;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .hdr-rows .lbl {
@@ -296,7 +297,7 @@
     /*
         8 baris agar tulisan lebih renggang dan jelas di printer dot matrix.
     */
-    $items_per_page = 15;
+    $items_per_page = 10;
     $chunks         = array_chunk($data['detail_sales'], $items_per_page);
     $total_page     = count($chunks);
     $page           = 1;
@@ -309,7 +310,6 @@
 
 <div class="page">
 
-    <!-- ================= HEADER ================= -->
     <div class="hdr">
 
         <div class="hdr-left">
@@ -441,13 +441,13 @@
                 <div class="sign-col">
                     <div class="slabel">Penerima</div>
                     <div class="sspace"></div>
-                    <div class="sname">(........................)</div>
+                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
                 </div>
 
                 <div class="sign-col">
                     <div class="slabel">Hormat Kami</div>
                     <div class="sspace"></div>
-                    <div class="sname">(........................)</div>
+                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
                 </div>
 
             </div>

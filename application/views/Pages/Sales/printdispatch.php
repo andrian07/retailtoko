@@ -1,235 +1,471 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Surat Jalan</title>
+    <title>Faktur Penjualan</title>
 
-	<style>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-		body{
-			font-family:"Courier New", monospace;
-			font-size:13px;
-		}
+        /*
+            DOT MATRIX LANDSCAPE
+            Ukuran kertas continuous form sekitar 9.5 x 5.5 inch
+        */
+        @page {
+            size: 9.5in 5.5in;
+            margin: 0.15in;
+        }
 
-		.container{
-			width:1000px;
-			margin:auto;
-		}
+        body {
+            font-size: 10px;
+            color: #000;
+            background: #fff;
+            width: 9.2in;
+            line-height: 1.15;
+            padding: 2px;
+        }
 
-		table{
-			width:100%;
-			border-collapse:collapse;
-		}
+        .page {
+            width: 9.5in;
+            min-height: 5.15in;
+            display: flex;
+            flex-direction: column;
+        }
 
-		td,th{
-			padding:4px;
-		}
+        /* ================= HEADER ================= */
 
-		.text-center{
-			text-align:center;
-		}
+        .hdr {
+            display: flex;
+            border: 1px solid #000;
+            margin-bottom: 4px;
+        }
 
-		.text-right{
-			text-align:right;
-		}
+        .hdr-left {
+            width: 55%;
+            display: flex;
+            align-items: center;
+            padding: 5px;
+        }
 
-		.box{
-			border:1px solid #000;
-		}
+        .hdr-logo img {
+            width: 42px;
+            max-height: 42px;
+            object-fit: contain;
+            display: block;
+            filter: grayscale(100%) contrast(200%);
+        }
 
-		.header-title{
-			font-size:22px;
-			font-weight:bold;
-			text-decoration:underline;
-		}
+        .hdr-store {
+            margin-left: 7px;
+        }
 
-		.colly-box{
-			height:100px;
-			font-size:80px;
-			font-weight:bold;
-		}
+        .hdr-store .sname {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
 
-		.item-box{
-			height:260px;
-		}
+        .hdr-store .sdoc {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 2px;
+        }
 
-		.sign td{
-			border:1px solid #000;
-			height:70px;
-		}
+        .hdr-store .saddr {
+            font-size: 11px;
+            margin-top: 3px;
+            line-height: 1.3;
+        }
 
-		@media print{
-			@page{
-				margin:5mm;
-			}
-		}
+        .hdr-right {
+            width: 45%;
+            padding: 5px;
+            font-size: 9px;
+        }
 
-	</style>
+        .hdr-inv {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 3px;
+            margin-bottom: 3px;
+        }
 
+        .hdr-inv .inv-num {
+            font-size: 14px;
+        }
+
+        .hdr-inv .pg-info {
+            font-size: 8px;
+        }
+
+        .hdr-rows table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .hdr-rows td {
+            padding: 1px 2px;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        .hdr-rows .lbl {
+            width: 72px;
+            white-space: nowrap;
+        }
+
+        .hdr-rows .sep {
+            width: 10px;
+        }
+
+
+        /* ================= TABLE BARANG ================= */
+
+        .tbl-item {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1px solid #000;
+        }
+
+        .tbl-item th {
+            border: 1px solid #000;
+            background: #fff !important;
+            color: #000 !important;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 3px 2px;
+            text-align: center;
+        }
+
+        .tbl-item td {
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px dashed #555;
+            padding: 3px;
+            font-size: 12px;
+            vertical-align: middle;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: clip;
+        }
+
+        .tbl-item tbody tr:last-child td {
+            border-bottom: 1px solid #000;
+        }
+
+        .tbl-item tbody tr:nth-child(odd),
+        .tbl-item tbody tr:nth-child(even) {
+            background: #fff !important;
+        }
+
+        .tc {
+            text-align: center;
+        }
+
+        .tr {
+            text-align: right;
+        }
+
+        .al {
+            text-align: left !important;
+        }
+
+        /* ================= FOOTER ================= */
+
+        .footer {
+            display: flex;
+            margin-top: 4px;
+            gap: 4px;
+        }
+
+        .sign-wrap {
+            width: 100%;
+            display: flex;
+            min-height: 78px;
+        }
+
+        .sign-col {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            padding: 5px;
+            font-size: 9px;
+        }
+
+        .sign-col .slabel {
+			font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .sign-col .sspace {
+            min-height: 58px;
+        }
+
+        .sign-col .sname {
+            border-top: 1px solid #000;
+            padding-top: 2px;
+            font-size: 8px;
+        }
+
+        .sum-wrap {
+            width: 40%;
+        }
+
+        .sum-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3.5px 7px;
+            font-size: 15.5px;
+        }
+
+        .sum-row:last-child {
+            border-bottom: none;
+        }
+
+        .sum-row.grand {
+            background: #1e1e1e !important;
+            color: #fff !important;
+            font-weight: 900;
+            letter-spacing: 0.3px;
+            padding: 5px 7px;
+            border-bottom: none;
+        }
+
+        .sum-row.disc .slbl,
+        .sum-row.disc .sval {
+            color: #b50000;
+        }
+
+        .sum-row.sisa {
+            font-weight: 800;
+            font-size: 11px;
+        }
+
+        .slbl,
+        .sval {
+            white-space: nowrap;
+        }
+
+        .slbl {
+            font-weight: 600;
+        }
+
+        .sval {
+            font-weight: 700;
+        }
+
+        .sum-row.grand .slbl,
+        .sum-row.grand .sval {
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        @media print {
+            body {
+                width: 9.2in;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-	<div class="container">
+<?php
+    /*
+        8 baris agar tulisan lebih renggang dan jelas di printer dot matrix.
+    */
+    $items_per_page = 10;
+    $chunks         = array_chunk($data['detail_sales'], $items_per_page);
+    $total_page     = count($chunks);
+    $page           = 1;
 
-		<!-- HEADER -->
+    foreach ($chunks as $chunk) {
+        foreach ($data['header_sales'] as $header) {
+            /* bind header */
+        }
+?>
 
-		<table>
+<div class="page">
 
-			<tr>
+    <div class="hdr">
 
-				<td width="50%">
+        <div class="hdr-left">
+            <div class="hdr-store">
+                <div class="sname">TOKO PIONIR SUDIRMAN</div>
+                <div class="sdoc">FAKTUR PENJUALAN</div>
+                <div class="saddr">
+                    Jl. Nusa Indah 2 Block D5 No.10-11, Pontianak<br>
+                    Telp: (0561) 731219
+                </div>
+            </div>
+        </div>
 
-					<div class="header-title">
-						TOKO PIONIR SUDIRMAN
-					</div>
+        <div class="hdr-right">
 
-					JL NUSA INDAH 2 BLOCK D5 NO.10-11<br>
-					(0561) 731219<br>
-					PONTIANAK
+            <div class="hdr-inv">
+                <span class="inv-num"><?php echo $header->hd_sales_inv; ?></span>
+                <span class="pg-info">Hal <?php echo $page; ?> / <?php echo $total_page; ?></span>
+            </div>
 
-					<br><br>
+            <div class="hdr-rows">
+                <table>
+                    <tr>
+                        <td class="lbl">Tanggal</td>
+                        <td class="sep">:</td>
+                        <td class="val"><?php echo $header->hd_sales_date; ?></td>
+                    </tr>
 
-					NO SURAT JALAN : <?php echo $data['header_sales'][0]->hd_sales_inv; ?><br>
-					KIRIM VIA : <?php echo $data['header_sales'][0]->ekspedisi_name; ?>
+                    <tr>
+                        <td class="lbl">Pembayaran</td>
+                        <td class="sep">:</td>
+                        <td class="val"><?php echo $header->payment_name; ?></td>
+                    </tr>
 
-				</td>
+                    <tr>
+                        <td class="lbl">Kepada</td>
+                        <td class="sep">:</td>
+                        <td class="val">
+                            <?php echo $header->customer_name; ?>
+                            <?php
+                                if (!empty($header->customer_phone)) {
+                                    echo ' / ' . $header->customer_phone;
+                                }
+                            ?>
+                        </td>
+                    </tr>
 
-				<td width="50%">
+                    <tr>
+                        <td class="lbl">Alamat</td>
+                        <td class="sep">:</td>
+                        <td class="val">
+                            <?php echo $header->customer_address; ?>
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
-					<table class="box">
+        </div>
 
-						<tr>
-							<td class="text-left">
-								<?php echo $data['header_sales'][0]->hd_sales_date; ?><br>
-								Kepada,
-							</td>
-						</tr>
+    </div>
 
-						<tr>
-							<td>
-								<b><?php echo $data['header_sales'][0]->customer_name; ?> - <?php echo $data['header_sales'][0]->customer_phone; ?></b><br><br>
-								<?php echo $data['header_sales'][0]->customer_address; ?>
-							</td>
-						</tr>
+    <!-- ================= TABLE BARANG ================= -->
+    <div class="tbl-wrap">
 
-					</table>
+        <table class="tbl-item">
 
-				</td>
+            <colgroup>
+                <col style="width:5%">
+                <col style="width:8%">
+                <col style="width:13%">
+                <col style="width:39%">
+            </colgroup>
 
-			</tr>
+            <thead>
+                <tr>
+                    <th>NO</th>
+                    <th>QTY</th>
+                    <th>SKU</th>
+                    <th class="al">NAMA BARANG</th>
+                </tr>
+            </thead>
 
-			<tr>
+            <tbody>
 
-				<td colspan="2" class="text-center" style="font-size:20px; padding-top:10px;">
-					<b>SURAT JALAN</b>
-				</td>
+                <?php
+                    $no = 1 + (($page - 1) * $items_per_page);
 
-			</tr>
+                    foreach ($chunk as $row) {
+                ?>
+                    <tr>
+                        <td class="tc"><?php echo $no++; ?></td>
+                        <td class="tc"><?php echo $row->dt_sales_qty; ?>x</td>
+                        <td><?php echo $row->product_code; ?></td>
+                        <td><?php echo $row->product_name; ?></td>
+                    </tr>
+                <?php } ?>
 
-		</table>
+                <!-- Baris kosong agar tabel tetap rapi -->
+                <?php for ($i = count($chunk); $i < $items_per_page; $i++) { ?>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                <?php } ?>
 
-		<br>
+            </tbody>
+        </table>
 
-		<!-- BODY -->
+    </div>
 
-		<table>
+    <?php if ($page == $total_page) { ?>
 
-			<tr>
+        <!-- ================= FOOTER ================= -->
+        <div class="footer">
 
-				<!-- JUMLAH COLLY -->
+            <!-- TANDA TANGAN -->
+            <div class="sign-wrap">
 
-				<td width="45%">
+                <div class="sign-col">
+                    <div class="slabel">Penerima</div>
+                    <div class="sspace"></div>
+                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
+                </div>
 
-					<table class="box">
+                <div class="sign-col">
+                    <div class="slabel">Hormat Kami</div>
+                    <div class="sspace"></div>
+                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
+                </div>
 
-						<tr>
-							<td class="text-center">
-								Jumlah Colly
-							</td>
-						</tr>
+				<div class="sign-col">
+                    <div class="slabel">Pengirim</div>
+                    <div class="sspace"></div>
+                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
+                </div>
 
-						<tr>
-							<td class="text-center colly-box">
-								<?php echo $data['header_sales'][0]->hd_sales_colly; ?> X
-							</td>
-						</tr>
-						
+            </div>
 
-					</table>
+            <!-- TOTAL -->
 
-					<table class="ttd" style="border:1px solid #000; border-collapse:collapse; margin-top:20px;">
-						<tr>
-							<td width="50%" class="text-center" style="border:1px solid #000;">
-								Tanda Terima,
-							</td>
+        </div>
 
-							<td width="50%" class="text-center" style="border:1px solid #000;">
-								Hormat Kami,
-							</td>
-						</tr>
+    <?php } ?>
 
-						<tr>
-							<td width="50%" class="text-center" style="border:1px solid #000; height:50px;">
-								
-							</td>
+</div>
 
-							<td width="50%" class="text-center" style="border:1px solid #000; height:50px; vertical-align: bottom;">
-								Toko Pionir
-							</td>
-						</tr>
-					</table>
+<?php if ($page < $total_page) { ?>
+    <div class="page-break"></div>
+<?php } ?>
 
-				</td>
+<?php
+        $page++;
+    }
+?>
 
-				<td width="2%"></td>
-
-				<!-- BARANG -->
-
-				<td width="50%">
-
-					<table class="box">
-						<tr>
-							<th width="10%">No</th>
-							<th>Barang</th>
-						</tr>
-
-						<?php 
-							$no = 1;
-							$max_row = 10;
-							$current_row = count($data['detail_sales']);
-
-							foreach($data['detail_sales'] as $item){ 
-							?>
-							<?php } ?>
-
-							<?php
-								$empty = $max_row - $current_row;
-
-								for($i = 0; $i < $empty; $i++){
-								?>
-								<tr>
-									<td>&nbsp;</td>
-									<td></td>
-								</tr>
-								<?php } ?>
-
-							</table>
-
-						</td>
-
-					</tr>
-
-				</table>
-
-				<br>
-
-				<!-- FOOTER -->
-
-				<br>
-
-				Item prepared by : <?php echo $data['header_sales'][0]->hd_sales_prepare; ?>
-
-			</div>
-
-		</body>
-		</html>
+</body>
+</html>

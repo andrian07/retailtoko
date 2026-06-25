@@ -604,4 +604,135 @@ class Sales extends CI_Controller {
 
 	// end sales
 
+
+	// retur sales
+
+	public function retursales()
+	{
+		
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$supplier_list['supplier_list'] = $this->masterdata_model->supplier_list();
+			$check_auth['check_auth'] = $check_auth;
+			$data['data'] = array_merge($supplier_list, $check_auth);
+			$this->load->view('Pages/Sales/retursales', $data);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function retur_sales_list()
+	{
+
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$search 			= $this->input->post('search');
+			$length 			= $this->input->post('length');
+			$start 			  	= $this->input->post('start');
+			if($search != null){
+				$search = $search['value'];
+			}
+
+			$list = $this->sales_model->retursales_list($search, $length, $start)->result_array();
+			$count_list = $this->sales_model->retursales_list_count($search)->result_array();
+			$total_row = $count_list[0]['total_row'];
+			$data = array();
+			$no = $_POST['start'];
+			foreach ($list as $field) {
+
+				if($field['hd_retur_sales_status'] == 'Success'){
+					$hd_retur_sales_status = '<span class="badge badge-success">Success</span>';
+				}else if($field['hd_retur_sales_status'] == 'Pending'){
+					$hd_retur_sales_status = '<span class="badge badge-primary">Pending</span>';
+				}else{
+					$hd_retur_sales_status = '<span class="badge badge-danger multi-badge">Cancel</span>';
+				}
+
+				if($field['hd_retur_sales_payment_type'] == 'Cash'){
+					$payment_sts = '<span class="badge badge-primary">Cash</span>';
+				}else if($field['hd_retur_sales_payment_type'] == 'PN'){
+					$payment_sts = '<span class="badge badge-primary">Potong Nota</span>';
+				}else{
+					$payment_sts = '<span class="badge badge-primary multi-badge">Garansi</span>';
+				}
+
+				if($check_auth['check_access'][0]->view == 'Y'){
+					$url = base_url();
+					$detail = '<a href="'.base_url().'Sales/detailretursales?id='.$field['hd_retur_sales_id'].'" data-fancybox="" data-type="iframe"><button type="button" class="btn btn-icon btn-primary btn-sm mb-2-btn" data-id="'.$field['hd_retur_sales_id'].'"><i class="fas fa-eye sizing-fa"></i></button></a> ';
+				}else{
+					$detail = '<a href="'.base_url().'Sales/detailretursales?id='.$field['hd_retur_sales_id'].'" data-fancybox="" data-type="iframe"><button type="button" class="btn btn-icon btn-primary btn-sm mb-2-btn" disabled="disabled"><i class="fas fa-eye sizing-fa"></i></button></a> ';
+				}
+
+
+				if($check_auth['check_access'][0]->delete == 'Y'){
+					if($field['hd_retur_sales_status'] == 'Pending'){
+						$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_sales_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+					}else{
+						$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_sales_id'].')" disabled><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+					}
+				}else{
+					$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn"  disabled="disabled"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+				}
+
+				if($check_auth['check_access'][0]->edit == 'Y'){
+					if($field['hd_retur_sales_status'] == 'Pending'){
+						$payment = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="'.$field['hd_retur_sales_id'].'" data-inv="'.$field['hd_retur_sales_inv'].'" data-total="'.$field['hd_retur_sales_total'].'" data-bs-toggle="modal" data-bs-target="#exampleModaledit"><i class="fas fa-money-bill-wave sizing-fa"></i></button>';
+					}else{
+						$payment = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="'.$field['hd_retur_sales_id'].'" data-inv="'.$field['hd_retur_sales_inv'].'" data-total="'.$field['hd_retur_sales_total'].'" data-bs-toggle="modal" data-bs-target="#exampleModaledit" disabled="disabled"><i class="fas fa-money-bill-wave sizing-fa"></i></button>';
+					}
+				}else{
+					$payment = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn edit" data-id="'.$field['hd_retur_sales_id'].'" data-inv="'.$field['hd_retur_sales_inv'].'" data-total="'.$field['hd_retur_sales_total'].'" data-bs-toggle="modal" data-bs-target="#exampleModaledit" disabled="disabled"><i class="fas fa-money-bill-wave sizing-fa"></i></button>';
+				}
+
+
+				$date = date_create($field['hd_retur_sales_date']); 
+
+				$no++;
+				$row = array();
+				$row[] 	= $field['hd_retur_sales_inv'];
+				$row[] 	= date_format($date,"d-M-Y");
+				$row[] 	= $field['customer_name'];
+				$row[] 	= 'Rp. '.number_format($field['hd_retur_sales_total']);
+				$row[]  = $hd_retur_sales_status;
+				$row[] 	= $payment_sts;
+				$row[] 	= $detail.$delete.$payment;
+				$data[] = $row;
+			}
+
+			$output = array(
+				"draw" => $_POST['draw'],
+				"recordsTotal" => $total_row,
+				"recordsFiltered" => $total_row,
+				"data" => $data,
+			);
+			echo json_encode($output);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+
+	public function detailretursales()
+	{
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$retur_sales_id = $this->input->get('id');
+			$header_retur_sales['header_retur_sales'] = $this->sales_model->header_retur_sales($retur_sales_id);
+			$detail_retur_sales['detail_retur_sales'] = $this->sales_model->detail_retur_sales($retur_sales_id); 
+			$data['data'] = array_merge($header_retur_sales, $detail_retur_sales);
+			$this->load->view('Pages/Sales/detailretursales', $data);
+			//echo json_encode($output);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	// end retur sales
+
 }
