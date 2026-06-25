@@ -93,11 +93,8 @@ require DOC_ROOT_PATH . $this->config->item('header');
                       <div class="col-md-12 p-0">
                         <select class="form-control input-full" id="print_type" name="print_type">
                           <option value="">-- Pilih Jenis Print --</option>
-                          <option value="1">Nota Item</option>
-                          <option value="2">Alamat Konsumen</option>
-                          <option value="3">Nota Lunas 1(Ply)</option> 
-                          <option value="4">Nota Piutang 2(ply)</option>
-                          <option value="5">Surat Jalan</option> 
+                          <option value="1">Nota</option>
+                          <option value="2">Surat Jalan</option>
                         </select>
 
                         <input type="hidden" id="sales_id" name="sales_id" value="">

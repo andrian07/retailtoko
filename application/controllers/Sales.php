@@ -114,8 +114,12 @@ class Sales extends CI_Controller {
 				}else{
 					$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn"  disabled="disabled"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
 				}
-
-				$print = '<button type="button" class="btn btn-icon btn-warning delete btn-sm mb-2-btn" data-id="'.$field['hd_sales_id'].'" data-bs-toggle="modal" data-bs-target="#print"><i class="fas fa-print sizing-fa"></i></button> ';
+				
+				if($field['hd_sales_status'] != 'Cancel'){
+					$print = '<button type="button" class="btn btn-icon btn-warning delete btn-sm mb-2-btn" data-id="'.$field['hd_sales_id'].'" data-bs-toggle="modal" data-bs-target="#print"><i class="fas fa-print sizing-fa"></i></button> ';
+				}else{
+					$print = '<button type="button" class="btn btn-icon btn-warning delete btn-sm mb-2-btn" data-id="'.$field['hd_sales_id'].'" data-bs-toggle="modal" data-bs-target="#print" disabled="disabled"><i class="fas fa-print sizing-fa"></i></button> ';
+				}
 
 				$date = date_create($field['hd_sales_date']); 
 				$no++;
@@ -224,6 +228,380 @@ class Sales extends CI_Controller {
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
 		}
 	}
+
+	public function check_temp_sales()
+	{
+		$user_id 			= $_SESSION['user_id'];
+		$check_temp_sales   = $this->sales_model->check_temp_sales($user_id)->result_array();
+		echo json_encode(['code'=>200, 'data'=>$check_temp_sales]);
+		die();
+	}
+
+	public function search_product()
+	{	
+		$pricetype = $this->input->get('pricetype');
+		$keyword = $this->input->get('term');
+		$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+		if (!($keyword == '' || $keyword == NULL)) {
+			$find = $this->global_model->search_product_sales($keyword)->result_array();
+			$find_result = [];
+			foreach ($find as $row) {
+				$diplay_text = $row['product_code'].' - '.$row['product_name'].' - '.$row['unit_name'];
+				$product_id = $row['product_id'];
+				$stock = $this->global_model->total_stock_search($product_id)->result_array();
+				if($pricetype == 'Umum'){
+					$product_price = $row['product_sell_price_1'];
+				}else if($pricetype == 'Toko'){
+					$product_price = $row['product_sell_price_2'];
+				}else if($pricetype == 'Sales'){
+					$product_price = $row['product_sell_price_3'];
+				}else if($pricetype == 'Khusus'){
+					$product_price = $row['product_sell_price_4'];
+				}
+
+				$find_result[] = [
+					'id'                  => $row['product_id'],
+					'value'               => $diplay_text,
+					'product_code'        => $row['product_code'],
+					'product_price'       => $product_price,
+					'curent_stock'        => $stock[0]['curent_stock']
+				];
+			}
+			$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
+		}
+		echo json_encode($result);
+	} 
+
+	
+	public function add_temp_sales()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$warehouse_id 				= 1;
+			$product_id 				= $this->input->post('product_id');
+			$temp_qty  					= $this->input->post('temp_qty');
+			$temp_price_val 			= $this->input->post('temp_price_val');
+			$temp_discount_val 			= $this->input->post('temp_discount_val');
+			$temp_total_val 			= $this->input->post('temp_total_val');
+			$desc_item 					= $this->input->post('desc_item');
+			$user_id 					= $_SESSION['user_id'];
+
+			if($temp_price_val == null || $temp_price_val == 0){
+				$msg = "Silahkan Masukan Harga";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+			
+			if($warehouse_id == null){
+				$msg = "Silahkan Pilih Gudang / Cabang Terlebih Dahulu";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$check_stock  = $this->sales_model->check_stock($product_id, $warehouse_id);
+			if($check_stock == null){
+				$msg = "Stock Tidak Ada Di Gudang";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}else if($check_stock[0]->stock < $temp_qty)
+			{
+				$msg = "Stock Tidak Cukup";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+			
+
+			$check_temp_sales_input = $this->sales_model->check_temp_sales_input($product_id, $user_id);
+			$data_insert = array(
+				'temp_product_id'			=> $product_id,
+				'temp_sales_price'			=> $temp_price_val,
+				'temp_sales_qty'			=> $temp_qty,
+				'temp_sales_discount'		=> $temp_discount_val,
+				'temp_sales_total'			=> $temp_total_val,
+				'temp_desc_item'			=> $desc_item,
+				'temp_user_id'				=> $user_id
+			);	
+			$msg = 'Success Tambah';
+			if($check_temp_sales_input != null){
+				$this->sales_model->edit_temp_sales($product_id, $user_id, $data_insert);
+			}else{
+				$this->sales_model->add_temp_sales($data_insert);
+			}
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function get_edit_temp_sales()
+	{
+		$temp_product_id  	   = $this->input->post('id');
+		$warehouse_id  	  	   = 1;
+		$temp_user_id  	  	   = $_SESSION['user_id'];
+		$check_edit_temp_sales = $this->sales_model->check_edit_temp_sales($temp_product_id, $temp_user_id)->result_array();
+		$check_stock  		   = $this->sales_model->check_stock($temp_product_id, $warehouse_id);
+		echo json_encode(['code'=>200, 'result'=>$check_edit_temp_sales, 'stock'=>$check_stock]);
+		die();
+	}
+
+	public function delete_temp_sales()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$product_id  = $this->input->post('id');
+			$user_id 	 = $_SESSION['user_id'];
+			$this->sales_model->delete_temp_sales($product_id, $user_id);
+			$msg = 'Success Delete';
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+			die();
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);
+		}
+	}
+
+	public function clear_temp_sales()
+	{
+		$user_id 		= $_SESSION['user_id'];
+		$this->sales_model->clear_temp_sales($user_id);
+		echo json_encode(['code'=>200, 'data'=>"Cler Success"]);
+	} 
+
+	public function save_sales()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$sales_customer             			  = $this->input->post('sales_customer');
+			$sales_payment            				  = $this->input->post('sales_payment');
+			$sales_warehouse            			  = 1;
+			$sales_due_date             			  = $this->input->post('sales_due_date');
+			$sales_date               				  = $this->input->post('sales_date');
+			$footer_sub_total_submit          		  = $this->input->post('footer_sub_total_submit');
+			$footer_total_discount_submit        	  = $this->input->post('footer_total_discount_submit');
+			$edit_footer_discount_percentage1_submit  = $this->input->post('edit_footer_discount_percentage1_submit');
+			$edit_footer_discount_percentage2_submit  = $this->input->post('edit_footer_discount_percentage2_submit');
+			$edit_footer_discount_percentage3_submit  = $this->input->post('edit_footer_discount_percentage3_submit');
+			$edit_footer_discount1_submit         	  = $this->input->post('edit_footer_discount1_submit');
+			$edit_footer_discount2_submit         	  = $this->input->post('edit_footer_discount2_submit');
+			$edit_footer_discount3_submit         	  = $this->input->post('edit_footer_discount3_submit');
+			$footer_total_ppn_val                     = $this->input->post('footer_total_ppn_val');
+			$footer_total_invoice_val           	  = $this->input->post('footer_total_invoice_val');
+			$footer_dp_val                  		  = $this->input->post('footer_dp_val');
+			$footer_remaining_debt_val          	  = $this->input->post('footer_remaining_debt_val');
+			$sales_remark             				  = $this->input->post('sales_remark');
+			$user_id                  			      = $_SESSION['user_id'];
+
+			if($sales_customer == null){
+				$msg = 'Silahkan Masukan Customer';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($sales_payment == null){
+				$msg = 'Silahkan Masukan Jenis Pembayaran';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($footer_total_invoice_val <= 0){
+				$msg = 'Silahkan Input Data Terlebih Dahulu';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$warehouse_id     = $sales_warehouse;
+			$get_warehouse_code = $this->masterdata_model->get_warehouse_code($warehouse_id);
+			$warehouse_code   = $get_warehouse_code[0]->warehouse_code;
+			$warehouse_name   = $get_warehouse_code[0]->warehouse_name;
+
+			$customer_id = $sales_customer;
+			$get_customer_code = $this->masterdata_model->get_customer_code($customer_id);
+			$customer_code = $get_customer_code[0]->customer_code;
+			$customer_name = $get_customer_code[0]->customer_name;
+
+
+			$maxCode  = $this->sales_model->last_sales_inv();
+			
+			$inv_code = 'PJ/'.$customer_code.'/'.$warehouse_code.'/'.date("d/m/Y").'/';
+			if ($maxCode == NULL) {
+				$last_code = $inv_code.'000001';
+			} else {
+				$maxCode   = $maxCode[0]->hd_sales_inv;
+				$last_code = substr($maxCode, -6);
+				$last_code = $inv_code.substr('000000' . strval(floatval($last_code) + 1), -6);
+			}
+			$get_temp_sales_check_stock = $this->sales_model->get_temp_sales($user_id)->result_array();
+	
+			foreach($get_temp_sales_check_stock as $row){
+				$product_id 			= $row['temp_product_id'];
+				$qty 					= $row['temp_sales_qty'];
+				$product_name 			= $row['product_name'];
+				$get_last_stock_check 	= $this->global_model->get_last_stock($product_id, $warehouse_id);
+				if($get_last_stock_check == null){
+					$msg = "Tidak Ada Stock ".$product_name." Di Gudang";
+					echo json_encode(['code'=>0, 'result'=>$msg]);die();
+				}else{
+					$stock_now          = $get_last_stock_check[0]->stock;
+					if($stock_now < $qty){
+						$msg = "Stock ".$product_name." Tidak Cukup";
+						echo json_encode(['code'=>0, 'result'=>$msg]);die();
+					}
+				}	
+			}
+		
+			$data_insert = array(
+				'hd_sales_inv'            	=> $last_code,
+				'hd_sales_customer'     	=> $sales_customer,
+				'hd_sales_payment'      	=> $sales_payment,
+				'hd_sales_due_date'			=> $sales_due_date,
+				'hd_sales_date'       		=> $sales_date,
+				'hd_sales_warehouse'      	=> $sales_warehouse,
+				'hd_sales_sub_total'      	=> $footer_sub_total_submit,
+				'hd_sales_percentage1'    	=> $edit_footer_discount_percentage1_submit,
+				'hd_sales_percentage2'    	=> $edit_footer_discount_percentage2_submit,
+				'hd_sales_percentage3'    	=> $edit_footer_discount_percentage3_submit,
+				'hd_sales_disc1'        	=> $edit_footer_discount1_submit,
+				'hd_sales_disc2'        	=> $edit_footer_discount2_submit,
+				'hd_sales_disc3'        	=> $edit_footer_discount3_submit,
+				'hd_sales_total_discount'   => $footer_total_discount_submit,
+				'hd_sales_ppn'          	=> $footer_total_ppn_val,
+				'hd_sales_total'        	=> $footer_total_invoice_val,
+				'hd_sales_dp'         		=> $footer_dp_val,
+				'hd_sales_remaining_debt'   => $footer_remaining_debt_val,
+				'hd_sales_note'       		=> $sales_remark,
+				'created_by'            	=> $user_id
+			);  
+			$save_sales = $this->sales_model->save_sales($data_insert);
+
+			$get_temp_sales = $this->sales_model->get_temp_sales($user_id)->result_array();
+			foreach($get_temp_sales  as $row){
+				$data_insert_detail = array(
+					'hd_sales_id'   	     => $save_sales,
+					'dt_sales_product_id'    => $row['temp_product_id'],
+					'dt_sales_price'         => $row['temp_sales_price'],
+					'dt_sales_qty'           => $row['temp_sales_qty'],
+					'dt_sales_discount'      => $row['temp_sales_discount'],
+					'dt_sales_total'         => $row['temp_sales_total'],
+					'dt_sales_desc'          => $row['temp_desc_item']
+				);
+				$save_detail_sales = $this->sales_model->save_detail_sales($data_insert_detail);
+
+	
+					$product_id 	= $row['temp_product_id'];
+					$qty 			= $row['temp_sales_qty'];
+					$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
+
+					$last_stock 	= $get_last_stock[0]->stock;
+					$new_stock 		= $last_stock - $qty;
+					$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
+
+					$movement_stock = array(
+						'stock_movement_product_id'		=> $product_id,
+						'stock_movement_qty'			=> $qty,
+						'stock_movement_before_stock'	=> $last_stock,
+						'stock_movement_new_stock'		=> $new_stock,
+						'stock_movement_desc'			=> 'Penjualan',
+						'stock_movement_inv'			=> $last_code,
+						'stock_movement_calculate'		=> 'Minus',
+						'stock_movement_date'			=> $sales_date,
+						'stock_movement_creted_by'		=> $user_id,	
+					);	
+					$this->global_model->insert_movement_stock($movement_stock);
+
+			}
+
+			$data_insert_act = array(
+				'activity_table_desc'        => 'Tambah Penjualan Cabang '.$warehouse_name.' '.$last_code.'',
+				'activity_table_user'        => $user_id,
+			);
+
+			$this->global_model->save($data_insert_act);
+
+			$this->sales_model->clear_temp_sales($user_id);
+
+			$msg = 'Success Tambah';
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function delete_sales()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->delete == 'Y'){
+			$sales_id  			= $this->input->post('id');
+			$header_sales 		= $this->sales_model->header_sales($sales_id);
+			$detail_sales 		= $this->sales_model->detail_sales($sales_id);
+			$warehouse_id 		= 1;
+			$inv 				= $header_sales[0]->hd_sales_inv;
+			$user_id 			= $_SESSION['user_id'];
+
+			/*$check_payment_status = $this->sales_model->check_payment_receivable($sales_id)->result_array();
+			if($check_payment_status != null){
+				$msg = "Transaksi Ini Sudah Pernah Melakukan Pembayaran Piutang";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}*/
+
+			$this->sales_model->delete_sales($sales_id);
+			foreach($detail_sales as $row)
+			{
+				$product_id = $row->dt_sales_product_id;
+				$qty_sell 	= $row->dt_sales_qty;
+				$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
+
+				$last_stock 	= $get_last_stock[0]->stock;
+				$new_stock 		= $last_stock + $qty_sell;
+				$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
+
+				$movement_stock = array(
+					'stock_movement_product_id'		=> $product_id,
+					'stock_movement_qty'			=> $qty_sell,
+					'stock_movement_before_stock'	=> $last_stock,
+					'stock_movement_new_stock'		=> $new_stock,
+					'stock_movement_desc'			=> 'Batalkan Penjualan',
+					'stock_movement_inv'			=> $inv,
+					'stock_movement_calculate'		=> 'Plus',
+					'stock_movement_date'			=> date('Y-m-d H:i:s'),
+					'stock_movement_creted_by'		=> $user_id,	
+				);	
+				$this->global_model->insert_movement_stock($movement_stock);
+			}
+			
+			$data_insert_act = array(
+				'activity_table_desc'	       => 'Batalkan Penjualan '.$inv,
+				'activity_table_user'	       => $user_id
+			);
+			$this->global_model->save($data_insert_act);
+			$msg = "Succes Delete";
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+			die();
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);
+		}
+	}
+
+	public function printnota()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$id  	      = $this->input->get('print_type');
+			$hd_sales_id  = $this->input->get('sales_id');
+			$header_sales['header_sales'] = $this->sales_model->header_sales($hd_sales_id);
+			$detail_sales['detail_sales'] = $this->sales_model->detail_sales($hd_sales_id);
+			$data['data'] = array_merge($header_sales, $detail_sales);
+			if($id == 1){
+				$this->load->view('Pages/Sales/printnotanormal', $data);
+			}else{
+				$this->load->view('Pages/Sales/printdispatch', $data);
+			}
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
 	// end sales
 
 }
