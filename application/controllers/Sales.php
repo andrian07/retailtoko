@@ -536,11 +536,11 @@ class Sales extends CI_Controller {
 			$inv 				= $header_sales[0]->hd_sales_inv;
 			$user_id 			= $_SESSION['user_id'];
 
-			/*$check_payment_status = $this->sales_model->check_payment_receivable($sales_id)->result_array();
+			$check_payment_status = $this->sales_model->check_payment_receivable($sales_id)->result_array();
 			if($check_payment_status != null){
 				$msg = "Transaksi Ini Sudah Pernah Melakukan Pembayaran Piutang";
 				echo json_encode(['code'=>0, 'result'=>$msg]);die();
-			}*/
+			}
 
 			$this->sales_model->delete_sales($sales_id);
 			foreach($detail_sales as $row)
@@ -668,11 +668,8 @@ class Sales extends CI_Controller {
 
 
 				if($check_auth['check_access'][0]->delete == 'Y'){
-					if($field['hd_retur_sales_status'] == 'Pending'){
-						$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_sales_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
-					}else{
-						$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_sales_id'].')" disabled><i class="fas fa-trash-alt sizing-fa"></i></button> ';
-					}
+					$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['hd_retur_sales_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+				
 				}else{
 					$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn"  disabled="disabled"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
 				}
@@ -732,6 +729,344 @@ class Sales extends CI_Controller {
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
 		}
 	}
+
+	public function delete_retur_sales()
+	{
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+
+		if($check_auth['check_access'][0]->delete == 'Y'){
+			$retur_sales_id = $this->input->post('id');
+			$retur_sales_delete = $this->sales_model->retur_sales_delete($retur_sales_id);
+			$user_id 	= $_SESSION['user_id'];
+			foreach($retur_sales_delete as $row)
+			{
+				$warehouse_id   = 1;
+				$last_code 	    = $row->hd_retur_sales_inv;
+				$product_id 	= $row->dt_retur_sales_product_id;
+				$qty 			= $row->dt_retur_sales_qty;
+				$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
+				$last_stock 	= $get_last_stock[0]->stock;
+				$new_stock 		= $last_stock - $qty;
+				$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
+
+				$movement_stock = array(
+						'stock_movement_product_id'		=> $product_id,
+						'stock_movement_qty'			=> $qty,
+						'stock_movement_before_stock'	=> $last_stock,
+						'stock_movement_new_stock'		=> $new_stock,
+						'stock_movement_desc'			=> 'Batal Retur Penjualan',
+						'stock_movement_inv'			=> $last_code,
+						'stock_movement_calculate'		=> 'Minus',
+						'stock_movement_date'			=> date("Y/m/d"),
+						'stock_movement_creted_by'		=> $user_id,	
+					);	
+					$this->global_model->insert_movement_stock($movement_stock);
+			}
+			$last_code 	    = $retur_sales_delete[0]->hd_retur_sales_inv;
+			$data_insert_act = array(
+				'activity_table_desc'	       => 'Batal Retur Penjualan Ref: '.$last_code,
+				'activity_table_ref'		   => $last_code,
+				'activity_table_user'	       => $user_id,
+			);
+
+			$this->global_model->save($data_insert_act);
+
+			$this->sales_model->delete_retur_sales($retur_sales_id);
+
+			$msg = "Berhasil Hapus";
+			echo json_encode(['code'=>200, 'result'=>$msg]);die();
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function addretursales()
+	{
+		
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
+			$check_auth['check_auth'] = $check_auth;
+			$data['data'] = array_merge($customer_list, $check_auth);
+			$this->load->view('Pages/Sales/addretursales', $data);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function temp_retur_sales_list()
+	{
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$search 			= $this->input->post('search');
+			$length 			= $this->input->post('length');
+			$start 			  	= $this->input->post('start');
+			$user 			    = $_SESSION['user_id'];
+			if($search != null){
+				$search = $search['value'];
+			}
+			$list = $this->sales_model->temp_retur_sales_list($search, $length, $start, $user)->result_array();
+			$count_list = $this->sales_model->temp_retur_sales_list_count($search, $user)->result_array();
+			$total_row = $count_list[0]['total_row'];
+			$data = array();
+			$no = $_POST['start'];
+			foreach ($list as $field) {
+
+				$edit = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn" onclick="edit_temp('.$field['temp_retur_sales_product_id'].', '.$field['temp_retur_sales_b_id'].')"><i class="fas fa-edit sizing-fa"></i></button> ';
+				$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['temp_retur_sales_product_id'].', '.$field['temp_retur_sales_b_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+
+				$no++;
+				$row = array();
+				$row[] 	= $field['product_code'];
+				$row[] 	= $field['product_name'];
+				$row[] 	= $field['unit_name'];
+				$row[] 	= $field['temp_retur_sales_qty'];
+				$row[] 	= 'Rp. '.number_format($field['temp_retur_sales_total']);
+				$row[] 	= $field['temp_retur_sales_note'];
+				$row[] 	= $edit.$delete;
+				$data[] = $row;
+			}
+
+			$output = array(
+				"draw" => $_POST['draw'],
+				"recordsTotal" => $total_row,
+				"recordsFiltered" => $total_row,
+				"data" => $data
+			);
+			echo json_encode($output);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function check_temp_retur_sales()
+	{
+		$user_id 		= $_SESSION['user_id'];
+		$check_temp_retur_sales  = $this->sales_model->check_temp_retur_sales($user_id)->result_array();
+		echo json_encode(['code'=>200, 'data'=>$check_temp_retur_sales]);
+		die();
+	}
+
+	public function search_sales_inv()
+	{
+		$customer_id = $this->input->get('id');
+		if($customer_id == null){
+			$result = ['success' => False, 'message' => 'Silahkan Isi Customer Terlebih Dahulu'];
+		}else{
+			$keyword = $this->input->get('term');
+			$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+			if (!($keyword == '' || $keyword == NULL)) {
+				$find = $this->global_model->search_sales_inv($keyword, $customer_id)->result_array();
+				$find_result = [];
+				foreach ($find as $row) {
+					$diplay_text = $row['hd_sales_inv'];
+					$find_result[] = [
+						'id'                  => $row['hd_sales_id'],
+						'value'               => $diplay_text
+					];
+				}
+				$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
+			}
+		}
+		echo json_encode($result);
+	}
+
+	public function search_product_retur()
+	{
+		$sales_id = $this->input->get('id');
+		$keyword = $this->input->get('term');
+		$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+		if (!($keyword == '' || $keyword == NULL)) {
+			$find = $this->sales_model->search_product_retur($keyword, $sales_id)->result_array(); 
+			$find_result = [];
+			foreach ($find as $row) {
+				$diplay_text = $row['product_name'];
+				$find_result[] = [
+					'id'                  => $row['dt_sales_product_id'],
+					'value'               => $diplay_text,
+					'sales_price'      	  => $row['dt_sales_price'],
+					'sales_qty'        	  => $row['dt_sales_qty'],
+				];
+			}
+			$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
+		}
+		echo json_encode($result);
+	}
+
+	public function add_temp_retur_sales()
+	{
+
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$sales_id 					= $this->input->post('sales_id');
+			$sales_inv 					= $this->input->post('sales_inv');
+			$product_id 				= $this->input->post('product_id');
+			$product_name 				= $this->input->post('product_name');
+			$temp_price_submit 			= $this->input->post('temp_price_submit');
+			$temp_qty 					= $this->input->post('temp_qty');
+			$temp_qty_sell 				= $this->input->post('temp_qty_sell');
+			$temp_total_submit 			= $this->input->post('temp_total_submit');
+			$temp_note 					= $this->input->post('temp_note');
+			$customer_id 				= $this->input->post('customer_id');
+			$user_id 					= $_SESSION['user_id'];
+
+			$check_total_item_retur = $this->sales_model->check_total_item_retur($sales_id, $product_id);
+
+			$check_stock = $this->global_model->get_last_stock($product_id, 1);
+			$stock_now = $check_stock[0]->stock;
+			if($stock_now - $temp_qty < 0){
+				$msg = "Stock Tidak Cukup Untuk Retur";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$total_qty_retur = $check_total_item_retur[0]->total_qty_retur;
+
+			$total_qty_retur_count = $total_qty_retur + $temp_qty;
+
+			if($total_qty_retur_count > $temp_qty_sell){
+				$msg = "Qty Retur Tidak Bisa Lebih Besar Dari Qty Jual";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$check_temp_retur_sales_input = $this->sales_model->check_temp_retur_sales_input($sales_id, $product_id, $user_id);
+			$data_insert = array(
+				'temp_retur_sales_b_id'				=> $sales_id,
+				'temp_retur_sales_b_inv'			=> $sales_inv,
+				'temp_retur_sales_product_id'		=> $product_id,
+				'temp_retur_sales_product_name'		=> $product_name,
+				'temp_retur_sales_price'			=> $temp_price_submit,
+				'temp_retur_sales_qty'				=> $temp_qty,
+				'temp_retur_sales_qty_sales'		=> $temp_qty_sell,
+				'temp_retur_sales_total'			=> $temp_total_submit,
+				'temp_retur_sales_note'				=> $temp_note,
+				'temp_retur_sales_customer'			=> $customer_id,
+				'temp_user_id'						=> $user_id,
+			);	
+			$msg = 'Success Tambah';
+			if($check_temp_retur_sales_input != null){
+				$this->sales_model->edit_temp_retur_sales($sales_id, $product_id, $user_id, $data_insert);
+			}else{
+				$this->sales_model->add_temp_retur_sales($data_insert);
+			}
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function save_retur_sales()
+	{
+
+		$modul = 'ReturSales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+
+			$retur_sales_customer 	    = $this->input->post('retur_sales_customer');
+			$retur_sales_date 			= $this->input->post('retur_sales_date');
+			$footer_total_invoice_val	= $this->input->post('footer_total_invoice_val');
+			$sales_retur_remark 		= $this->input->post('sales_retur_remark');
+			$payment_type 				= $this->input->post('payment_type');
+			$user_id 					= $_SESSION['user_id'];
+
+			if($retur_sales_customer == null){
+				$msg = 'Silahkan Masukan Customer';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($footer_total_invoice_val <= 0){
+				$msg = 'Silahkan Masukan Data Retur';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			$customer_id = $retur_sales_customer;
+			$get_customer_code = $this->masterdata_model->get_customer_code($customer_id);
+			$customer_code = $get_customer_code[0]->customer_code;
+			$customer_name = $get_customer_code[0]->customer_name;
+			
+
+			$maxCode  = $this->sales_model->last_retur_sales();
+			$inv_code = 'RS/'.$customer_code.'/'.date("d/m/Y").'/';
+			if ($maxCode == NULL) {
+				$last_code = $inv_code.'000001';
+			} else {
+				$maxCode   = $maxCode[0]->hd_retur_sales_inv;
+				$last_code = substr($maxCode, -6);
+				$last_code = $inv_code.substr('000000' . strval(floatval($last_code) + 1), -6);
+			}
+
+			$data_insert = array(
+				'hd_retur_sales_inv'			=> $last_code,
+				'hd_retur_sales_customer_id'	=> $retur_sales_customer,
+				'hd_retur_sales_date'			=> $retur_sales_date,
+				'hd_retur_sales_total'			=> $footer_total_invoice_val,
+				'hd_retur_sales_note'			=> $sales_retur_remark,
+				'hd_retur_sales_payment_type'	=> $payment_type,
+				'created_by'					=> $user_id
+			);	
+			$save_retur_sales = $this->sales_model->save_retur_sales($data_insert);
+
+			$get_temp_retur_sales = $this->sales_model->get_temp_retur_sales($user_id)->result_array();
+			foreach($get_temp_retur_sales  as $row){
+				$data_insert_detail = array(
+					'hd_retur_sales_id'				=> $save_retur_sales,
+					'dt_retur_sales_b_id'			=> $row['temp_retur_sales_b_id'],
+					'dt_retur_sales_product_id'		=> $row['temp_retur_sales_product_id'],
+					'dt_retur_sales_price'			=> $row['temp_retur_sales_price'],
+					'dt_retur_sales_qty'			=> $row['temp_retur_sales_qty'],
+					'dt_retur_sales_total'			=> $row['temp_retur_sales_total'],
+					'dt_retur_sales_note'			=> $row['temp_retur_sales_note'],
+				);
+
+				$save_detail_retur_sales = $this->sales_model->save_detail_retur_sales($data_insert_detail);
+
+				$warehouse_id 	= 1;
+				$product_id 	= $row['temp_retur_sales_product_id'];
+				$qty 			= $row['temp_retur_sales_qty'];
+				$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
+				$last_stock 	= $get_last_stock[0]->stock;
+				$new_stock 		= $last_stock + $qty;
+				$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
+
+				$movement_stock = array(
+					'stock_movement_product_id'		=> $product_id,
+					'stock_movement_qty'			=> $qty,
+					'stock_movement_before_stock'	=> $last_stock,
+					'stock_movement_new_stock'		=> $new_stock,
+					'stock_movement_desc'			=> 'Retur Penjualan',
+					'stock_movement_inv'			=> $last_code,
+					'stock_movement_calculate'		=> 'Plus',
+					'stock_movement_date'			=> $retur_sales_date,
+					'stock_movement_creted_by'		=> $user_id,	
+				);	
+				$this->global_model->insert_movement_stock($movement_stock);
+			}
+
+			$data_insert_act = array(
+				'activity_table_desc'	       => 'Tambah Retur Penjualan Ref: '.$last_code,
+				'activity_table_ref'		   => $last_code,
+				'activity_table_user'	       => $user_id,
+			);
+
+			$this->global_model->save($data_insert_act);
+
+			$this->sales_model->clear_temp_retur_sales($user_id);
+
+			$msg = 'Success Tambah';
+			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
 
 	// end retur sales
 

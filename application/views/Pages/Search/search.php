@@ -133,8 +133,6 @@ require DOC_ROOT_PATH . $this->config->item('header');
               </div>
 
               <div class="col-md-3">
-                <button type="button" class="btn btn-sm btn-info" id="toggle_select_btn" onclick="toggle_select_mode()" style="margin-top: 25px;">Pilih</button>
-                <button type="button" class="btn btn-sm btn-primary" onclick="show_summary()" style="margin-top: 25px;">Rangkuman</button>
               </div>
 
 

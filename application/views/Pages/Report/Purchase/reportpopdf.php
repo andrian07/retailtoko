@@ -50,10 +50,8 @@
                 <tr>
                     <th>Invoice</th>
                     <th>Tanggal</th>
-                    <th>Cabang</th>
                     <th>Supplier</th>
                     <th>Tax</th>
-                    <th>TOP</th>
                     <th>Payment</th>
                     <th>Diskon</th>
                     <th>Total</th>
@@ -64,10 +62,8 @@
                     <tr>
                         <td><?php echo $row['hd_po_invoice']; ?> </td>
                         <td><?php echo $row['hd_po_date']; ?></td>
-                        <td><?php echo $row['warehouse_name']; ?> </td>
                         <td><?php echo $row['supplier_name']; ?></td>
                         <td><?php echo $row['hd_po_tax']; ?></td>
-                        <td><?php echo $row['hd_po_top']; ?></td>
                         <td><?php echo $row['payment_name']; ?></td>
                         <td>Rp. <?php echo number_format($row['hd_po_total_discount']); ?></td>
                         <td>Rp. <?php echo number_format($row['hd_po_grand_total']); ?></td>

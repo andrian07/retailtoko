@@ -50,12 +50,12 @@
                 <tr>
                     <th>Invoice</th>
                     <th>Supplier</th>
-                    <th>Cabang</th>
                     <th>Tanggal</th>
-                    <th>Nama Barang</th>
-                    <th>Qty</th>
-                    <th>Harga</th>
+                    <th>Diskon</th>
+                    <th>PPN</th>
                     <th>Total</th>
+                    <th>Status Pembayaran</th>
+                    <th>Status Pembelian</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,12 +63,16 @@
                     <tr>
                         <td><?php echo $row['hd_purchase_invoice']; ?> </td>
                         <td><?php echo $row['supplier_name']; ?></td>
-                        <td><?php echo $row['warehouse_name']; ?></td>
                         <td><?php echo $row['hd_purchase_date']; ?> </td>
-                        <td><?php echo $row['product_name']; ?></td>
-                        <td><?php echo $row['dt_purchase_qty']; ?></td>
-                        <td>Rp. <?php echo number_format($row['dt_purchase_total']); ?></td>
+                        <td>Rp. <?php echo number_format($row['hd_purchase_total_discount']); ?></td>
+                        <td>Rp. <?php echo number_format($row['hd_purchase_ppn']); ?></td>
                         <td>Rp. <?php echo number_format($row['hd_purchase_grand_total']); ?></td>
+                        <?php if($row['hd_purchase_remaining_debt'] == 0){ ?>
+                            <td>Lunas</td>
+                        <?php }else{ ?>
+                            <td>Belum Lunas</td>
+                        <?php } ?>
+                        <td><?php echo $row['hd_purchase_status']; ?></td>
                     </tr>
                 <?php } ?>
             </tbody>

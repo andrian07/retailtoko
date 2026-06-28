@@ -51,10 +51,9 @@
                     <th>Invoice</th>
                     <th>Supplier</th>
                     <th>Tanggal</th>
-                    <th>Nama Barang</th>
-                    <th>Qty</th>
-                    <th>Harga</th>
-                    <th>Total</th>
+                    <th>Total Transaksi</th>
+                    <th>Jenis retur</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,10 +62,9 @@
                         <td><?php echo $row['hd_retur_purchase_inv']; ?> </td>
                         <td><?php echo $row['supplier_name']; ?></td>
                         <td><?php echo $row['hd_retur_purchase_date']; ?> </td>
-                        <td><?php echo $row['product_name']; ?></td>
-                        <td><?php echo $row['dt_retur_purchase_qty']; ?></td>
-                        <td>Rp. <?php echo number_format($row['dt_retur_purchase_total']); ?></td>
                         <td>Rp. <?php echo number_format($row['hd_retur_purchase_total']); ?></td>
+                        <td><?php echo $row['hd_retur_purchase_payment_type']; ?></td>
+                        <td><?php echo $row['hd_retur_purchase_status']; ?></td>
                     </tr>
                 <?php } ?>
             </tbody>

@@ -35,8 +35,8 @@ require DOC_ROOT_PATH . $this->config->item('header');
                     <thead>
                       <tr>
                         <th>Kode Opname</th>
-                        <th>Gudang</th>
                         <th>Tanggal</th>
+                        <th>Opname User</th>
                         <th>Total</th>
                         <th>Aksi</th>
                       </tr>

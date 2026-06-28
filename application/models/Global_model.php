@@ -196,36 +196,6 @@ class global_model extends CI_Model {
         return $query;
     }
 
-    public function transfer_stock()
-    {
-        $this->db->select('
-            hd_transfer_stock.*,
-            dt_transfer_stock.*,
-            wf.warehouse_name AS warehouse_from_name,
-            wt.warehouse_name AS warehouse_to_name
-        ');
-        $this->db->from('hd_transfer_stock');
-        $this->db->join(
-            'dt_transfer_stock',
-            'hd_transfer_stock.hd_transfer_stock_id = dt_transfer_stock.hd_transfer_stock_id'
-        );
-        $this->db->join(
-            'ms_warehouse wf',
-            'dt_transfer_stock.dt_transfer_stock_warehouse_from = wf.warehouse_id',
-            'left'
-        );
-        $this->db->join(
-            'ms_warehouse wt',
-            'dt_transfer_stock.dt_transfer_stock_warehouse_to = wt.warehouse_id',
-            'left'
-        );
-        $this->db->group_by('hd_transfer_stock.hd_transfer_stock_id');
-        $this->db->order_by('hd_transfer_stock.created_at', 'desc');
-        $this->db->limit(10);
-        $query = $this->db->get();
-        return $query;
-    }
-
     public function lost_faktur()
     {
         $this->db->select('*');
@@ -273,6 +243,33 @@ class global_model extends CI_Model {
         $this->db->from('hd_purchase');
         $this->db->where('hd_purchase_invoice like "%'.$keyword.'%"');
         $this->db->where('hd_purchase_supplier', $supplier_id);
+        $this->db->where('hd_purchase_status', 'Success');
+        $this->db->limit(50);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function search_sales_inv($keyword)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_sales');
+        $this->db->where('hd_sales_inv like "%'.$keyword.'%"');
+        $this->db->where('hd_sales_status', 'Success');
+        $this->db->limit(50);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function search_product_opname($keyword)
+    {
+        $this->db->select('*');
+        $this->db->from('ms_product');
+        $this->db->join('ms_unit', 'ms_product.product_unit = ms_unit.unit_id');
+        $this->db->join('ms_product_stock', 'ms_product.product_id = ms_product_stock.product_id');
+
+        if($keyword != null){
+            $this->db->where('(ms_product.product_name like "%'.$keyword.'%" OR ms_product.product_code like "%'.$keyword.'%") ');
+        }
         $this->db->limit(50);
         $query = $this->db->get();
         return $query;

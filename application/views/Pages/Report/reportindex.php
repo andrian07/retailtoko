@@ -43,16 +43,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                           <span class="name-specification">Laporan Customer</span>
                         </li>
                       </a>
-                      <a href="<?php echo base_url(); ?>Reportmaster/reportekspedisi">
-                        <li>
-                          <span class="name-specification">Laporan Ekspedisi</span>
-                        </li>
-                      </a>
-                      <a href="<?php echo base_url(); ?>Reportmaster/reportwarehouse">
-                        <li>
-                          <span class="name-specification">Laporan Gudang</span>
-                        </li>
-                      </a>
+
                       <a href="<?php echo base_url(); ?>Reportmaster/reportcategory">
                         <li>
                           <span class="name-specification">Laporan Kategori</span>
@@ -63,11 +54,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                           <span class="name-specification">Laporan Produk</span>
                         </li>
                       </a>
-                      <a href="<?php echo base_url(); ?>Reportmaster/reportsalesman">
-                        <li>
-                          <span class="name-specification">Laporan Salesman</span>
-                        </li>
-                      </a>
+
                       <a href="<?php echo base_url(); ?>Reportmaster/reportsupplier">
                         <li>
                           <span class="name-specification">Laporan Supplier</span>
@@ -85,19 +72,10 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   </div>
                   <div class="card-body">
                     <ul class="specification-list">
-                      <a href="<?php echo base_url(); ?>Reportpurchase/reportsubmission">
-                        <li>
-                          <span class="name-specification">Laporan Pengajuan</span>
-                        </li>
-                      </a>
+
                       <a href="<?php echo base_url(); ?>Reportpurchase/reportpo">
                         <li>
                           <span class="name-specification">Laporan PO</span>
-                        </li>
-                      </a>
-                      <a href="<?php echo base_url(); ?>Reportpurchase/reportinputwarehouse">
-                        <li>
-                          <span class="name-specification">Laporan Penginputan Gudang</span>
                         </li>
                       </a>
                       <a href="<?php echo base_url(); ?>Reportpurchase/reportpurchases">

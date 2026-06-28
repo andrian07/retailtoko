@@ -103,9 +103,9 @@ class Opname extends CI_Controller {
 		$modul = 'Opname';
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->add == 'Y'){
-			$warehouse_list['warehouse_list'] = $this->masterdata_model->warehouse_list();
+			$title['title'] = 'title';
 			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($check_auth, $warehouse_list);
+			$data['data'] = array_merge($check_auth, $title);
 			$this->load->view('Pages/Opname/addopname', $data);
 		}else{
 			$msg = "No Access";
@@ -115,13 +115,11 @@ class Opname extends CI_Controller {
 
 	public function search_product_opname()
 	{
-		$warehouse = $this->input->get('id');
-		if($warehouse != null){
-			$keyword = $this->input->get('term');
-			$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
-			if (!($keyword == '' || $keyword == NULL)) {
-				$find = $this->global_model->search_product_opname($keyword, $warehouse)->result_array();
-				$find_result = [];
+		$keyword = $this->input->get('term');
+		$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+		if (!($keyword == '' || $keyword == NULL)) {
+			$find = $this->global_model->search_product_opname($keyword)->result_array();
+			$find_result = [];
 				foreach ($find as $row) {
 					$diplay_text = $row['product_code'].' - '.$row['product_name'].' - '.$row['unit_name'];
 					$find_result[] = [
@@ -135,11 +133,6 @@ class Opname extends CI_Controller {
 				$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
 			}
 			echo json_encode($result);
-		}else{
-			$result = ['success' => FALSE, 'num_product' => 0, 'data' => '', 'message' => 'Silahkan Isi Gudang Terlebih Dahulu'];
-			echo json_encode($result);
-		}
-		
 	}
 
 	public function temp_opname()
@@ -197,7 +190,7 @@ class Opname extends CI_Controller {
 		$modul = 'Opname';
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->add == 'Y'){
-			$warehouse 				= $this->input->post('warehouse');
+			$warehouse 				= 1;
 			$product_id 			= $this->input->post('product_id');
 			$system_stock 			= $this->input->post('system_stock');
 			$fisik_stock 			= $this->input->post('fisik_stock');
@@ -274,7 +267,7 @@ class Opname extends CI_Controller {
 		$modul = 'Opname';
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->add == 'Y'){
-			$warehouse   	= $this->input->post('warehouse');
+			$warehouse   	= 1;
 			$opname_date   	= $this->input->post('opname_date');
 			$total_opname   = $this->input->post('total_opname');
 			$user_id 		= $_SESSION['user_id'];
@@ -324,17 +317,18 @@ class Opname extends CI_Controller {
 					'dt_opname_stock_akhir'				=> $row['temp_opname_fisik_stock'],
 					'dt_opname_stock_difference'		=> $row['temp_opname_diferent_stock'],
 					'dt_opname_stock_difference_hpp'	=> $row['temp_opname_diferent_hpp'],
+					'dt_opname_note'					=> $row['temp_opname_note'],
 					'dt_opname_stock_status'			=> $status,
 				);
 
 				$save_detail_opname = $this->opname_model->save_detail_opname($data_insert_detail);
 
-				if($warehouse_id != 1){
+		
 					$product_id 	= $row['temp_opname_product_id'];
 					$qty 			= $row['temp_opname_fisik_stock'];
 					$last_stock 	= $row['temp_opname_system_stock'];
 					$new_stock 		= $row['temp_opname_fisik_stock'];
-					$get_last_stock = $this->purchase_model->get_last_stock($product_id, $warehouse_id);
+					$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
 					$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
 
 					$movement_stock = array(
@@ -349,7 +343,7 @@ class Opname extends CI_Controller {
 						'stock_movement_creted_by'		=> $user_id,	
 					);	
 					$this->global_model->insert_movement_stock($movement_stock);
-				}
+		
 
 			}
 
@@ -365,6 +359,23 @@ class Opname extends CI_Controller {
 
 			$msg = 'Success Tambah';
 			echo json_encode(['code'=>200, 'result'=>$msg]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function detailopname()
+	{
+		$modul = 'Opname';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$opname_id = $this->input->get('id');
+			$get_header_opname['get_header_opname'] = $this->opname_model->get_header_opname($opname_id)->result_array();
+			$get_detail_opname['get_detail_opname'] = $this->opname_model->get_detail_opname($opname_id)->result_array();
+	
+			$data['data'] = array_merge($check_auth, $get_header_opname, $get_detail_opname);
+			$this->load->view('Pages/Opname/detailopname', $data);
 		}else{
 			$msg = "No Access";
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();

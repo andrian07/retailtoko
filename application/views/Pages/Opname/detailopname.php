@@ -39,11 +39,11 @@
 <body>
   <div class="row">
     <div class="col-md-12 header-detail">
-      <h2>Detail Pembayaran Hutang</h2>
+      <h2>Detail Opname</h2>
     </div>
   </div>
 
-  <?php foreach($data['header_debt_payment'] as $row){ ?>
+  <?php foreach($data['get_header_opname'] as $row){ ?>
     <div class="row header-details">
       <div class="col-md-4">
         <p class="detail-company"><b><?php echo company ?> </b></p>
@@ -51,23 +51,21 @@
         <p><?php echo company_phone ?></p>
       </div>
       <div class="col-md-4">
-        <p class="detail-invoice"><?php echo $row->payment_debt_invoice; ?></p>
-        <p>Supplier: <b><?php echo $row->supplier_name; ?></b></p>
-        <p>Metode Bayar: <b><?php echo $row->payment_name; ?></b></p>
+        <p class="detail-invoice"><?php echo $row['opname_code']; ?></p>
       </div>
       <div class="col-md-4">
         <p>Status: 
           <b>
             <?php 
-            if($row->status == 'Success'){
+            if($row['opname_status'] == 'Success'){
               echo '<span class="badge badge-primary">Success</span>';
             }else{
-              echo '<span class="badge badge-danfer">Cancel</span>';
+              echo '<span class="badge badge-danger">Cancel</span>';
             }
             ?>
           </b>
         </p>
-        <p>Tanggal: <b><?php $date = date_create($row->payment_debt_date);  echo date_format($date,"d-M-Y"); ?></b></p>
+        <p>Tanggal: <b><?php $date = date_create($row['opname_date']);  echo date_format($date,"d-M-Y"); ?></b></p>
       </div>
     </div>
   <?php } ?>
@@ -77,21 +75,25 @@
       <table class="table table-striped mt-3" style="border:none !important; font-weight:500;">
         <thead>
           <tr>
-            <th scope="col">No Invoice Pembelian</th>
-            <th scope="col">Tgl</th>
-            <th scope="col">Discount</th>
-            <th scope="col">Potongan Retur</th>
-            <th scope="col">Nominal Bayar</th>
+            <th scope="col">Kode Produk</th>
+            <th scope="col">Nama Produk</th>
+            <th scope="col">Stok Sebelum</th>
+            <th scope="col">Stok Sesudah</th>
+            <th scope="col">Selisih</th>
+            <th scope="col">Selisih Rupiah</th>
+            <th scope="col">Catatan</th>
           </tr>
         </thead>
         <tbody>
-          <?php foreach($data['detail_debt_payment'] as $row){ ?>
+          <?php foreach($data['get_detail_opname'] as $row){ ?>
             <tr>
-              <td><?php echo $row->hd_purchase_invoice; ?></td>
-              <td><?php $date = date_create($row->hd_purchase_date);  echo date_format($date,"d-M-Y"); ?></td>
-              <td><?php echo number_format($row->dt_payment_debt_discount); ?></td>
-              <td><?php echo number_format($row->dt_payment_debt_retur); ?></td>
-              <td><?php echo number_format($row->dt_payment_debt_nominal); ?></td>
+              <td><?php echo $row['product_code']; ?></td>
+              <td><?php echo $row['product_name']; ?></td>
+              <td><?php echo number_format($row['dt_opname_stock_awal']); ?></td>
+              <td><?php echo number_format($row['dt_opname_stock_akhir']); ?></td>
+              <td><?php echo number_format($row['dt_opname_stock_difference']); ?></td>
+              <td><?php echo number_format($row['dt_opname_stock_difference_hpp']); ?></td>
+              <td><?php echo $row['dt_opname_note']; ?></td>
             </tr>
           <?php } ?>
         </tbody>
@@ -103,7 +105,7 @@
     <div class="col-md-4">
       <table class="table table-hover" style="border:none !important;">
         <tbody>
-          <?php foreach($data['header_debt_payment'] as $row){ ?>
+          <?php foreach($data['get_header_opname'] as $row){ ?>
             <tr>
               <td scope="col"><b>Action</b></td>
               <td scope="col"><b>User</b></td>
@@ -111,8 +113,8 @@
             </tr>
             <tr>
               <td scope="col"><b>Dibuat</b></td>
-              <td scope="col"><b><?php echo $row->user_name; ?></b></td>
-              <td scope="col"><b><?php $date = date_create($row->created_at);  echo date_format($date,"d-M-Y"); ?></b></td>
+              <td scope="col"><b><?php echo $row['user_name']; ?></b></td>
+              <td scope="col"><b><?php $date = date_create($row['created_at']);  echo date_format($date,"d-M-Y"); ?></b></td>
             </tr>
           <?php } ?>
         </tbody>
@@ -126,22 +128,10 @@
     <div class="col-md-4">
       <table class="table" style="border:none !important; text-align:right;">
         <tbody>
-          <?php foreach($data['header_debt_payment'] as $row){ ?>
+          <?php foreach($data['get_header_opname'] as $row){ ?>
             <tr>
-              <td scope="col"><b>Total Pembayaran: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_pay); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Total Diskon: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_discount); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Total Retur: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_retur); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Total Nota: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_nota); ?></td>
+              <td scope="col"><b>Total: </b></td>
+              <td scope="col">Rp. <?php echo number_format($row['opname_total']); ?></td>
             </tr>
           <?php } ?>
         </tbody>

@@ -20,23 +20,6 @@ class Reportmaster_model extends CI_Model {
         return $query;
     }
 
-    public function ekspedisi_list()
-    {
-        $this->db->select('*');
-        $this->db->from('ms_ekspedisi');
-        $this->db->where('is_active', 'Y');
-        $query = $this->db->get();
-        return $query;
-    }
-
-    public function warehouse_list()
-    {
-        $this->db->select('*');
-        $this->db->from('ms_warehouse');
-        $this->db->where('is_active', 'Y');
-        $query = $this->db->get();
-        return $query;
-    }
 
     public function category_list()
     {
@@ -64,15 +47,6 @@ class Reportmaster_model extends CI_Model {
         if($Supplier_report != null){
             $this->db->where('ms_product.product_supplier_tag like "%'.$Supplier_report.'%"');
         }
-        $query = $this->db->get();
-        return $query;
-    }
-
-    public function salesman_list()
-    {
-        $this->db->select('*');
-        $this->db->from('ms_salesman');
-        $this->db->join('ms_warehouse', 'ms_salesman.salesman_branch = ms_warehouse.warehouse_id');
         $query = $this->db->get();
         return $query;
     }

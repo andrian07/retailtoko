@@ -3,6 +3,7 @@
 class sales_model extends CI_Model {
 
 
+    // start sales
     public function sales_list($search, $cat, $length, $start, $start_date, $end_date, $customer_filter, $payment_status_filter)
     {
         $this->db->select('*');
@@ -209,6 +210,9 @@ class sales_model extends CI_Model {
         $this->db->update('hd_sales');
     }
 
+    // end retur sales
+
+    // start retur sales
 
     public function retursales_list($search, $length, $start)
     {
@@ -251,10 +255,164 @@ class sales_model extends CI_Model {
 
     public function detail_retur_sales($retur_sales_id)
     {
-        $query = $this->db->query("select * from dt_retur_sales a,  hd_sales b, ms_product c, ms_unit d, hd_retur_sales e where  a.hd_retur_sales_id = e.hd_retur_sales_id and a.dt_retur_sales_product_id = c.product_id and c.product_unit = d.unit_id where a.hd_retur_sales_id = '".$retur_sales_id."'");
+        $query = $this->db->query("select * from dt_retur_sales a,  hd_sales b, ms_product c, ms_unit d, hd_retur_sales e where  a.dt_retur_sales_b_id = b.hd_sales_id and a.hd_retur_sales_id = e.hd_retur_sales_id and a.dt_retur_sales_product_id = c.product_id and c.product_unit = d.unit_id and a.hd_retur_sales_id = '".$retur_sales_id."'");
         $result = $query->result();
         return $result;
     }
+
+    public function check_payment_receivable($sales_id)
+    {
+        $this->db->select('*');
+        $this->db->from('dt_payment_receivable');
+        $this->db->where('dt_payment_receivable_sales_id ', $sales_id);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function delete_retur_sales($retur_sales_id)
+    {
+        $this->db->set('hd_retur_sales_status', 'Cancel');
+        $this->db->where('hd_retur_sales_id', $retur_sales_id);
+        $this->db->update('hd_retur_sales');
+    }
+
+    
+    public function retur_sales_delete($retur_sales_id)
+    {
+        $query = $this->db->query("select * from hd_retur_sales a, dt_retur_sales b where a.hd_retur_sales_id = b.hd_retur_sales_id and a.hd_retur_sales_id = '".$retur_sales_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+     public function temp_retur_sales_list($search, $length, $start, $user)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_retur_sales');
+        $this->db->join('ms_product', 'temp_retur_sales.temp_retur_sales_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
+        $this->db->join('ms_user', 'temp_retur_sales.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id', $user);
+        if($search != null){
+            $this->db->where('ms_product.product_name like "%'.$search.'%"');
+            $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+        }
+        $this->db->order_by('temp_retur_sales.created_at', 'desc');
+        $this->db->limit($length);
+        $this->db->offset($start);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function temp_retur_sales_list_count($search, $user)
+    {
+        $this->db->select('count(*) as total_row');
+        $this->db->from('temp_retur_sales');
+        $this->db->join('ms_product', 'temp_retur_sales.temp_retur_sales_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
+        $this->db->join('ms_user', 'temp_retur_sales.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id', $user);
+        if($search != null){
+            $this->db->where('ms_product.product_name like "%'.$search.'%"');
+            $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+        }
+        $this->db->order_by('temp_retur_sales.created_at', 'desc');
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function check_temp_retur_sales($user_id)
+    {
+        $this->db->select('sum(temp_retur_sales_total) as sub_total, temp_retur_sales_customer as customer');
+        $this->db->from('temp_retur_sales');
+        $this->db->where('temp_user_id', $user_id);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function search_product_retur($keyword, $sales_id)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_sales');
+        $this->db->join('dt_sales', 'hd_sales.hd_sales_id = dt_sales.hd_sales_id');
+        $this->db->join('ms_product', 'dt_sales.dt_sales_product_id = ms_product.product_id');
+        if($keyword != null){
+            $this->db->where('(ms_product.product_name like "%'.$keyword.'%"');
+            $this->db->or_where('ms_product.product_code like "%'.$keyword.'%")');
+        }
+        $this->db->where('hd_sales.hd_sales_id', $sales_id);
+        $this->db->group_by('ms_product.product_id');
+        $this->db->limit(50);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function check_total_item_retur($sales_id, $product_id)
+    {
+        $query = $this->db->query("select sum(dt_retur_sales_qty) as total_qty_retur from dt_retur_sales a, hd_retur_sales b where a.hd_retur_sales_id = b.hd_retur_sales_id  and dt_retur_sales_b_id = '".$sales_id."' and dt_retur_sales_product_id = '".$product_id."' and hd_retur_sales_status = 'Success'");
+        $result = $query->result();
+        return $result;
+    }
+
+    public function check_temp_retur_sales_input($sales_id, $product_id, $user_id)
+    {
+        $query = $this->db->query("select * from temp_retur_sales where temp_retur_sales_product_id = '".$product_id."' and temp_retur_sales_b_id ='".$sales_id."' and temp_user_id = '".$user_id."'");
+        $result = $query->result();
+        return $result;
+    }
+
+     public function add_temp_retur_sales($data_insert)
+    {
+        $this->db->insert('temp_retur_sales', $data_insert);
+    }
+
+    public function edit_temp_retur_sales($sales_id, $product_id, $user_id, $data_insert)
+    {
+        $this->db->set($data_insert);
+        $this->db->where('temp_retur_sales_b_id ', $sales_id);
+        $this->db->where('temp_retur_sales_product_id ', $product_id);
+        $this->db->where('temp_user_id ', $user_id);
+        $this->db->update('temp_retur_sales');
+    }
+
+    public function last_retur_sales()
+    {
+        $query = $this->db->query("select hd_retur_sales_inv from hd_retur_sales order by hd_retur_sales_id  desc limit 1");
+        $result = $query->result();
+        return $result;
+    }
+
+    public function save_retur_sales($data_insert)
+    {
+        $this->db->trans_start();
+        $this->db->insert('hd_retur_sales', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
+    }
+
+    public function get_temp_retur_sales($user_id)
+    {
+        $this->db->select('*');
+        $this->db->from('temp_retur_sales');
+        $this->db->join('ms_product', 'temp_retur_sales.temp_retur_sales_product_id = ms_product.product_id');
+        $this->db->join('ms_user', 'temp_retur_sales.temp_user_id = ms_user.user_id');
+        $this->db->where('temp_user_id ', $user_id);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public  function save_detail_retur_sales($data_insert_detail)
+    {
+        $this->db->insert('dt_retur_sales', $data_insert_detail);
+    }
+
+    public function clear_temp_retur_sales($user_id)
+    {
+        $this->db->where('temp_user_id', $user_id);
+        $this->db->delete('temp_retur_sales');
+    }
+
+    // end retur sales
 
 
     

@@ -4,164 +4,371 @@ require DOC_ROOT_PATH . $this->config->item('header');
 ?>
 </div>
 
+<style>
+/* ===== Opname Page Styles ===== */
+.opname-page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.opname-page-header .page-icon {
+  width: 48px; height: 48px;
+  background: #eef2ff;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: #4f6ef7;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.opname-page-header h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1e2a4a;
+}
+.opname-page-header p {
+  margin: 0;
+  font-size: .82rem;
+  color: #8a94a6;
+}
+
+/* Card wrapper */
+.opname-card {
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.07);
+  margin-bottom: 20px;
+}
+.opname-card .card-header-custom {
+  padding: 16px 24px 14px;
+  border-bottom: 1px solid #f0f2f7;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.opname-card .card-header-custom .ch-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+.opname-card .card-header-custom .ch-title {
+  font-size: .92rem;
+  font-weight: 700;
+  color: #1e2a4a;
+}
+.opname-card .card-body-custom { padding: 20px 24px; }
+
+/* Info grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 32px;
+}
+@media (max-width: 576px) { .info-grid { grid-template-columns: 1fr; } }
+
+.info-field label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #8a94a6;
+  margin-bottom: 5px;
+}
+.info-field .form-control,
+.info-field .form-select {
+  border: 1.5px solid #e8ecf3;
+  border-radius: 9px;
+  font-size: .88rem;
+  padding: 9px 13px;
+  color: #1e2a4a;
+  background: #fff;
+  transition: border-color .2s, box-shadow .2s;
+}
+.info-field .form-control:focus,
+.info-field .form-select:focus {
+  border-color: #4f6ef7;
+  box-shadow: 0 0 0 3px rgba(79,110,247,.1);
+  outline: none;
+}
+.info-field .form-control[readonly] {
+  background: #f7f8fc;
+  color: #6c757d;
+}
+
+/* Product input area */
+.input-panel {
+  background: #f7f8fc;
+  border-radius: 11px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1.5px dashed #dde3f0;
+}
+.input-panel-grid {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+@media (max-width: 992px) {
+  .input-panel-grid { grid-template-columns: 1fr 1fr; }
+}
+.input-panel-grid .form-label {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #8a94a6;
+  margin-bottom: 5px;
+}
+.input-panel-grid .form-control {
+  border: 1.5px solid #e0e5f0;
+  border-radius: 9px;
+  font-size: .88rem;
+  padding: 9px 13px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.input-panel-grid .form-control:focus {
+  border-color: #4f6ef7;
+  box-shadow: 0 0 0 3px rgba(79,110,247,.1);
+  outline: none;
+}
+.input-panel-grid .form-control[readonly] {
+  background: #edf0f7;
+  color: #6c757d;
+}
+.input-panel-note {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 12px;
+}
+.btn-add-item {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  background: #4f6ef7;
+  border: none;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: background .2s, transform .15s;
+}
+.btn-add-item:hover { background: #3a58e0; transform: scale(1.05); }
+
+/* Table */
+#temp-opname thead th {
+  background: #f7f8fc;
+  color: #8a94a6;
+  font-size: .73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border-bottom: 2px solid #ebeef5;
+  padding: 10px 14px;
+}
+#temp-opname tbody td {
+  font-size: .85rem;
+  padding: 10px 14px;
+  color: #1e2a4a;
+  vertical-align: middle;
+}
+#temp-opname tbody tr:hover { background: #f7f8fc; }
+
+/* Summary row */
+.summary-panel {
+  background: #f7f8fc;
+  border-radius: 11px;
+  padding: 18px 20px;
+}
+.total-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+.total-row .total-label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #8a94a6;
+}
+.total-row .form-control {
+  max-width: 200px;
+  border: 1.5px solid #e0e5f0;
+  border-radius: 9px;
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1e2a4a;
+  background: #fff;
+  text-align: right;
+  padding: 8px 13px;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+.btn-cancel-op {
+  padding: 9px 22px;
+  border-radius: 9px;
+  border: 1.5px solid #e0e5f0;
+  background: #fff;
+  color: #6c757d;
+  font-size: .88rem;
+  font-weight: 600;
+  transition: all .2s;
+}
+.btn-cancel-op:hover { background: #f7f8fc; color: #e53935; border-color: #e53935; }
+.btn-save-op {
+  padding: 9px 26px;
+  border-radius: 9px;
+  border: none;
+  background: #4f6ef7;
+  color: #fff;
+  font-size: .88rem;
+  font-weight: 600;
+  transition: background .2s, box-shadow .2s;
+}
+.btn-save-op:hover { background: #3a58e0; box-shadow: 0 4px 12px rgba(79,110,247,.3); }
+</style>
+
 <div class="container">
   <div class="page-inner">
-    <div class="page-header">
 
-    </div>
-    <div class="row">
-      <h3 class="fw-bold mb-3">Tambah Opname </h3>
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-body">
-            <div class="form-group row">
-              <label for="noinvoice" class="col-sm-1 col-form-label text-right">No Opname :</label>
-              <div class="col-sm-3">
-                <input id="opname_invoice" name="opname_invoice" type="text" class="form-control" value="AUTO" readonly="">
-              </div>
-              <div class="col-md-4"></div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">Tanggal :</label>
-              <div class="col-sm-3">
-                <input id="opname_date" name="opname_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
-              </div>
-            </div>
-
-            <div class="form-group row">
-              <label for="noinvoice" class="col-sm-1 col-form-label text-right">Gudang:</label>
-              <div class="col-sm-3">
-                <select class="form-control input-full js-example-basic-single" id="warehouse" name="warehouse">
-                  <option value="">-- Pilih Gudang --</option>
-                  <?php foreach ($data['warehouse_list'] as $row) { ?>
-                    <option value="<?php echo $row->warehouse_id; ?>"><?php echo $row->warehouse_name; ?></option>  
-                  <?php } ?>
-                </select>
-              </div>
-              <div class="col-md-4"></div>
-              <label for="tanggal" class="col-sm-1 col-form-label text-right">User :</label>
-              <div class="col-sm-3">
-                <input id="po_user_id" name="po_user_id" type="text" class="form-control" value="<?php echo $_SESSION['user_name']; ?>" readonly="">
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- ===== Page Header ===== -->
+    <div class="opname-page-header">
+      <div class="page-icon"><i class="fas fa-clipboard-list"></i></div>
+      <div>
+        <h3>Tambah Opname</h3>
+        <p>Isi informasi opname dan tambahkan item produk di bawah</p>
       </div>
+    </div>
 
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-body">
-            <form id="formaddtemp">
-              <div class="row well well-sm input-temp">
-
-                <div class="col-sm-3">
-                  <div class="form-group">
-                    <label>Produk</label>
-                    <input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="ketikkan Nama Produk" value="" required="" autocomplete="off">
-                    <input id="product_id" type="hidden" name="product_id">
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Stok System</label>
-                    <input id="system_stock" name="system_stock" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Stok Fisik</label>
-                    <input id="fisik_stock" name="fisik_stock" type="text" class="form-control text-right" value="0" required="">
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Selisih Stok</label>
-                    <input id="stock_diferent" name="stock_diferent" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Selisih HPP</label>
-                    <input id="hpp" name="hpp" type="hidden" class="form-control text-right" value="0" readonly>
-                    <input id="hpp_diferent" name="hpp_diferent" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-                <div class="col-sm-3"></div>
-
-                <div class="col-sm-8">
-                  <div class="form-group">
-                    <label>Catatan</label>
-                    <input id="temp_note" name="temp_note" type="text" class="form-control text-right">
-                  </div>
-                </div>
-
-                <div class="col-sm-1" style="padding-right: 62px;">
-
-                  <!-- text input -->
-
-                  <label>&nbsp;</label>
-
-                  <div class="form-group">
-
-                    <button id="btnadd_temp" class="btn btn-md btn-primary rounded-circle float-right btn-add-temp"><i class="fas fa-plus"></i></button>
-
-                  </div>
-
-                </div>
-
-              </div>
-            </form>
-
-            <div class="table-responsive">
-              <table id="temp-opname" class="display table table-striped table-hover" >
-                <thead>
-                  <tr>
-                    <th>Produk</th>
-                    <th>SKU</th>
-                    <th>Stok Sistem</th>
-                    <th>Stok Fisik</th>
-                    <th>Selisih</th>
-                    <th>Selisih Rupiah</th>
-                    <th>Catatan</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="row form-space">
-              <div class="col-lg-6">
-                <div class="form-group">
-                  <div class="col-sm-12">
-                    <textarea id="opname_remark" name="opname_remark" class="form-control" placeholder="Catatan" maxlength="500" rows="8"></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-lg-6 text-right">
-                <div class="form-group row">
-                  <label for="total_opname" class="col-sm-7 col-form-label text-right:">Total :</label>
-                  <div class="col-sm-5">
-                    <input id="total_opname" name="total_opname" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row" style="margin-top: 20px;">
-                  <div class="col-sm-12">
-                    <button id="btncancel" class="btn btn-danger"><i class="fas fa-times-circle"></i> Batal</button>
-                    <button id="btnsave" class="btn btn-success button-header-custom-save"><i class="fas fa-save"></i> Simpan</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- ===== Info Card ===== -->
+    <div class="card opname-card">
+      <div class="card-header-custom">
+        <div class="ch-icon" style="background:#eef2ff;color:#4f6ef7;"><i class="fas fa-info-circle"></i></div>
+        <span class="ch-title">Informasi Opname</span>
+      </div>
+      <div class="card-body-custom">
+        <div class="info-grid">
+          <div class="info-field">
+            <label><i class="fas fa-hashtag me-1"></i>No Opname</label>
+            <input id="opname_invoice" name="opname_invoice" type="text" class="form-control" value="AUTO" readonly>
+          </div>
+          <div class="info-field">
+            <label><i class="far fa-calendar-alt me-1"></i>Tanggal</label>
+            <input id="opname_date" name="opname_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+          </div>
+          <div class="info-field">
+            <label><i class="fas fa-user me-1"></i>User</label>
+            <input id="po_user_id" name="po_user_id" type="text" class="form-control" value="<?php echo $_SESSION['user_name']; ?>" readonly>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ===== Input Item Card ===== -->
+    <div class="card opname-card">
+      <div class="card-header-custom">
+        <div class="ch-icon" style="background:#e6f4ea;color:#2e7d32;"><i class="fas fa-plus-circle"></i></div>
+        <span class="ch-title">Tambah Item Produk</span>
+      </div>
+      <div class="card-body-custom">
+        <form id="formaddtemp">
+          <div class="input-panel">
+            <div class="input-panel-grid">
+              <div>
+                <label class="form-label">Produk</label>
+                <input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="Ketik nama produk..." value="" required autocomplete="off">
+                <input id="product_id" type="hidden" name="product_id">
+              </div>
+              <div>
+                <label class="form-label">Stok Sistem</label>
+                <input id="system_stock" name="system_stock" type="text" class="form-control text-end" value="0" readonly>
+              </div>
+              <div>
+                <label class="form-label">Stok Fisik</label>
+                <input id="fisik_stock" name="fisik_stock" type="text" class="form-control text-end" value="0" required>
+              </div>
+              <div>
+                <label class="form-label">Selisih Stok</label>
+                <input id="stock_diferent" name="stock_diferent" type="text" class="form-control text-end" value="0" readonly>
+              </div>
+              <div>
+                <label class="form-label">Selisih HPP</label>
+                <input id="hpp" name="hpp" type="hidden" value="0">
+                <input id="hpp_diferent" name="hpp_diferent" type="text" class="form-control text-end" value="0" readonly>
+              </div>
+            </div>
+            <div class="input-panel-note">
+              <div>
+                <label class="form-label">Catatan Item</label>
+                <input id="temp_note" name="temp_note" type="text" class="form-control" placeholder="Catatan tambahan (opsional)">
+              </div>
+              <div>
+                <button id="btnadd_temp" type="button" class="btn-add-item btn-add-temp" title="Tambah Item">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- ===== DataTable ===== -->
+        <div class="table-responsive">
+          <table id="temp-opname" class="display table table-hover w-100">
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th>Kode produk</th>
+                <th>Stok Sistem</th>
+                <th>Stok Fisik</th>
+                <th>Selisih</th>
+                <th>Selisih Rupiah</th>
+                <th>Catatan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- ===== Summary & Actions ===== -->
+        <div class="row mt-4 g-3">
+          <div class="col-lg-6">
+            <label class="form-label" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#8a94a6;">
+              <i class="fas fa-comment-alt me-1"></i>Catatan Opname
+            </label>
+            <textarea id="opname_remark" name="opname_remark" class="form-control" placeholder="Tambahkan catatan opname..." maxlength="500" rows="5"
+              style="border:1.5px solid #e0e5f0;border-radius:9px;font-size:.88rem;resize:none;padding:10px 14px;"></textarea>
+          </div>
+          <div class="col-lg-6 d-flex flex-column justify-content-between">
+            <div class="summary-panel">
+              <div class="total-row">
+                <span class="total-label"><i class="fas fa-calculator me-1"></i>Total Selisih HPP</span>
+                <input id="total_opname" name="total_opname" type="text" class="form-control" value="0" readonly>
+              </div>
+            </div>
+            <div class="action-bar">
+              <button id="btncancel" type="button" class="btn-cancel-op">
+                <i class="fas fa-times me-1"></i>Batal
+              </button>
+              <button id="btnsave" type="button" class="btn-save-op button-header-custom-save">
+                <i class="fas fa-save me-1"></i>Simpan Opname
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -171,7 +378,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 
 <script>
 
-  $('#purchase_warehouse').prop('disabled', true);
 
   let hpp_diferent = new AutoNumeric('#hpp_diferent', {
     currencySymbol : 'Rp. ',

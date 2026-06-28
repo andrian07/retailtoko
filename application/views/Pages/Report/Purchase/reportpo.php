@@ -42,20 +42,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                       <input type="date" class="form-control input-full" id="end_date" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                   </div>
-
-                  <div class="col-sm-2">
-                    <!-- text input -->
-                    <div class="form-group">
-                      <label>Gudang:</label>
-                      <select class="form-control input-full js-example-basic-single" id="warehouse_report" name="warehouse_report">
-                        <option value="">-- Pilih Gudang --</option>
-                        <?php foreach ($data['warehouse_list'] as $row) { ?>
-                          <option value="<?php echo $row->warehouse_id; ?>"><?php echo $row->warehouse_name; ?></option>  
-                        <?php } ?>
-                      </select>
-                    </div>
-                  </div>
-
+                  
                   <div class="col-sm-2">
                     <!-- text input -->
                     <div class="form-group">
@@ -72,20 +59,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   <div class="col-sm-2">
                     <!-- text input -->
                     <div class="form-group">
-                      <label>Status Input Gudang:</label>
-                      <select class="form-control input-full js-example-basic-single" id="status_gudang" name="status_gudang">
-                        <option value="">-- Pilih Status --</option>
-                        <option value="Success">Success</option> 
-                        <option value="Pending">Pending</option> 
-                        <option value="Cancel">Cancel</option>  
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="col-sm-2">
-                    <!-- text input -->
-                    <div class="form-group">
-                      <label>Status Input Pembelian:</label>
+                      <label>Status:</label>
                       <select class="form-control input-full js-example-basic-single" id="status_pembelian" name="status_pembelian">
                         <option value="">-- Pilih Status --</option>
                         <option value="Success">Success</option> 
@@ -133,17 +107,13 @@ require DOC_ROOT_PATH . $this->config->item('header');
       e.preventDefault();
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
-      let warehouse_report = $('#warehouse_report').val();
       let supplier_report  = $('#supplier_report').val();
-      let status_gudang    = $('#status_gudang').val();
       let status_pembelian = $('#status_pembelian').val();
 
       let url = '<?php echo base_url(); ?>Reportpurchase/reportpopdf?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
-      url += '&warehouse_report=' + warehouse_report;
       url += '&supplier_report=' + supplier_report;
-      url += '&status_gudang=' + status_gudang;
       url += '&status_pembelian=' + status_pembelian;
       $('#preview').attr('src', url);
     })
@@ -153,16 +123,12 @@ require DOC_ROOT_PATH . $this->config->item('header');
       e.preventDefault();
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
-      let warehouse_report = $('#warehouse_report').val();
       let supplier_report  = $('#supplier_report').val();
-      let status_gudang    = $('#status_gudang').val();
       let status_pembelian = $('#status_pembelian').val();
       let url = '<?php echo base_url(); ?>Reportpurchase/reportpo_excell?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
-      url += '&warehouse_report=' + warehouse_report;
       url += '&supplier_report=' + supplier_report;
-      url += '&status_gudang=' + status_gudang;
       url += '&status_pembelian=' + status_pembelian;
       window.open(url, '_blank');
     })

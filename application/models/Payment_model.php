@@ -66,6 +66,7 @@ class payment_model extends CI_Model {
         $this->db->from('hd_purchase');
         $this->db->where('hd_purchase.hd_purchase_supplier', $supplier_id);
         $this->db->where('hd_purchase.hd_purchase_remaining_debt > 0');
+        $this->db->where('hd_purchase.hd_purchase_status', 'Success');
         $query = $this->db->get();
         return $query;
     }
@@ -78,6 +79,7 @@ class payment_model extends CI_Model {
         $this->db->where('dt_retur_purchase_b_id', $purchase_id);
         $this->db->where('dt_retur_purchase_process', 'N');
         $this->db->where('hd_retur_purchase_payment_type', 'PN');
+        $this->db->where('hd_retur_purchase.hd_retur_purchase_status', 'Success');
         $query = $this->db->get();
         return $query;
     }

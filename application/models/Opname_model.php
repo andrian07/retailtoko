@@ -136,13 +136,33 @@ class opname_model extends CI_Model {
 
     public function save_detail_opname($data_insert_detail)
     {
-        $this->db->insert('dt_opanme', $data_insert_detail);
+        $this->db->insert('dt_opname', $data_insert_detail);
     }
 
     public function clear_temp_opname($user_id)
     {
         $this->db->where('user_id', $user_id);
         $this->db->delete('temp_opname');
+    }
+
+    public function get_header_opname($opname_id)
+    {
+        $this->db->select('*');
+        $this->db->from('hd_opname');
+        $this->db->join('ms_user', 'hd_opname.opname_user = ms_user.user_id');
+        $this->db->where('hd_opname.opname_id', $opname_id);
+        $query = $this->db->get();
+        return $query;
+    }
+
+    public function get_detail_opname($opname_id)
+    {
+        $this->db->select('*');
+        $this->db->from('dt_opname');
+        $this->db->join('ms_product', 'dt_opname.dt_opname_product_id = ms_product.product_id');
+        $this->db->where('dt_opname.opname_id', $opname_id);
+        $query = $this->db->get();
+        return $query;
     }
 
 }

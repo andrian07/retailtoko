@@ -169,102 +169,8 @@ class Reportmaster extends CI_Controller {
 	}
 	// End Report Customer
 
-	// Report Exspedisi
-	public function reportekspedisi(){
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-			$sheet = $excel->getActiveSheet();
-			$sheet->setCellValue('A1', "List Ekspedisi"); 
-			$sheet->mergeCells('A1:E1');
-			$sheet->getStyle('A1')->getFont()->setBold(true);
-			$sheet->getStyle('A3:E3')->getFont()->setBold(true);
-			$sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-			$sheet->getStyle('A3:E3')->getAlignment()->setHorizontal('center');
-			$sheet->setCellValue('A3', "Kode Ekspedisi"); 
-			$sheet->setCellValue('B3', "Nama Ekspedisi"); 
-			$sheet->setCellValue('C3', "No HP"); 
-			$sheet->setCellValue('D3', "Alamat");
-			$sheet->setCellValue('E3', "Keterangan");
-			$data = $this->reportmaster_model->ekspedisi_list()->result_array();
-			$i = 4;
-			foreach($data as $row){
-				$sheet->setCellValue('A'.$i, $row['ekspedisi_id']); 
-				$sheet->setCellValue('B'.$i, $row['ekspedisi_name']); 
-				$sheet->setCellValue('C'.$i, $row['ekspedisi_phone']);
-				$sheet->setCellValue('D'.$i, $row['ekspedisi_address']); 
-				$sheet->setCellValue('E'.$i, $row['ekspedisi_desc']);
-				$i++;
-			}
-			$sheet->getColumnDimension('A')->setWidth(35); 
-			$sheet->getColumnDimension('B')->setWidth(35); 
-			$sheet->getColumnDimension('C')->setWidth(35);
-			$sheet->getColumnDimension('D')->setWidth(35); 
-			$sheet->getColumnDimension('E')->setWidth(35);
-			$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-			$sheet->setTitle("Excell");
-			ob_end_clean();
-			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="ekspedisi_' .date('Y-m-d') . '.xlsx"');
-			header('Cache-Control: max-age=0');
 
-			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');
-			$xlsxWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
-			exit($xlsxWriter->save('php://output'));
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-	// End Report ekspedisi
 
-	// Report warehouse
-	public function reportwarehouse(){
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-			$sheet = $excel->getActiveSheet();
-			$sheet->setCellValue('A1', "List Gudang"); 
-			$sheet->mergeCells('A1:D1');
-			$sheet->getStyle('A1')->getFont()->setBold(true);
-			$sheet->getStyle('A3:D3')->getFont()->setBold(true);
-			$sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-			$sheet->getStyle('A3:D3')->getAlignment()->setHorizontal('center');
-			$sheet->setCellValue('A3', "ID"); 
-			$sheet->setCellValue('B3', "Kode Gudang"); 
-			$sheet->setCellValue('C3', "Nama Gudang"); 
-			$sheet->setCellValue('D3', "Alamat");
-			$data = $this->reportmaster_model->warehouse_list()->result_array();
-			$i = 4;
-			foreach($data as $row){
-				$sheet->setCellValue('A'.$i, $row['warehouse_id']); 
-				$sheet->setCellValue('B'.$i, $row['warehouse_code']); 
-				$sheet->setCellValue('C'.$i, $row['warehouse_name']);
-				$sheet->setCellValue('D'.$i, $row['warehouse_address']);
-				$i++;
-			}
-			$sheet->getColumnDimension('A')->setWidth(35); 
-			$sheet->getColumnDimension('B')->setWidth(35); 
-			$sheet->getColumnDimension('C')->setWidth(35);
-			$sheet->getColumnDimension('D')->setWidth(60); 
-			$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-			$sheet->setTitle("Excell");
-			ob_end_clean();
-			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="warehouse_' .date('Y-m-d') . '.xlsx"');
-			header('Cache-Control: max-age=0');
-
-			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');
-			$xlsxWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
-			exit($xlsxWriter->save('php://output'));
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-	// End Report warehouse
 
 
 	// Report category
@@ -498,54 +404,6 @@ class Reportmaster extends CI_Controller {
 	// End Report Product
 
 	
-	// laporan salesman //
-
-	public function reportsalesman(){
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-			$sheet = $excel->getActiveSheet();
-			$sheet->setCellValue('A1', "List Kategori"); 
-			$sheet->mergeCells('A1:D1');
-			$sheet->getStyle('A1')->getFont()->setBold(true);
-			$sheet->getStyle('A3:D3')->getFont()->setBold(true);
-			$sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-			$sheet->getStyle('A3:D3')->getAlignment()->setHorizontal('center');
-			$sheet->setCellValue('A3', "Nama Sales"); 
-			$sheet->setCellValue('B3', "Alamat"); 
-			$sheet->setCellValue('C3', "No HP");
-			$sheet->setCellValue('D3', "Cabang");  
-			$data = $this->reportmaster_model->salesman_list()->result_array();
-			$i = 4;
-			foreach($data as $row){
-				$sheet->setCellValue('A'.$i, $row['salesman_name']); 
-				$sheet->setCellValue('B'.$i, $row['salesman_address']); 
-				$sheet->setCellValue('C'.$i, $row['salesman_phone']);
-				$sheet->setCellValue('D'.$i, $row['warehouse_name']);
-				$i++;
-			}
-			$sheet->getColumnDimension('A')->setWidth(35); 
-			$sheet->getColumnDimension('B')->setWidth(35); 
-			$sheet->getColumnDimension('C')->setWidth(60); 
-			$sheet->getColumnDimension('D')->setWidth(35);
-			$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-			$sheet->setTitle("Excell");
-			ob_end_clean();
-			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="salesman_' .date('Y-m-d') . '.xlsx"');
-			header('Cache-Control: max-age=0');
-
-			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');
-			$xlsxWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
-			exit($xlsxWriter->save('php://output'));
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-	// end laporan salsesman
-
 
 	// laporan supplier //
 	public function reportsupplier(){
@@ -581,7 +439,7 @@ class Reportmaster extends CI_Controller {
 			$sheet->setTitle("Excell");
 			ob_end_clean();
 			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="saelsman_' .date('Y-m-d') . '.xlsx"');
+			header('Content-Disposition: attachment;filename="supplier_' .date('Y-m-d') . '.xlsx"');
 			header('Cache-Control: max-age=0');
 
 			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');

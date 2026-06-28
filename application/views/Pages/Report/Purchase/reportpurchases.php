@@ -46,19 +46,6 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   <div class="col-sm-2">
                     <!-- text input -->
                     <div class="form-group">
-                      <label>Gudang:</label>
-                      <select class="form-control input-full js-example-basic-single" id="warehouse_report" name="warehouse_report">
-                        <option value="">-- Pilih Gudang --</option>
-                        <?php foreach ($data['warehouse_list'] as $row) { ?>
-                          <option value="<?php echo $row->warehouse_id; ?>"><?php echo $row->warehouse_name; ?></option>  
-                        <?php } ?>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="col-sm-2">
-                    <!-- text input -->
-                    <div class="form-group">
                       <label>Supplier:</label>
                       <select class="form-control input-full js-example-basic-single" id="supplier_report" name="supplier_report">
                         <option value="">-- Pilih Supplier --</option>
@@ -108,13 +95,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
       e.preventDefault();
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
-      let warehouse_report = $('#warehouse_report').val();
       let supplier_report  = $('#supplier_report').val();
 
       let url = '<?php echo base_url(); ?>Reportpurchase/reportpurchasespdf?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
-      url += '&warehouse_report=' + warehouse_report;
       url += '&supplier_report=' + supplier_report;
       $('#preview').attr('src', url);
     })
@@ -124,12 +109,10 @@ require DOC_ROOT_PATH . $this->config->item('header');
       e.preventDefault();
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
-      let warehouse_report = $('#warehouse_report').val();
       let supplier_report  = $('#supplier_report').val();
       let url = '<?php echo base_url(); ?>Reportpurchase/reportpurchases_excell?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
-      url += '&warehouse_report=' + warehouse_report;
       url += '&supplier_report=' + supplier_report;
       window.open(url, '_blank');
     })

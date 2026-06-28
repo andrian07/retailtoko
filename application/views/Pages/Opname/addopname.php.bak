@@ -31,7 +31,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
               <div class="col-sm-3">
                 <select class="form-control input-full js-example-basic-single" id="warehouse" name="warehouse">
                   <option value="">-- Pilih Gudang --</option>
-                  <?php foreach ($warehouse_list as $row) { ?>
+                  <?php foreach ($data['warehouse_list'] as $row) { ?>
                     <option value="<?php echo $row->warehouse_id; ?>"><?php echo $row->warehouse_name; ?></option>  
                   <?php } ?>
                 </select>
