@@ -56,6 +56,19 @@ require DOC_ROOT_PATH . $this->config->item('header');
                     </div>
                   </div>
 
+                       <div class="col-sm-2">
+                    <!-- text input -->
+                    <div class="form-group">
+                      <label>Status:</label>
+                      <select class="form-control input-full js-example-basic-single" id="status" name="status">
+                        <option value="Success">Success</option> 
+                        <option value="Pending">Pending</option>
+                        <option value="Cancel">Cancel</option> 
+                      </select>
+                    </div>
+                  </div>
+
+
                   <div class="col-sm-2">
                     <!-- text input -->
                     <div class="form-group">
@@ -96,11 +109,13 @@ require DOC_ROOT_PATH . $this->config->item('header');
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
       let supplier_report  = $('#supplier_report').val();
+      let status           = $('#status').val();
 
       let url = '<?php echo base_url(); ?>Reportpurchase/reportreturpurchasespdf?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
       url += '&supplier_report=' + supplier_report;
+      url += '&status=' + status;
       $('#preview').attr('src', url);
     })
 
@@ -110,10 +125,13 @@ require DOC_ROOT_PATH . $this->config->item('header');
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
       let supplier_report  = $('#supplier_report').val();
+      let status           = $('#status').val();
+
       let url = '<?php echo base_url(); ?>Reportpurchase/reportreturpurchases_excell?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
       url += '&supplier_report=' + supplier_report;
+      url += '&status=' + status;
       window.open(url, '_blank');
     })
   </script>

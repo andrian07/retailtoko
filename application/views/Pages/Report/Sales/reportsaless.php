@@ -56,28 +56,14 @@ require DOC_ROOT_PATH . $this->config->item('header');
                     </div>
                   </div>
 
-                  <div class="col-sm-3">
+                  <div class="col-sm-2">
                     <!-- text input -->
                     <div class="form-group">
-                      <label>Salesman:</label>
-                      <select class="form-control input-full js-example-basic-single" id="salesman_report" name="salesman_report">
-                        <option value="">-- Pilih Salesman --</option>
-                        <?php foreach ($data['salesman_list'] as $row) { ?>
-                          <option value="<?php echo $row->salesman_id; ?>"><?php echo $row->salesman_name; ?></option>  
-                        <?php } ?>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="col-sm-3">
-                    <!-- text input -->
-                    <div class="form-group">
-                      <label>Cabang:</label>
-                      <select class="form-control input-full js-example-basic-single" id="warehouse_report" name="warehouse_report">
-                        <option value="">-- Pilih Cabang --</option>
-                        <?php foreach ($data['warehouse_list'] as $row) { ?>
-                          <option value="<?php echo $row->warehouse_id; ?>"><?php echo $row->warehouse_name; ?></option>  
-                        <?php } ?>
+                      <label>Status:</label>
+                      <select class="form-control input-full js-example-basic-single" id="status" name="status">
+                        <option value="Success">Success</option> 
+                        <option value="Pending">Pending</option>
+                        <option value="Cancel">Cancel</option> 
                       </select>
                     </div>
                   </div>
@@ -122,15 +108,13 @@ require DOC_ROOT_PATH . $this->config->item('header');
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
       let customer_report  = $('#customer_report').val();
-      let salesman_report  = $('#salesman_report').val();
-      let warehouse_report = $('#warehouse_report').val();
+      let status           = $('#status').val();
 
       let url = '<?php echo base_url(); ?>Reportsales/reportsalesspdf?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
       url += '&customer_report=' + customer_report;
-      url += '&salesman_report=' + salesman_report;
-      url += '&warehouse_report=' + warehouse_report;
+      url += '&status=' + status;
       $('#preview').attr('src', url);
     })
 
@@ -140,14 +124,13 @@ require DOC_ROOT_PATH . $this->config->item('header');
       let start_date       = $('#start_date').val();
       let end_date         = $('#end_date').val();
       let customer_report  = $('#customer_report').val();
-      let salesman_report  = $('#salesman_report').val();
-      let warehouse_report = $('#warehouse_report').val();
+      let status           = $('#status').val();
+      
       let url = '<?php echo base_url(); ?>Reportsales/reportsaless_excell?';
       url += '&start_date=' + start_date;
       url += '&end_date=' + end_date;
       url += '&customer_report=' + customer_report;
-      url += '&salesman_report=' + salesman_report;
-      url += '&warehouse_report=' + warehouse_report;
+      url += '&status=' + status;
       window.open(url, '_blank');
     })
   </script>

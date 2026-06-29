@@ -39,161 +39,7 @@ class Reportsales extends CI_Controller {
 		echo 'Report Pembelian';die();
 	}
 
-	// Report Sales Order
-	public function reportsalesorder()
-	{
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
-            $salesman_list['salesman_list'] = $this->masterdata_model->salesman_list();
-            $warehouse_list['warehouse_list'] = $this->masterdata_model->warehouse_list();
-			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($customer_list, $salesman_list, $warehouse_list, $check_auth);
-			$this->load->view('Pages/Report/Sales/reportsalesorder', $data);
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-    
-    public function reportsalesorderpdf()
-    {
-        $start_date       = $this->input->get('start_date');
-		$end_date 	      = $this->input->get('end_date');
-		$customer_report  = $this->input->get('customer_report');
-        $salesman_report  = $this->input->get('salesman_report');
-        $warehouse_report = $this->input->get('warehouse_report');
-
-		$data['data'] = $this->reportsales_model->get_report_sales_order($start_date, $end_date, $customer_report, $salesman_report, $warehouse_report)->result_array();
-		$htmlView   = $this->load->view('Pages/Report/Sales/reportsalesorderpdf', $data, true);
-		$dompdf = new Dompdf();
-		$dompdf->loadHtml($htmlView);
-		$dompdf->setPaper('A4', 'landscape');
-		$dompdf->render();
-		$dompdf->stream('salesorder.pdf', array("Attachment" => false));
-		exit();
-    }
-
-    public function reportsalesorder_excell()
-	{
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$start_date       = $this->input->get('start_date');
-			$end_date 	      = $this->input->get('end_date');
-		    $customer_report  = $this->input->get('customer_report');
-            $salesman_report  = $this->input->get('salesman_report');
-            $warehouse_report = $this->input->get('warehouse_report');
-
-			$excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-			$sheet = $excel->getActiveSheet();
-			$sheet->setCellValue('A1', "Laporan Sales Order"); 
-			$sheet->mergeCells('A1:S1');
-			$sheet->getStyle('A1')->getFont()->setBold(true);
-			$sheet->getStyle('A3:S3')->getFont()->setBold(true);
-			$sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-			$sheet->getStyle('A3:S3')->getAlignment()->setHorizontal('center');
-			$sheet->setCellValue('A3', "Invoice"); 
-			$sheet->setCellValue('B3', "Tanggal"); 
-			$sheet->setCellValue('C3', "Pelanggan");
-			$sheet->setCellValue('D3', "Rate"); 
-			$sheet->setCellValue('E3', "Pembayaran"); 
-			$sheet->setCellValue('F3', "Ekspedisi");
-            $sheet->setCellValue('G3', "Nama Barang");
-            $sheet->setCellValue('H3', "Satuan");
-            $sheet->setCellValue('I3', "Qty");
-            $sheet->setCellValue('J3', "Harga");
-            $sheet->setCellValue('K3', "Total Harga Barang");
-			$sheet->setCellValue('L3', "TOP");
-			$sheet->setCellValue('M3', "Salsesman");
-			$sheet->setCellValue('N3', "Prepare By");
-			$sheet->setCellValue('O3', "Koli");
-			$sheet->setCellValue('P3', "Cabang");
-            $sheet->setCellValue('Q3', "Subtotal");
-            $sheet->setCellValue('R3', "Diskon");
-            $sheet->setCellValue('S3', "PPN");
-            $sheet->setCellValue('T3', "Total");
-            $sheet->setCellValue('U3', "Catatan");
-             $sheet->setCellValue('V3', "Di Buat Oleh");
-
-			$data = $this->reportsales_model->get_report_sales_order($start_date, $end_date, $customer_report, $salesman_report, $warehouse_report)->result_array();
-			$i = 4;
-
-			foreach($data as $row){
-				$sheet->setCellValue('A'.$i, $row['hd_sales_order_inv']); 
-				$sheet->setCellValue('B'.$i, $row['hd_sales_order_date']); 
-				$sheet->setCellValue('C'.$i, $row['customer_name']);
-				$sheet->setCellValue('D'.$i, $row['customer_rate']);
-				$sheet->setCellValue('E'.$i, $row['payment_name']); 
-				$sheet->setCellValue('F'.$i, $row['ekspedisi_name']); 
-				$sheet->setCellValue('G'.$i, $row['product_name']);
-				$sheet->setCellValue('H'.$i, $row['unit_name']);
-				$sheet->setCellValue('I'.$i, $row['dt_so_qty']); 
-				$sheet->setCellValue('J'.$i, $row['dt_so_price']); 
-				$sheet->setCellValue('K'.$i, $row['dt_so_total']); 
-                $sheet->setCellValue('L'.$i, $row['hd_sales_order_top']); 
-                $sheet->setCellValue('M'.$i, $row['salesman_name']); 
-                $sheet->setCellValue('N'.$i, $row['hd_sales_order_prepare']); 
-                $sheet->setCellValue('O'.$i, $row['hd_sales_order_colly']); 
-                $sheet->setCellValue('P'.$i, $row['warehouse_name']); 
-                $sheet->setCellValue('Q'.$i, $row['hd_sales_order_sub_total']); 
-                $sheet->setCellValue('R'.$i, $row['hd_sales_order_total_discount']); 
-                $sheet->setCellValue('S'.$i, $row['hd_sales_order_ppn']); 
-                $sheet->setCellValue('T'.$i, $row['hd_sales_order_total']); 
-                $sheet->setCellValue('U'.$i, $row['hd_sales_order_note']); 
-                $sheet->setCellValue('V'.$i, $row['user_name']); 
-				$i++;
-			};
-
-			$sheet->getColumnDimension('A')->setWidth(35); 
-			$sheet->getColumnDimension('B')->setWidth(25); 
-			$sheet->getColumnDimension('C')->setWidth(25);
-			$sheet->getColumnDimension('D')->setWidth(25);
-			$sheet->getColumnDimension('E')->setWidth(25);
-			$sheet->getColumnDimension('F')->setWidth(25);
-			$sheet->getColumnDimension('G')->setWidth(65);
-			$sheet->getColumnDimension('H')->setWidth(20);
-			$sheet->getColumnDimension('I')->setWidth(20);
-			$sheet->getColumnDimension('J')->setWidth(20);
-            $sheet->getColumnDimension('K')->setWidth(30);
-            $sheet->getColumnDimension('L')->setWidth(35);
-            $sheet->getColumnDimension('M')->setWidth(30);
-            $sheet->getColumnDimension('N')->setWidth(20);
-            $sheet->getColumnDimension('O')->setWidth(30);
-            $sheet->getColumnDimension('P')->setWidth(30);
-            $sheet->getColumnDimension('Q')->setWidth(30);
-            $sheet->getColumnDimension('R')->setWidth(30);
-            $sheet->getColumnDimension('S')->setWidth(30);
-            $sheet->getColumnDimension('T')->setWidth(30);
-            $sheet->getColumnDimension('U')->setWidth(50);
-            $sheet->getColumnDimension('V')->setWidth(30);
-
-
-            $sheet->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');	
-            $sheet->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('R')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('S')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('T')->getNumberFormat()->setFormatCode('#,##0');	
-
-
-			$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-			$sheet->setTitle("Excell");
-			ob_end_clean();
-			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="sales_order_' .date('Y-m-d') . '.xlsx"');
-			header('Cache-Control: max-age=0');
-
-			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');
-			$xlsxWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
-			exit($xlsxWriter->save('php://output'));
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-	// End Report sales Order 
+	
 
 
 
@@ -204,10 +50,8 @@ class Reportsales extends CI_Controller {
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->view == 'Y'){
 			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
-            $salesman_list['salesman_list'] = $this->masterdata_model->salesman_list();
-            $warehouse_list['warehouse_list'] = $this->masterdata_model->warehouse_list();
 			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($customer_list, $salesman_list, $warehouse_list, $check_auth);
+			$data['data'] = array_merge($customer_list, $check_auth);
 			$this->load->view('Pages/Report/Sales/reportsaless', $data);
 		}else{
 			$msg = "No Access";
@@ -220,10 +64,9 @@ class Reportsales extends CI_Controller {
         $start_date       = $this->input->get('start_date');
 		$end_date 	      = $this->input->get('end_date');
 		$customer_report  = $this->input->get('customer_report');
-        $salesman_report  = $this->input->get('salesman_report');
-        $warehouse_report = $this->input->get('warehouse_report');
-
-		$data['data'] = $this->reportsales_model->get_report_sales($start_date, $end_date, $customer_report, $salesman_report, $warehouse_report)->result_array();
+		$status           = $this->input->get('status');
+		
+		$data['data'] = $this->reportsales_model->get_report_hd_sales($start_date, $end_date, $customer_report, $status)->result_array();
 		$htmlView   = $this->load->view('Pages/Report/Sales/reportsalespdf', $data, true);
 		$dompdf = new Dompdf();
 		$dompdf->loadHtml($htmlView);
@@ -238,281 +81,170 @@ class Reportsales extends CI_Controller {
 		$modul = 'Report';
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->view == 'Y'){
-			$start_date       = $this->input->get('start_date');
-			$end_date 	      = $this->input->get('end_date');
-		    $customer_report  = $this->input->get('customer_report');
-            $salesman_report  = $this->input->get('salesman_report');
-            $warehouse_report = $this->input->get('warehouse_report');
+			$start_date      = $this->input->get('start_date');
+			$end_date        = $this->input->get('end_date');
+			$customer_report = $this->input->get('customer_report');
+			$status          = $this->input->get('status');
 
 			$excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 			$sheet = $excel->getActiveSheet();
-			$sheet->setCellValue('A1', "Laporan Penjualan"); 
-			$sheet->mergeCells('A1:S1');
-			$sheet->getStyle('A1')->getFont()->setBold(true);
-			$sheet->getStyle('A3:S3')->getFont()->setBold(true);
-			$sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-			$sheet->getStyle('A3:S3')->getAlignment()->setHorizontal('center');
-			$sheet->setCellValue('A3', "Invoice"); 
-			$sheet->setCellValue('B3', "Tanggal"); 
+
+			// ===== JUDUL =====
+			$sheet->setCellValue('A1', "LAPORAN PENJUALAN");
+			$sheet->mergeCells('A1:O1');
+			$sheet->getStyle('A1')->applyFromArray([
+				'font'      => ['bold' => true, 'size' => 14, 'color' => ['argb' => 'FFFFFFFF']],
+				'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1F4E79']],
+				'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+			]);
+			$sheet->getRowDimension(1)->setRowHeight(32);
+
+			// ===== PERIODE =====
+			$sheet->setCellValue('A2', "Periode: " . $start_date . "  s/d  " . $end_date);
+			$sheet->mergeCells('A2:O2');
+			$sheet->getStyle('A2')->applyFromArray([
+				'font'      => ['italic' => true, 'size' => 10, 'color' => ['argb' => 'FF1F4E79']],
+				'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+				'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD6E4F0']],
+			]);
+			$sheet->getRowDimension(2)->setRowHeight(20);
+
+			// ===== HEADER KOLOM =====
+			$headerStyle = [
+				'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+				'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF2E75B6']],
+				'alignment' => ['horizontal' => 'center', 'vertical' => 'center', 'wrapText' => true],
+				'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFFFFFFF']]],
+			];
+			$sheet->getStyle('A3:O3')->applyFromArray($headerStyle);
+			$sheet->getRowDimension(3)->setRowHeight(28);
+
+			$sheet->setCellValue('A3', "Invoice");
+			$sheet->setCellValue('B3', "Tanggal");
 			$sheet->setCellValue('C3', "Pelanggan");
-			$sheet->setCellValue('D3', "Rate");  
-			$sheet->setCellValue('E3', "Pembayaran"); 
-			$sheet->setCellValue('F3', "Ekspedisi");
-            $sheet->setCellValue('G3', "Nama Barang");
-            $sheet->setCellValue('H3', "Satuan");
-            $sheet->setCellValue('I3', "Qty");
-            $sheet->setCellValue('J3', "Harga");
-            $sheet->setCellValue('K3', "Total Harga Barang");
-			$sheet->setCellValue('L3', "TOP");
-			$sheet->setCellValue('M3', "Salsesman");
-			$sheet->setCellValue('N3', "Prepare By");
-			$sheet->setCellValue('O3', "Koli");
-			$sheet->setCellValue('P3', "Cabang");
-            $sheet->setCellValue('Q3', "Subtotal");
-            $sheet->setCellValue('R3', "Diskon");
-            $sheet->setCellValue('S3', "PPN");
-            $sheet->setCellValue('T3', "Total");
-            $sheet->setCellValue('U3', "Catatan");
-            $sheet->setCellValue('V3', "Di Buat Oleh");
+			$sheet->setCellValue('D3', "Pembayaran");
+			$sheet->setCellValue('E3', "Nama Barang");
+			$sheet->setCellValue('F3', "Satuan");
+			$sheet->setCellValue('G3', "Qty");
+			$sheet->setCellValue('H3', "Harga");
+			$sheet->setCellValue('I3', "Total Harga Barang");
+			$sheet->setCellValue('J3', "Subtotal");
+			$sheet->setCellValue('K3', "Diskon");
+			$sheet->setCellValue('L3', "PPN");
+			$sheet->setCellValue('M3', "Total");
+			$sheet->setCellValue('N3', "Catatan");
+			$sheet->setCellValue('O3', "Di Buat Oleh");
 
-			$data = $this->reportsales_model->get_report_sales($start_date, $end_date, $customer_report, $salesman_report, $warehouse_report)->result_array();
+			$data = $this->reportsales_model->get_report_sales($start_date, $end_date, $customer_report, $status)->result_array();
 			$i = 4;
 
-			foreach($data as $row){
-				$sheet->setCellValue('A'.$i, $row['hd_sales_inv']); 
-				$sheet->setCellValue('B'.$i, $row['hd_sales_date']); 
-				$sheet->setCellValue('C'.$i, $row['customer_name']);
-				$sheet->setCellValue('D'.$i, $row['customer_rate']);
-				$sheet->setCellValue('E'.$i, $row['payment_name']); 
-				$sheet->setCellValue('F'.$i, $row['ekspedisi_name']); 
-				$sheet->setCellValue('G'.$i, $row['product_name']);
-				$sheet->setCellValue('H'.$i, $row['unit_name']);
-				$sheet->setCellValue('I'.$i, $row['dt_sales_qty']); 
-				$sheet->setCellValue('J'.$i, $row['dt_sales_price']); 
-				$sheet->setCellValue('K'.$i, $row['dt_sales_total']); 
-                $sheet->setCellValue('L'.$i, $row['hd_sales_top']); 
-                $sheet->setCellValue('M'.$i, $row['salesman_name']); 
-                $sheet->setCellValue('N'.$i, $row['hd_sales_prepare']); 
-                $sheet->setCellValue('O'.$i, $row['hd_sales_colly']); 
-                $sheet->setCellValue('P'.$i, $row['warehouse_name']); 
-                $sheet->setCellValue('Q'.$i, $row['hd_sales_sub_total']); 
-                $sheet->setCellValue('R'.$i, $row['hd_sales_total_discount']); 
-                $sheet->setCellValue('S'.$i, $row['hd_sales_ppn']); 
-                $sheet->setCellValue('T'.$i, $row['hd_sales_total']); 
-                $sheet->setCellValue('U'.$i, $row['hd_sales_note']); 
-                $sheet->setCellValue('V'.$i, $row['user_name']); 
+			$last_invoice    = '';
+			$group_start_row = 4;
+			$color_toggle    = true;
+			// Kolom header invoice yang akan di-merge jika invoice sama
+			$merge_cols = ['A', 'B', 'C', 'D', 'J', 'K', 'L', 'M', 'N', 'O'];
+
+			foreach ($data as $row) {
+				$is_new_invoice = ($row['hd_sales_inv'] !== $last_invoice);
+
+				if ($is_new_invoice) {
+					if (!empty($last_invoice) && ($i - 1) > $group_start_row) {
+						foreach ($merge_cols as $col) {
+							$sheet->mergeCells($col . $group_start_row . ':' . $col . ($i - 1));
+							$sheet->getStyle($col . $group_start_row . ':' . $col . ($i - 1))
+								->getAlignment()->setVertical('center');
+						}
+					}
+					$group_start_row = $i;
+					$color_toggle    = !$color_toggle;
+					$last_invoice    = $row['hd_sales_inv'];
+
+					$sheet->setCellValue('A'.$i, $row['hd_sales_inv']);
+					$sheet->setCellValue('B'.$i, $row['hd_sales_date']);
+					$sheet->setCellValue('C'.$i, $row['customer_name']);
+					$sheet->setCellValue('D'.$i, $row['payment_name']);
+					$sheet->setCellValue('J'.$i, $row['hd_sales_sub_total']);
+					$sheet->setCellValue('K'.$i, $row['hd_sales_total_discount']);
+					$sheet->setCellValue('L'.$i, $row['hd_sales_ppn']);
+					$sheet->setCellValue('M'.$i, $row['hd_sales_total']);
+					$sheet->setCellValue('N'.$i, $row['hd_sales_note']);
+					$sheet->setCellValue('O'.$i, $row['user_name']);
+				}
+
+				// Selalu tampilkan detail produk di setiap baris
+				$sheet->setCellValue('E'.$i, $row['product_name']);
+				$sheet->setCellValue('F'.$i, $row['unit_name']);
+				$sheet->setCellValue('G'.$i, $row['dt_sales_qty']);
+				$sheet->setCellValue('H'.$i, $row['dt_sales_price']);
+				$sheet->setCellValue('I'.$i, $row['dt_sales_total']);
+
+				// Warna baris bergantian per grup invoice
+				$rowBgColor = $color_toggle ? 'FFDCE6F1' : 'FFFFFFFF';
+				$sheet->getStyle('A'.$i.':O'.$i)->applyFromArray([
+					'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $rowBgColor]],
+					'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFB8CCE4']]],
+					'alignment' => ['vertical' => 'center'],
+				]);
+				$sheet->getRowDimension($i)->setRowHeight(18);
 				$i++;
-			};
+			}
 
-			$sheet->getColumnDimension('A')->setWidth(35); 
-			$sheet->getColumnDimension('B')->setWidth(25); 
+			// Merge sel header invoice untuk grup terakhir
+			if (!empty($last_invoice) && ($i - 1) > $group_start_row) {
+				foreach ($merge_cols as $col) {
+					$sheet->mergeCells($col . $group_start_row . ':' . $col . ($i - 1));
+					$sheet->getStyle($col . $group_start_row . ':' . $col . ($i - 1))
+						->getAlignment()->setVertical('center');
+				}
+			}
+
+			// ===== LEBAR KOLOM =====
+			$sheet->getColumnDimension('A')->setWidth(35);
+			$sheet->getColumnDimension('B')->setWidth(14);
 			$sheet->getColumnDimension('C')->setWidth(25);
-			$sheet->getColumnDimension('D')->setWidth(25);
-			$sheet->getColumnDimension('E')->setWidth(25);
-			$sheet->getColumnDimension('F')->setWidth(30);
-			$sheet->getColumnDimension('G')->setWidth(65);
-			$sheet->getColumnDimension('H')->setWidth(20);
-			$sheet->getColumnDimension('I')->setWidth(20);
-			$sheet->getColumnDimension('J')->setWidth(20);
-            $sheet->getColumnDimension('K')->setWidth(30);
-            $sheet->getColumnDimension('L')->setWidth(35);
-            $sheet->getColumnDimension('M')->setWidth(30);
-            $sheet->getColumnDimension('N')->setWidth(20);
-            $sheet->getColumnDimension('O')->setWidth(30);
-            $sheet->getColumnDimension('P')->setWidth(30);
-            $sheet->getColumnDimension('Q')->setWidth(30);
-            $sheet->getColumnDimension('R')->setWidth(30);
-            $sheet->getColumnDimension('S')->setWidth(30);
-            $sheet->getColumnDimension('T')->setWidth(30);
-            $sheet->getColumnDimension('U')->setWidth(30);
-            $sheet->getColumnDimension('U')->setWidth(50);
-			$sheet->getColumnDimension('V')->setWidth(30);
+			$sheet->getColumnDimension('D')->setWidth(18);
+			$sheet->getColumnDimension('E')->setWidth(35);
+			$sheet->getColumnDimension('F')->setWidth(15);
+			$sheet->getColumnDimension('G')->setWidth(8);
+			$sheet->getColumnDimension('H')->setWidth(18);
+			$sheet->getColumnDimension('I')->setWidth(22);
+			$sheet->getColumnDimension('J')->setWidth(18);
+			$sheet->getColumnDimension('K')->setWidth(15);
+			$sheet->getColumnDimension('L')->setWidth(15);
+			$sheet->getColumnDimension('M')->setWidth(18);
+			$sheet->getColumnDimension('N')->setWidth(30);
+			$sheet->getColumnDimension('O')->setWidth(20);
 
+			// ===== FORMAT ANGKA (hanya pada range data) =====
+			if ($i > 4) {
+				$lastRow = $i - 1;
+				$sheet->getStyle('H4:H'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+				$sheet->getStyle('I4:I'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+				$sheet->getStyle('J4:J'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+				$sheet->getStyle('K4:K'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+				$sheet->getStyle('L4:L'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+				$sheet->getStyle('M4:M'.$lastRow)->getNumberFormat()->setFormatCode('#,##0');
+			}
 
-            $sheet->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');	
-            $sheet->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('R')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('S')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('T')->getNumberFormat()->setFormatCode('#,##0');	
-
-
+			$sheet->freezePane('A4');
 			$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-			$sheet->setTitle("Excell");
+			$sheet->setTitle("Laporan Penjualan");
+
 			ob_end_clean();
 			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="sales_' .date('Y-m-d') . '.xlsx"');
+			header('Content-Disposition: attachment;filename="sales_' . date('Y-m-d') . '.xlsx"');
 			header('Cache-Control: max-age=0');
 
-			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');
 			$xlsxWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
 			exit($xlsxWriter->save('php://output'));
-		}else{
+		} else {
 			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			echo json_encode(['code' => 0, 'result' => $msg]); die();
 		}
 	}
     // End Report Sales
 
-
-	// Report Revisi Sales
-    public function reportrevisisales()
-	{
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
-            $salesman_list['salesman_list'] = $this->masterdata_model->salesman_list();
-            $warehouse_list['warehouse_list'] = $this->masterdata_model->warehouse_list();
-			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($customer_list, $salesman_list, $warehouse_list, $check_auth);
-			$this->load->view('Pages/Report/Sales/reportsalesrevisi', $data);
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-    
-    public function reportsalesrevisipdf()
-    {
-        $start_date       = $this->input->get('start_date');
-		$end_date 	      = $this->input->get('end_date');
-		$customer_report  = $this->input->get('customer_report');
-        $salesman_report  = $this->input->get('salesman_report');
-        $warehouse_report = $this->input->get('warehouse_report');
-
-		$data['data'] = $this->reportsales_model->get_report_revisi_sales($start_date, $end_date, $customer_report, $salesman_report, $warehouse_report)->result_array();
-		$htmlView   = $this->load->view('Pages/Report/Sales/reportsalesrevisipdf', $data, true);
-		$dompdf = new Dompdf();
-		$dompdf->loadHtml($htmlView);
-		$dompdf->setPaper('A4', 'landscape');
-		$dompdf->render();
-		$dompdf->stream('revisisales.pdf', array("Attachment" => false));
-		exit();
-    }
-
-	public function reportrevisisales_excell()
-	{
-		$modul = 'Report';
-		$check_auth = $this->check_auth($modul);
-		if($check_auth['check_access'][0]->view == 'Y'){
-			$start_date       = $this->input->get('start_date');
-			$end_date 	      = $this->input->get('end_date');
-		    $customer_report  = $this->input->get('customer_report');
-            $salesman_report  = $this->input->get('salesman_report');
-            $warehouse_report = $this->input->get('warehouse_report');
-
-			$excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-			$sheet = $excel->getActiveSheet();
-			$sheet->setCellValue('A1', "Laporan Revisi Penjualan"); 
-			$sheet->mergeCells('A1:S1');
-			$sheet->getStyle('A1')->getFont()->setBold(true);
-			$sheet->getStyle('A3:S3')->getFont()->setBold(true);
-			$sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
-			$sheet->getStyle('A3:S3')->getAlignment()->setHorizontal('center');
-			$sheet->setCellValue('A3', "Invoice"); 
-			$sheet->setCellValue('B3', "Tanggal"); 
-			$sheet->setCellValue('C3', "Pelanggan"); 
-			$sheet->setCellValue('D3', "Rate");
-			$sheet->setCellValue('E3', "Pembayaran"); 
-			$sheet->setCellValue('F3', "Ekspedisi");
-            $sheet->setCellValue('G3', "Nama Barang");
-            $sheet->setCellValue('H3', "Satuan");
-            $sheet->setCellValue('I3', "Qty");
-            $sheet->setCellValue('J3', "Harga");
-            $sheet->setCellValue('K3', "Total Harga Barang");
-			$sheet->setCellValue('L3', "TOP");
-			$sheet->setCellValue('M3', "Salsesman");
-			$sheet->setCellValue('N3', "Prepare By");
-			$sheet->setCellValue('O3', "Koli");
-			$sheet->setCellValue('P3', "Cabang");
-            $sheet->setCellValue('Q3', "Subtotal");
-            $sheet->setCellValue('R3', "Diskon");
-            $sheet->setCellValue('S3', "PPN");
-            $sheet->setCellValue('T3', "Total");
-            $sheet->setCellValue('U3', "Catatan");
-            $sheet->setCellValue('V3', "Di Buat Oleh");
-
-			$data = $this->reportsales_model->get_report_revisi_sales($start_date, $end_date, $customer_report, $salesman_report, $warehouse_report)->result_array();
-			$i = 4;
-
-			foreach($data as $row){
-				$sheet->setCellValue('A'.$i, $row['hd_sales_inv']); 
-				$sheet->setCellValue('B'.$i, $row['hd_sales_date']); 
-				$sheet->setCellValue('C'.$i, $row['customer_name']);
-				$sheet->setCellValue('D'.$i, $row['customer_rate']);
-				$sheet->setCellValue('E'.$i, $row['payment_name']); 
-				$sheet->setCellValue('F'.$i, $row['ekspedisi_name']); 
-				$sheet->setCellValue('G'.$i, $row['product_name']);
-				$sheet->setCellValue('H'.$i, $row['unit_name']);
-				$sheet->setCellValue('I'.$i, $row['dt_sales_qty']); 
-				$sheet->setCellValue('J'.$i, $row['dt_sales_price']); 
-				$sheet->setCellValue('K'.$i, $row['dt_sales_total']); 
-                $sheet->setCellValue('L'.$i, $row['hd_sales_top']); 
-                $sheet->setCellValue('M'.$i, $row['salesman_name']); 
-                $sheet->setCellValue('N'.$i, $row['hd_sales_prepare']); 
-                $sheet->setCellValue('O'.$i, $row['hd_sales_colly']); 
-                $sheet->setCellValue('P'.$i, $row['warehouse_name']); 
-                $sheet->setCellValue('Q'.$i, $row['hd_sales_sub_total']); 
-                $sheet->setCellValue('R'.$i, $row['hd_sales_total_discount']); 
-                $sheet->setCellValue('S'.$i, $row['hd_sales_ppn']); 
-                $sheet->setCellValue('T'.$i, $row['hd_sales_total']); 
-                $sheet->setCellValue('U'.$i, $row['hd_sales_note']); 
-                $sheet->setCellValue('V'.$i, $row['user_name']); 
-				$i++;
-			};
-
-			$sheet->getColumnDimension('A')->setWidth(35); 
-			$sheet->getColumnDimension('B')->setWidth(25); 
-			$sheet->getColumnDimension('C')->setWidth(25);
-			$sheet->getColumnDimension('D')->setWidth(25);
-			$sheet->getColumnDimension('E')->setWidth(25);
-			$sheet->getColumnDimension('F')->setWidth(30);
-			$sheet->getColumnDimension('G')->setWidth(65);
-			$sheet->getColumnDimension('H')->setWidth(20);
-			$sheet->getColumnDimension('I')->setWidth(20);
-			$sheet->getColumnDimension('J')->setWidth(20);
-            $sheet->getColumnDimension('K')->setWidth(30);
-            $sheet->getColumnDimension('L')->setWidth(35);
-            $sheet->getColumnDimension('M')->setWidth(30);
-            $sheet->getColumnDimension('N')->setWidth(20);
-            $sheet->getColumnDimension('O')->setWidth(30);
-            $sheet->getColumnDimension('P')->setWidth(30);
-            $sheet->getColumnDimension('Q')->setWidth(30);
-            $sheet->getColumnDimension('R')->setWidth(30);
-            $sheet->getColumnDimension('S')->setWidth(30);
-            $sheet->getColumnDimension('T')->setWidth(30);
-            $sheet->getColumnDimension('U')->setWidth(50);
-            $sheet->getColumnDimension('v')->setWidth(30);
-
-
-            $sheet->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');	
-            $sheet->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('Q')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('R')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('S')->getNumberFormat()->setFormatCode('#,##0');	
-			$sheet->getStyle('T')->getNumberFormat()->setFormatCode('#,##0');	
-
-
-			$sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-			$sheet->setTitle("Excell");
-			ob_end_clean();
-			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-			header('Content-Disposition: attachment;filename="sales_revisi_' .date('Y-m-d') . '.xlsx"');
-			header('Cache-Control: max-age=0');
-
-			$xlsxWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excel, 'Xlsx');
-			$xlsxWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
-			exit($xlsxWriter->save('php://output'));
-		}else{
-			$msg = "No Access";
-			echo json_encode(['code'=>0, 'result'=>$msg]);die();
-		}
-	}
-    // End Report Sales
-
-
-	// Report Revisi Sales
+	// Report Retur Sales
     public function reportretursales()
 	{
 		$modul = 'Report';

@@ -61,9 +61,9 @@ require DOC_ROOT_PATH . $this->config->item('header');
                     <div class="form-group">
                       <label>Status:</label>
                       <select class="form-control input-full js-example-basic-single" id="status_pembelian" name="status_pembelian">
-                        <option value="">-- Pilih Status --</option>
                         <option value="Success">Success</option> 
                         <option value="Pending">Pending</option>
+                        <option value="Success">Cancel</option> 
                       </select>
                     </div>
                   </div>

@@ -100,20 +100,10 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   </div>
                   <div class="card-body">
                     <ul class="specification-list">
-                      <a href="<?php echo base_url(); ?>Reportsales/reportsalesorder">
-                        <li>
-                          <span class="name-specification">Laporan Sales Order</span>
-                        </li>
-                      </a>
                       <a href="<?php echo base_url(); ?>Reportsales/reportsaless">
                         <li>
                           <span class="name-specification">Laporan Penjualan</span>
                         </li>
-                      </a>
-                      <a href="<?php echo base_url(); ?>Reportsales/reportrevisisales">
-                      <li>
-                        <span class="name-specification">Laporan Revisi Penjualan</span>
-                      </li>
                       </a>
                       <a href="<?php echo base_url(); ?>Reportsales/reportretursales">
                       <li>
