@@ -85,6 +85,6 @@ defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automat
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 
-define('company', 'PIONIR');
+define('company', 'CV. Anugrah Harapan Utama');
 define('company_address', 'Jl. Nusa Indah 2');
 define('company_phone', '0561-731219');

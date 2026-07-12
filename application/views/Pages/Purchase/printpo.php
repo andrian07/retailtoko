@@ -391,10 +391,10 @@
                 <div class="company-block">
                     <img src="<?php echo base_url(); ?>assets/logo.png" alt="Logo">
                     <div>
-                        <div class="company-name">TOKO PIONIR</div>
+                        <div class="company-name"><?php echo company; ?></div>
                         <div class="company-address">
-                            Jl. Sungai Raya Dalam 1 No A2<br>
-                            Telp: 0812-3456-7890 &nbsp;|&nbsp; pionir.toko@gmail.com
+                            <?php echo company_address; ?><br>
+                            Telp: <?php echo company_phone; ?>
                         </div>
                     </div>
                 </div>
@@ -423,8 +423,8 @@
                 </div>
                 <div class="party-box">
                     <div class="party-label">Dari (Pembeli)</div>
-                    <div class="party-name">Toko Pionir</div>
-                    <div class="party-detail">Jl. Sungai Raya Dalam 1 No A2, Kab. Kubu Raya</div>
+                    <div class="party-name"><?php echo company; ?></div>
+                    <div class="party-detail"><?php echo company_address; ?></div>
                 </div>
             </div>
             <?php endif; ?>

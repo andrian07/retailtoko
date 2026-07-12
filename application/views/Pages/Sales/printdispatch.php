@@ -314,11 +314,11 @@
 
         <div class="hdr-left">
             <div class="hdr-store">
-                <div class="sname">TOKO PIONIR SUDIRMAN</div>
+                <div class="sname"><?php echo company; ?></div>
                 <div class="sdoc">FAKTUR PENJUALAN</div>
                 <div class="saddr">
-                    Jl. Nusa Indah 2 Block D5 No.10-11, Pontianak<br>
-                    Telp: (0561) 731219
+                    <?php echo company_address; ?><br>
+                    Telp: <?php echo company_phone; ?>
                 </div>
             </div>
         </div>

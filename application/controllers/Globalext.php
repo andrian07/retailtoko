@@ -41,6 +41,27 @@ class Globalext extends CI_Controller {
 		echo json_encode($result);
 	} 
 
+	public function search_product_all()
+	{	
+		$keyword = $this->input->get('term');
+		$result = ['success' => FALSE, 'num_product' => 0, 'data' => [], 'message' => ''];
+		if (!($keyword == '' || $keyword == NULL)) {
+			$find = $this->global_model->search_product_all($keyword)->result_array();
+			$find_result = [];
+			foreach ($find as $row) {
+				$diplay_text = $row['product_code'].' - '.$row['product_name'].' - '.$row['unit_name'];
+				$find_result[] = [
+					'id'                  => $row['product_id'],
+					'value'               => $diplay_text,
+					'product_code'        => $row['product_code'],
+					'product_price'       => $row['product_price']
+				];
+			}
+			$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
+		}
+		echo json_encode($result);
+	}
+
 	
 
 

@@ -49,13 +49,16 @@ class reportpayment_model extends CI_Model {
         return $query;
     }
 
-    public function get_report_repayment($start_date, $end_date, $supplier_report)
+    public function get_report_repayment($start_date, $end_date, $supplier_report, $status)
     {
         if($start_date == null){
             $start_date = date('Y-m-01');
         }
         if($end_date == null){
             $end_date = date('Y-m-d');
+        }
+        if($status == null){
+            $status = 'Success';
         }
         $this->db->select('*');
         $this->db->from('hd_payment_debt');
@@ -67,17 +70,23 @@ class reportpayment_model extends CI_Model {
         if($supplier_report != null){
             $this->db->where('payment_debt_supplier_id', $supplier_report);
         }
+        if($status != null){
+            $this->db->where('hd_payment_debt.status', $status);
+        }
         $query = $this->db->get();
         return $query;
     }
 
-    public function get_report_piutang($start_date, $end_date, $customer_report)
+    public function get_report_piutang($start_date, $end_date, $customer_report, $status)
     {
         if($start_date == null){
             $start_date = date('Y-m-01');
         }
         if($end_date == null){
             $end_date = date('Y-m-d');
+        }
+        if($status == null){
+            $status = 'Success';
         }
         $this->db->select('*');
         $this->db->from('hd_payment_receivable');
@@ -88,6 +97,9 @@ class reportpayment_model extends CI_Model {
         }
         if($customer_report != null){
             $this->db->where('payment_receivable_customer_id', $customer_report);
+        }
+        if($status != null){
+            $this->db->where('hd_payment_receivable.status', $status);
         }
         $query = $this->db->get();
         return $query;

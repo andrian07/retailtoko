@@ -135,7 +135,11 @@ class masterdata_model extends CI_Model {
     //brand
     public function save_brand($data_insert)
     {
+        $this->db->trans_start();
         $this->db->insert('ms_brand', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
     }
 
     public function update_brand($data_update, $brand_id)
@@ -155,6 +159,13 @@ class masterdata_model extends CI_Model {
     public function brand_list()
     {
         $query = $this->db->query("select * from ms_brand where is_active = 'Y'");
+        $result = $query->result();
+        return $result;
+    }
+
+    public function check_product_brand($product_brand)
+    {
+        $query = $this->db->query("select * from ms_brand where brand_name = '".$product_brand."' and is_active = 'Y'");
         $result = $query->result();
         return $result;
     }
@@ -221,9 +232,20 @@ class masterdata_model extends CI_Model {
 
     //category
 
+    public function check_product_category($product_category)
+    {
+        $query = $this->db->query("select * from ms_category where category_name = '".$product_category."' and is_active = 'Y'");
+        $result = $query->result();
+        return $result;
+    }
+
     public function save_category($data_insert)
     {
+        $this->db->trans_start();
         $this->db->insert('ms_category', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
     }
 
     public function category_list()
@@ -251,9 +273,21 @@ class masterdata_model extends CI_Model {
 
 
     //unit
+
+    public function check_product_unit($product_unit)
+    {
+        $query = $this->db->query("select * from ms_unit where unit_name = '".$product_unit."' and is_active = 'Y'");
+        $result = $query->result();
+        return $result;
+    }
+
     public function save_unit($data_insert)
     {
+        $this->db->trans_start();
         $this->db->insert('ms_unit', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
     }
 
     public function unit_list()
@@ -279,9 +313,21 @@ class masterdata_model extends CI_Model {
     //end unit
 
     //supplier
+
+    public function check_product_supplier($product_supplier)
+    {
+        $query = $this->db->query("select * from ms_supplier where supplier_name = '".$product_supplier."' and is_active = 'Y'");
+        $result = $query->result();
+        return $result;
+    }
+
     public function save_supplier($data_insert)
     {
+        $this->db->trans_start();
         $this->db->insert('ms_supplier', $data_insert);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return  $insert_id;
     }
 
     public function get_last_supplier()
@@ -329,7 +375,7 @@ class masterdata_model extends CI_Model {
 
 
     //product
-
+    
     public function save_product($data_insert)
     {
         $this->db->trans_start();

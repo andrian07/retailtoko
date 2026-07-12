@@ -251,10 +251,8 @@ class Reportsales extends CI_Controller {
 		$check_auth = $this->check_auth($modul);
 		if($check_auth['check_access'][0]->view == 'Y'){
 			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
-            $salesman_list['salesman_list'] = $this->masterdata_model->salesman_list();
-            $warehouse_list['warehouse_list'] = $this->masterdata_model->warehouse_list();
 			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($customer_list, $salesman_list, $warehouse_list, $check_auth);
+			$data['data'] = array_merge($customer_list, $check_auth);
 			$this->load->view('Pages/Report/Sales/reportretursales', $data);
 		}else{
 			$msg = "No Access";
@@ -267,8 +265,9 @@ class Reportsales extends CI_Controller {
         $start_date       = $this->input->get('start_date');
 		$end_date 	      = $this->input->get('end_date');
 		$customer_report  = $this->input->get('customer_report');
+		$status           = $this->input->get('status');
 
-		$data['data'] = $this->reportsales_model->get_report_retur_sales($start_date, $end_date, $customer_report)->result_array();
+		$data['data'] = $this->reportsales_model->get_report_retur_sales($start_date, $end_date, $customer_report, $status)->result_array();
 		$htmlView   = $this->load->view('Pages/Report/Sales/reportretursalespdf', $data, true);
 		$dompdf = new Dompdf();
 		$dompdf->loadHtml($htmlView);

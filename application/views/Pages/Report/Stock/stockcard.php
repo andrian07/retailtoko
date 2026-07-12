@@ -3,65 +3,232 @@ define('DOC_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 require DOC_ROOT_PATH . $this->config->item('header');
 ?>
 <style type="text/css">
-  .card-pricing .specification-list li {
+  /* ===== Filter Card ===== */
+  .filter-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(31, 78, 121, 0.10);
+  }
+  .filter-card .card-header {
+    background: linear-gradient(135deg, #1F4E79 0%, #2E75B6 100%);
+    border-radius: 12px 12px 0 0;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .filter-card .card-header .header-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .filter-card .card-header i {
+    color: rgba(255,255,255,0.85);
+    font-size: 16px;
+  }
+  .filter-card .card-body {
+    background: #f8fafd;
+    border-radius: 0 0 12px 12px;
+    padding: 20px 22px 10px;
+  }
+  .filter-card label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1F4E79;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .filter-card .form-control {
+    border-radius: 7px;
+    border: 1px solid #c9d9ea;
     font-size: 13px;
+    background: #fff;
   }
-  .card.card-pricing {
-    height: 602px;
+  .filter-card .form-control:focus {
+    border-color: #2E75B6;
+    box-shadow: 0 0 0 3px rgba(46,117,182,0.12);
   }
-  .card-pricing .specification-list li {
-    border-bottom: 1px solid #000 !important;
+  .btn-filter-search {
+    background: linear-gradient(135deg, #1F4E79, #2E75B6);
+    border: none;
+    color: #fff;
+    border-radius: 7px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
   }
+  .btn-filter-search:hover { opacity: 0.88; color: #fff; }
+  .btn-filter-excel {
+    background: linear-gradient(135deg, #c07a00, #f0a500);
+    border: none;
+    color: #fff;
+    border-radius: 7px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+  }
+  .btn-filter-excel:hover { opacity: 0.88; color: #fff; }
+
+  /* ===== Preview Card ===== */
+  .preview-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(31, 78, 121, 0.10);
+    margin-top: 18px;
+  }
+  .preview-card .card-header {
+    background: #fff;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 2px solid #e3edf7;
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .preview-card .card-header .preview-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1F4E79;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+  .preview-card .card-header .preview-title i { color: #2E75B6; }
+  .preview-card .card-body {
+    padding: 0;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .preview-card iframe {
+    display: block;
+    width: 100%;
+    height: 1000px;
+    border: none;
+    border-radius: 0 0 12px 12px;
+  }
+  #iframe-loading {
+    position: absolute;
+    inset: 0;
+    background: #f8fafd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 10;
+    border-radius: 0 0 12px 12px;
+  }
+  #iframe-loading .spinner-border { color: #2E75B6; width: 2.5rem; height: 2.5rem; }
+  #iframe-loading span { color: #2E75B6; font-size: 13px; font-weight: 600; }
+
+  /* ===== Page Header ===== */
+  .report-page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .report-page-header .report-icon-wrap {
+    width: 46px; height: 46px;
+    background: linear-gradient(135deg, #1F4E79, #2E75B6);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .report-page-header .report-icon-wrap i { color: #fff; font-size: 20px; }
+  .report-page-header h3 { margin: 0; font-size: 20px; font-weight: 700; color: #1F4E79; }
+  .report-page-header p  { margin: 2px 0 0; font-size: 12px; color: #6c8eae; }
 </style>
 </div>
 
 <div class="container">
   <div class="page-inner">
-    <div class="page-header">
 
+    <!-- ===== Page Header ===== -->
+    <div class="report-page-header">
+      <div class="report-icon-wrap">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+      <div>
+        <h3>Kartu Stok</h3>
+        <p>Monitoring mutasi stok masuk dan keluar per produk</p>
+      </div>
     </div>
+
     <div class="row">
-      <h3 class="fw-bold mb-3">Laporan Stok </h3>
       <div class="col-md-12">
-        <div class="card">
+
+        <!-- ===== Filter Card ===== -->
+        <div class="card filter-card">
+          <div class="card-header">
+            <i class="fas fa-filter"></i>
+            <span class="header-title">Filter Laporan</span>
+          </div>
           <div class="card-body">
-            <div class="card-body">
-              <form>
-                <div class="row">
-                
-                <div class="col-sm-4">
-                    <!-- text input -->
-                    <div class="form-group">
-                      <label>Produk:</label>
-                      <input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="ketikkan nama produk" value="" required="" autocomplete="off"  data-parsley-required data-parsley-required-message="*Masukan Nama Produk">
-                      <input id="product_id" type="hidden" name="product_id">
-                    </div>
-                  </div>
+            <form>
+              <div class="row align-items-end g-3">
 
-                  <div class="col-sm-2">
-                    <!-- text input -->
-                    <div class="form-group">
-                      <label>&nbsp;</label>
-                      <div class="form-group">
-                        <div class="btn-group">
-                          <button id="btnsearch" type="button" class="btn btn-primary">Cari</button>
-                          <button id="btndownloadexcell" type="button" class="btn btn-warning" style="margin-left: 10px;">Excell</button>
-                        </div>
-                      </div>
-                    </div>
+                <div class="col-sm-6 col-md-7">
+                  <div class="form-group mb-0">
+                    <label><i class="fas fa-box me-1"></i>Nama Produk</label>
+                    <input id="product_name" name="product_name" type="text"
+                      class="form-control ui-autocomplete-input"
+                      placeholder="Ketikkan nama produk..."
+                      autocomplete="off">
+                    <input id="product_id" type="hidden" name="product_id">
                   </div>
-
                 </div>
-              </form>
-            </div>
-          </div>
-        </div>
 
-        <div class="card">
-          <div class="card-body">
-            <iframe id="preview" src="<?php echo base_url(); ?>Reportstock/stockcardpdf" width="100%" height="1000px"></iframe>
+                <div class="col-sm-6 col-md-5">
+                  <div class="d-flex gap-2 pt-1">
+                    <button id="btnsearch" type="button" class="btn btn-filter-search">
+                      <i class="fas fa-search"></i> Tampilkan
+                    </button>
+                    <button id="btndownloadexcell" type="button" class="btn btn-filter-excel">
+                      <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </form>
           </div>
         </div>
+        <!-- End Filter Card -->
+
+        <!-- ===== Preview Card ===== -->
+        <div class="card preview-card">
+          <div class="card-header">
+            <span class="preview-title">
+              <i class="fas fa-eye"></i> Preview Kartu Stok
+            </span>
+            <small class="text-muted" id="preview-product"></small>
+          </div>
+          <div class="card-body">
+            <div id="iframe-loading">
+              <div class="spinner-border" role="status"></div>
+              <span>Memuat laporan...</span>
+            </div>
+            <iframe id="preview"
+              src="<?php echo base_url(); ?>Reportstock/stockcardpdf"
+              width="100%" height="1000px"
+              onload="document.getElementById('iframe-loading').style.display='none'">
+            </iframe>
+          </div>
+        </div>
+        <!-- End Preview Card -->
 
       </div>
     </div>
@@ -72,45 +239,44 @@ require DOC_ROOT_PATH . $this->config->item('header');
   ?>
 
   <script type="text/javascript">
-
-    $('#product_name').autocomplete({ 
-        minLength: 2,
-        source: function(req, add) {
+    $('#product_name').autocomplete({
+      minLength: 2,
+      source: function(req, add) {
         $.ajax({
-            url: '<?php echo base_url(); ?>/Sales/search_product',
-            dataType: 'json',
-            type: 'GET',
-            data: req,
-            success: function(res) {
+          url: '<?php echo base_url(); ?>Globalext/search_product_all',
+          dataType: 'json',
+          type: 'GET',
+          data: req,
+          success: function(res) {
             if (res.success == true) {
-                add(res.data);
+              add(res.data);
             }
-            },
+          },
         });
-        },
-        select: function(event, ui) {
-        let id = ui.item.id;
-        let product_name = ui.item.product_name;
-        let product_id = ui.item.product_id;
-        $('#product_name').val(product_name);
-        $('#product_id').val(id);
-        },
+      },
+      select: function(event, ui) {
+        $('#product_name').val(ui.item.product_name);
+        $('#product_id').val(ui.item.id);
+        $('#preview-product').text('Produk: ' + ui.item.product_name);
+      },
     });
+
+    function showLoading() {
+      $('#iframe-loading').show();
+    }
 
     $('#btnsearch').click(function(e) {
       e.preventDefault();
-      let product_id       = $('#product_id').val();
-      let url = '<?php echo base_url(); ?>Reportstock/stockcardpdf?';
-      url += '&product_id=' + product_id;
+      showLoading();
+      let product_id = $('#product_id').val();
+      let url = '<?php echo base_url(); ?>Reportstock/stockcardpdf?&product_id=' + product_id;
       $('#preview').attr('src', url);
-    })
-
+    });
 
     $('#btndownloadexcell').click(function(e) {
       e.preventDefault();
-      let product_id       = $('#product_id').val();
-      let url = '<?php echo base_url(); ?>Reportstock/stockcard_excell?';
-      url += '&product_id=' + product_id;
+      let product_id = $('#product_id').val();
+      let url = '<?php echo base_url(); ?>Reportstock/stockcard_excell?&product_id=' + product_id;
       window.open(url, '_blank');
-    })
+    });
   </script>

@@ -49,26 +49,18 @@
             <thead>
                 <tr>
                     <th>Invoice</th>
-                    <th>Pelanggan</th>
-                    <th>Rate</th>
                     <th>Tanggal</th>
-                    <th>Nama Barang</th>
-                    <th>Qty</th>
-                    <th>Harga</th>
-                    <th>Total</th>
+                    <th>Pelanggan</th>
+                    <th>Total Retur</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach($data as $row){ ?>
                     <tr>
                         <td><?php echo $row['hd_retur_sales_inv']; ?> </td>
+                        <td><?php echo $row['hd_retur_sales_date']; ?></td>
                         <td><?php echo $row['customer_name']; ?></td>
-                        <td><?php echo $row['customer_rate']; ?></td>
-                        <td><?php echo $row['hd_retur_sales_date']; ?> </td>
-                        <td><?php echo $row['product_name']; ?></td>
-                        <td><?php echo $row['dt_retur_sales_qty']; ?></td>
-                        <td>Rp. <?php echo number_format($row['dt_retur_sales_price']); ?></td>
-                        <td>Rp. <?php echo number_format($row['dt_retur_sales_total']); ?></td>
+                        <td>Rp. <?php echo number_format($row['hd_retur_sales_total']); ?></td>
                     </tr>
                 <?php } ?>
             </tbody>

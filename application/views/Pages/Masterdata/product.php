@@ -90,8 +90,8 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown"><span class="btn-label"><i class="fas fa-file-excel"></i></span> Excell</button>
                   <ul class="dropdown-menu" role="menu">
                     <li>
-                      <a class="dropdown-item" href="#">Download Template</a>
-                      <a class="dropdown-item" href="#">Import Excell</a>
+                      <a class="dropdown-item" href="<?php echo base_url(); ?>Masterdata/export_sample_import_product">Download Template</a>
+                      <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalImportExcell">Import Excell</a>
                     </li>
                   </ul>
                 </div>
@@ -422,6 +422,33 @@ require DOC_ROOT_PATH . $this->config->item('header');
 </div>
 </div>
 
+
+<!-- Modal Import Excell -->
+<div class="modal fade" id="modalImportExcell" tabindex="-1" role="dialog" aria-labelledby="modalImportExcellLabel">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalImportExcellLabel">Import Excell Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="import_excell_form" enctype="multipart/form-data">
+        <div class="modal-body">
+          <p>Download terlebih dahulu template sebelum melakukan import.
+            <a href="<?php echo base_url(); ?>Masterdata/export_sample_import_product" class="text-success fw-bold"><i class="fas fa-file-excel"></i> Download Template</a>
+          </p>
+          <div class="form-group">
+            <label class="col-form-label">Pilih File Excel (.xlsx)</label>
+            <input type="file" class="form-control" id="import_excell_file" accept=".xlsx,.xls">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times-circle"></i> Batal</button>
+          <button type="submit" id="btn_import_excell" class="btn btn-success"><i class="fas fa-upload"></i> Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <?php 
 require DOC_ROOT_PATH . $this->config->item('footer');
@@ -863,6 +890,41 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     e.preventDefault();
     location.reload();
   });
-  
+
+  // Import Excel
+  $('#import_excell_form').on('submit', function(e){
+    e.preventDefault();
+    var file = $('#import_excell_file')[0].files[0];
+    if(!file){
+      Swal.fire({ icon: 'error', title: 'Oops...', text: 'Pilih file Excel terlebih dahulu.' });
+      return;
+    }
+    var formData = new FormData();
+    formData.append('file', file);
+    $('#btn_import_excell').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Importing...');
+    $.ajax({
+      type: 'POST',
+      url: '<?php echo base_url(); ?>Masterdata/import_product_excell',
+      data: formData,
+      cache: false,
+      contentType: false,
+      processData: false,
+      success: function(data){
+        var res = typeof data === 'string' ? JSON.parse(data) : data;
+        $('#btn_import_excell').prop('disabled', false).html('<i class="fas fa-upload"></i> Import');
+        if(res.code == 200){
+          $('#modalImportExcell').modal('hide');
+          $('#import_excell_file').val('');
+          Swal.fire({ icon: 'success', title: 'Berhasil!', text: res.result }).then(function(){ console.log('reload'); });
+        } else {
+          Swal.fire({ icon: 'error', title: 'Oops...', text: res.result });
+        }
+      },
+      error: function(){
+        $('#btn_import_excell').prop('disabled', false).html('<i class="fas fa-upload"></i> Import');
+        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Terjadi kesalahan saat mengupload file.' });
+      }
+    });
+  });
 
 </script>

@@ -165,6 +165,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
                         <span class="name-specification">Laporan Kartu Stok</span>
                       </li>
                       </a>
+                      <a href="<?php echo base_url(); ?>Reportstock/profit_and_loss">
+                      <li>
+                        <span class="name-specification">Laba Rugi</span>
+                      </li>
+                      </a>
                     </ul>
                   </div>
                 </div>

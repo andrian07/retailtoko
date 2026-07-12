@@ -56,6 +56,7 @@
                     <th>Total Nota</th>
                     <th>DP 1</th>
                     <th>Total Hutang</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>

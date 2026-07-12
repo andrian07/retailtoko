@@ -29,7 +29,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                   <!-- text input -->
                   <div class="form-group">
                     <label>Tanggal Pembayaran</label>
-                    <input id="repayment_date" name="repayment_date" type="date" class="form-control" value="2025-07-23">
+                    <input id="repayment_date" name="repayment_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
                   </div>
                 </div>
 

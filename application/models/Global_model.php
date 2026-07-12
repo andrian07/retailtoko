@@ -275,4 +275,17 @@ class global_model extends CI_Model {
         return $query;
     }
 
+    public function search_product_all($keyword)
+    {
+        $this->db->select('*');
+        $this->db->from('ms_product');
+        $this->db->join('ms_unit', 'ms_product.product_unit = ms_unit.unit_id');
+        if($keyword != null){
+            $this->db->where('(ms_product.product_name like "%'.$keyword.'%" OR ms_product.product_code like "%'.$keyword.'%") ');
+        }
+        $this->db->limit(50);
+        $query = $this->db->get();
+        return $query;
+    }
+
 }
