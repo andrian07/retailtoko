@@ -148,6 +148,9 @@ CREATE TABLE IF NOT EXISTS `dt_sales` (
   `dt_sales_total` int NOT NULL,
   `dt_sales_cost` decimal(15,2) NOT NULL DEFAULT 0,
   `dt_sales_profit` decimal(15,2) NOT NULL DEFAULT 0,
+  `dt_sales_package_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `dt_sales_package_conv` int NOT NULL DEFAULT 1,
+  `dt_sales_package_count` int NOT NULL DEFAULT 0,
   `dt_sales_desc` text COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`dt_sales_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -478,6 +481,17 @@ CREATE TABLE IF NOT EXISTS `ms_product` (
 
 -- Dumping data for table retail.ms_product: ~9 rows (approximately)
 
+-- Dumping structure for table retail.ms_product_package
+CREATE TABLE IF NOT EXISTS `ms_product_package` (
+  `package_id` int NOT NULL AUTO_INCREMENT,
+  `product_id` int NOT NULL,
+  `package_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `package_qty` int NOT NULL COMMENT 'isi per satuan besar (dalam satuan terkecil)',
+  `is_active` enum('Y','N') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Y',
+  PRIMARY KEY (`package_id`),
+  KEY `idx_package_product` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Dumping structure for table retail.ms_product_stock
 CREATE TABLE IF NOT EXISTS `ms_product_stock` (
   `ms_product_stock_id` int NOT NULL AUTO_INCREMENT,
@@ -800,6 +814,8 @@ CREATE TABLE IF NOT EXISTS `temp_sales` (
   `temp_sales_qty` int NOT NULL,
   `temp_sales_discount` int NOT NULL,
   `temp_sales_total` int NOT NULL,
+  `temp_package_id` int NOT NULL DEFAULT 0,
+  `temp_package_conv` int NOT NULL DEFAULT 1,
   `temp_user_id` int NOT NULL,
   `temp_desc_item` text COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP

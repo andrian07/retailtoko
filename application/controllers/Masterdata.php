@@ -1019,6 +1019,181 @@ class Masterdata extends CI_Controller {
 	}
 
 
+	public function package_list()
+	{
+		$modul = 'Product';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->edit == 'Y'){
+			$product_id = (int) $this->input->post('product_id');
+			echo json_encode(['code'=>200, 'data'=>$this->masterdata_model->package_list($product_id)]);
+		}else{
+			echo json_encode(['code'=>0, 'result'=>'No Access']);
+		}
+	}
+
+	public function add_package()
+	{
+		$modul = 'Product';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->edit == 'Y'){
+			$product_id   = (int) $this->input->post('product_id');
+			$package_name = trim($this->input->post('package_name'));
+			$package_qty  = (int) $this->input->post('package_qty');
+
+			if($package_name == '' || strlen($package_name) > 50){
+				echo json_encode(['code'=>0, 'result'=>'Nama satuan besar harus diisi (maks 50 karakter)']);die();
+			}
+			if($package_qty < 2){
+				echo json_encode(['code'=>0, 'result'=>'Isi per satuan besar minimal 2']);die();
+			}
+			if($this->masterdata_model->get_product_by_id($product_id) == null){
+				echo json_encode(['code'=>0, 'result'=>'Produk tidak ditemukan']);die();
+			}
+			if($this->masterdata_model->package_exists($product_id, $package_name, $package_qty)){
+				echo json_encode(['code'=>0, 'result'=>'Nama atau isi satuan besar sudah ada di produk ini']);die();
+			}
+
+			$this->masterdata_model->save_package(array(
+				'product_id'   => $product_id,
+				'package_name' => $package_name,
+				'package_qty'  => $package_qty,
+			));
+			$data_insert_act = array(
+				'activity_table_desc'        => 'Tambah Satuan Besar '.$package_name.' ('.$package_qty.') Produk ID '.$product_id,
+				'activity_table_user'        => $_SESSION['user_id'],
+			);
+			$this->global_model->save($data_insert_act);
+			echo json_encode(['code'=>200, 'result'=>'Success Tambah']);
+		}else{
+			echo json_encode(['code'=>0, 'result'=>'No Access']);
+		}
+	}
+
+	public function delete_package()
+	{
+		$modul = 'Product';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->edit == 'Y'){
+			$product_id = (int) $this->input->post('product_id');
+			$package_id = (int) $this->input->post('package_id');
+			$this->masterdata_model->delete_package($package_id, $product_id);
+			$data_insert_act = array(
+				'activity_table_desc'        => 'Hapus Satuan Besar ID '.$package_id.' Produk ID '.$product_id,
+				'activity_table_user'        => $_SESSION['user_id'],
+			);
+			$this->global_model->save($data_insert_act);
+			echo json_encode(['code'=>200, 'result'=>'Success Delete']);
+		}else{
+			echo json_encode(['code'=>0, 'result'=>'No Access']);
+		}
+	}
+
+	// simpan semua isian halaman detail produk (info + harga + gambar) sekaligus
+	public function save_product_detail()
+	{
+		$modul = 'Product';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->edit != 'Y'){
+			echo json_encode(['code'=>0, 'result'=>'No Access']);die();
+		}
+
+		$product_id   = (int) $this->input->post('product_id');
+		$product      = $this->masterdata_model->get_product_by_id($product_id);
+		if($product == null){
+			echo json_encode(['code'=>0, 'result'=>'Produk tidak ditemukan']);die();
+		}
+
+		$product_code     = trim($this->input->post('product_code'));
+		$product_name     = trim($this->input->post('product_name'));
+		$product_category = $this->input->post('product_category');
+		$product_brand    = $this->input->post('product_brand');
+		$suppliers        = $this->input->post('product_supplier');
+		$product_status   = $this->input->post('product_status');
+
+		if($product_code == '' || $product_name == ''){
+			echo json_encode(['code'=>0, 'result'=>'Kode dan Nama Produk Harus Di Isi']);die();
+		}
+		if($product_category == '' || $product_brand == '' || empty($suppliers) || !is_array($suppliers)){
+			echo json_encode(['code'=>0, 'result'=>'Kategori, Brand dan Supplier Harus Di Isi']);die();
+		}
+		if(!in_array($product_status, array('Aktif', 'Tidak Aktif', 'Discontinue'))){
+			echo json_encode(['code'=>0, 'result'=>'Status Tidak Valid']);die();
+		}
+		if($this->masterdata_model->product_code_used($product_code, $product_id)){
+			echo json_encode(['code'=>0, 'result'=>'Kode Produk sudah dipakai produk lain']);die();
+		}
+
+		// gambar: file baru, hapus (kembali ke default), atau tetap
+		$new_image_name = $product[0]->product_image;
+		if(isset($_FILES['screenshoot']) && $_FILES['screenshoot']['name'] != null){
+			$image_name = $product_code.$this->generateRandomString().'.png';
+			$config['upload_path']   = './assets/products/';
+			$config['allowed_types'] = 'gif|jpg|png|jpeg|PNG';
+			$config['max_size']      = 2048;
+			$config['file_name']     = $image_name;
+			$this->load->library('upload', $config);
+			if(!$this->upload->do_upload('screenshoot')){
+				echo json_encode(['code'=>0, 'result'=>strip_tags($this->upload->display_errors())]);die();
+			}
+			$new_image_name = $image_name;
+		}else if($this->input->post('reset_image') == 1){
+			$new_image_name = 'default.png';
+		}
+
+		$hpp_discount = $this->input->post('product_hpp_discount');
+		$hpp_discount = ($hpp_discount === '' || $hpp_discount === null) ? null : $hpp_discount; // kosong = pakai product_hpp
+
+		$supplier_names = array();
+		foreach($this->masterdata_model->supplier_list() as $sup){
+			if(in_array($sup->supplier_id, $suppliers)){
+				$supplier_names[] = $sup->supplier_name;
+			}
+		}
+
+		$data_edit = array(
+			'product_code'				=> $product_code,
+			'product_name'				=> $product_name,
+			'product_category'			=> $product_category,
+			'product_brand'				=> $product_brand,
+			'product_supplier_id_tag'	=> implode(',', $suppliers),
+			'product_supplier_tag'		=> implode(',', $supplier_names),
+			'is_package'				=> $this->input->post('is_package') == 'Y' ? 'Y' : 'N',
+			'is_ppn'					=> $this->input->post('is_ppn') == 'PPN' ? 'PPN' : 'NON PPN',
+			'product_min_stock'			=> (int) $this->input->post('product_min_stock'),
+			'product_desc'				=> (string) $this->input->post('product_desc'),
+			'product_status'			=> $product_status,
+			'product_image'				=> $new_image_name,
+			'product_price'				=> (int) $this->input->post('product_price'),
+			'product_hpp'				=> (int) $this->input->post('product_hpp'),
+			'product_hpp_discount'		=> $hpp_discount,
+			'product_disc_percentage'	=> (int) $this->input->post('product_disc_percentage'),
+			// tanggal kosong = pakai tanggal yang sudah tersimpan (kolom tidak boleh kosong)
+			'product_disc_start_date'	=> $this->input->post('product_disc_start_date') ?: $product[0]->product_disc_start_date,
+			'product_disc_end_date'		=> $this->input->post('product_disc_end_date') ?: $product[0]->product_disc_end_date,
+		);
+		for($i = 1; $i <= 5; $i++){
+			$data_edit['product_sell_percentage_'.$i] = (int) $this->input->post('product_sell_percentage_'.$i);
+			$data_edit['product_sell_price_'.$i]      = (int) $this->input->post('product_sell_price_'.$i);
+		}
+
+		$this->db->trans_start();
+		$this->masterdata_model->edit_product($data_edit, $product_id);
+		$this->masterdata_model->delete_product_supplier($product_id);
+		foreach($suppliers as $supplier_id){
+			$this->masterdata_model->save_product_supplier(array('product_id' => $product_id, 'supplier_id' => $supplier_id));
+		}
+		$this->global_model->save(array(
+			'activity_table_desc' => 'Edit Detail Produk '.$product_name,
+			'activity_table_user' => $_SESSION['user_id'],
+		));
+		$this->db->trans_complete();
+
+		if($this->db->trans_status() === FALSE){
+			echo json_encode(['code'=>0, 'result'=>'Gagal Menyimpan Produk']);die();
+		}
+		echo json_encode(['code'=>200, 'result'=>'Success Edit']);
+	}
+
 	public function edit_price()
 	{
 		$modul = 'Product';
@@ -1106,8 +1281,11 @@ class Masterdata extends CI_Controller {
 			$id = $this->input->get('id');
 			$settingproduct['settingproduct'] = $this->masterdata_model->settingproduct($id);
 			$product_stock['product_stock'] = $this->masterdata_model->product_stock($id);
+			$category_list['category_list'] = $this->masterdata_model->category_list();
+			$brand_list['brand_list'] 		= $this->masterdata_model->brand_list();
+			$supplier_list['supplier_list'] = $this->masterdata_model->supplier_list();
 			$check_auth['check_auth'] = $check_auth;
-			$data['data'] = array_merge($settingproduct, $product_stock, $check_auth);
+			$data['data'] = array_merge($settingproduct, $product_stock, $category_list, $brand_list, $supplier_list, $check_auth);
 			$this->load->view('Pages/Masterdata/product_setting', $data);
 		}else{
 			$msg = "No Access";

@@ -89,7 +89,7 @@
         </tr>
      <?php foreach($data['detail_sales'] as $detail){ ?>
       <tr>
-        <td width="70%" style="font-size:11px; padding: 2%;"><?php echo $detail->product_name; ?><br><span style="font-size:10px;"><?php echo $detail->dt_sales_qty; ?> <?php echo $detail->unit_name; ?> x <?php echo number_format($detail->dt_sales_price, 0, ',', '.'); ?></span></td>
+        <td width="70%" style="font-size:11px; padding: 2%;"><?php echo $detail->product_name; ?><br><span style="font-size:10px;"><?php echo $detail->dt_sales_qty; ?> <?php echo $detail->unit_name; ?> x <?php echo number_format($detail->dt_sales_price, 0, ',', '.'); ?><?php if($detail->dt_sales_package_count > 0){ echo ' ('.$detail->dt_sales_package_count.' '.htmlspecialchars($detail->dt_sales_package_name).' @'.$detail->dt_sales_package_conv.')'; } ?></span></td>
         <td class="text-center" width="10%"><?php echo $detail->dt_sales_qty; ?></td>
         <td class="text-right" width="20%"><?php echo number_format($detail->dt_sales_total, 0, ',', '.'); ?></td>
       </tr>

@@ -22,7 +22,7 @@ dt_cards(array(
 
 $rows = array();
 foreach ($data['detail_sales'] as $r) {
-  $rows[] = array(dt_e($r->product_code), dt_e($r->product_name), dt_num($r->dt_sales_qty), dt_rp($r->dt_sales_price), dt_rp($r->dt_sales_discount), dt_rp($r->dt_sales_total), dt_e($r->dt_sales_desc));
+  $rows[] = array(dt_e($r->product_code), dt_e($r->product_name), dt_num($r->dt_sales_qty).($r->dt_sales_package_count > 0 ? ' <small>('.dt_e($r->dt_sales_package_count.' '.$r->dt_sales_package_name).' @'.$r->dt_sales_package_conv.')</small>' : ''), dt_rp($r->dt_sales_price), dt_rp($r->dt_sales_discount), dt_rp($r->dt_sales_total), dt_e($r->dt_sales_desc));
 }
 dt_table(array(array('SKU'), array('Produk'), array('Qty'), array('Harga Satuan'), array('Discount'), array('Total'), array('Catatan')), $rows);
 

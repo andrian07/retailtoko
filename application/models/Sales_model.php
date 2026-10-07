@@ -82,6 +82,7 @@ class sales_model extends CI_Model {
         $this->db->join('ms_product', 'temp_sales.temp_product_id = ms_product.product_id');
         $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
         $this->db->join('ms_user', 'temp_sales.temp_user_id = ms_user.user_id');
+        $this->db->join('ms_product_package', 'temp_sales.temp_package_id = ms_product_package.package_id', 'left');
         $this->db->where('temp_user_id', $user);
         if($search != null){
             $this->db->group_start();
@@ -124,10 +125,12 @@ class sales_model extends CI_Model {
         return $query;
     }
 
-    public function edit_temp_sales($product_id, $user_id, $data_insert)
+    // satu baris keranjang = produk + satuan (satuan terkecil atau satuan besar tertentu)
+    public function edit_temp_sales($product_id, $user_id, $package_id, $data_insert)
     {
         $this->db->set($data_insert);
         $this->db->where('temp_product_id ', $product_id);
+        $this->db->where('temp_package_id ', $package_id);
         $this->db->where('temp_user_id ', $user_id);
         $this->db->update('temp_sales');
     }   
@@ -137,19 +140,29 @@ class sales_model extends CI_Model {
         $this->db->insert('temp_sales', $data_insert);
     }
 
-    public function check_temp_sales_input($product_id, $user_id)
+    public function check_temp_sales_input($product_id, $user_id, $package_id)
     {
-        $query = $this->db->query("select * from temp_sales where temp_product_id = '".$product_id."' and temp_user_id = '".$user_id."'");
+        $query = $this->db->query("select * from temp_sales where temp_product_id = ? and temp_package_id = ? and temp_user_id = ?", array($product_id, $package_id, $user_id));
         $result = $query->result();
         return $result;
     }
 
-    public function check_edit_temp_sales($temp_product_id, $temp_user_id)
+    // total satuan terkecil produk ini di keranjang pada baris satuan lain (untuk cek stok gabungan)
+    public function temp_base_qty_other($product_id, $user_id, $package_id)
+    {
+        $row = $this->db->query("select coalesce(sum(temp_sales_qty * temp_package_conv), 0) as qty from temp_sales where temp_product_id = ? and temp_user_id = ? and temp_package_id <> ?", array($product_id, $user_id, $package_id))->row_array();
+        return (int) $row['qty'];
+    }
+
+    public function check_edit_temp_sales($temp_product_id, $temp_user_id, $temp_package_id)
     {
         $this->db->select('*');
         $this->db->from('temp_sales');
         $this->db->join('ms_product', 'temp_sales.temp_product_id = ms_product.product_id');
+        $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
+        $this->db->join('ms_product_package', 'temp_sales.temp_package_id = ms_product_package.package_id', 'left');
         $this->db->where('temp_product_id', $temp_product_id);
+        $this->db->where('temp_package_id', $temp_package_id);
         $this->db->where('temp_user_id', $temp_user_id);
         $query = $this->db->get();
         return $query;
@@ -162,9 +175,31 @@ class sales_model extends CI_Model {
         return $result;
     }
 
-    public function delete_temp_sales($product_id, $user_id)
+    // satuan besar aktif milik produk (null kalau tidak ada / bukan milik produk ini)
+    public function get_package($product_id, $package_id)
+    {
+        return $this->db->query("select * from ms_product_package where package_id = ? and product_id = ? and is_active = 'Y'", array($package_id, $product_id))->row_array();
+    }
+
+    // daftar satuan besar beberapa produk sekaligus: [product_id => [package, ...]]
+    public function packages_by_products($product_ids)
+    {
+        $result = array();
+        $product_ids = array_values(array_filter(array_map('intval', (array) $product_ids)));
+        if(empty($product_ids)){
+            return $result;
+        }
+        $rows = $this->db->query("select package_id, product_id, package_name, package_qty from ms_product_package where is_active = 'Y' and product_id in (".implode(',', $product_ids).") order by package_qty asc")->result_array();
+        foreach($rows as $row){
+            $result[$row['product_id']][] = array('id' => (int) $row['package_id'], 'name' => $row['package_name'], 'qty' => (int) $row['package_qty']);
+        }
+        return $result;
+    }
+
+    public function delete_temp_sales($product_id, $user_id, $package_id)
     {
         $this->db->where('temp_product_id', $product_id);
+        $this->db->where('temp_package_id', $package_id);
         $this->db->where('temp_user_id', $user_id);
         $this->db->delete('temp_sales');
     }
@@ -188,6 +223,7 @@ class sales_model extends CI_Model {
         $this->db->from('temp_sales');
         $this->db->join('ms_product', 'temp_sales.temp_product_id = ms_product.product_id');
         $this->db->join('ms_user', 'temp_sales.temp_user_id = ms_user.user_id');
+        $this->db->join('ms_product_package', 'temp_sales.temp_package_id = ms_product_package.package_id', 'left');
         $this->db->where('temp_user_id ', $user_id);
         $query = $this->db->get();
         return $query;

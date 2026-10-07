@@ -147,9 +147,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
 						<input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="Ketik nama produk, SKU atau scan barcode..." value="" required="" autocomplete="off" data-parsley-required data-parsley-required-message="*Masukan Nama Produk">
 					</div>
 					<input id="product_id" type="hidden" name="product_id">
+					<input id="package_id" type="hidden" name="package_id" value="0">
+					<input id="package_conv" type="hidden" name="package_conv" value="1">
 				</div>
 				<div class="fp-field">
-					<label>Harga Jual / Unit</label>
+					<label>Harga Jual / Satuan</label>
 					<input id="temp_price" name="temp_price" class="form-control text-end" value="0" required="">
 				</div>
 				<div class="fp-field">
@@ -485,6 +487,9 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 				$('#curent_stock').val(curent_stock);
 			}
 			let sales_price_type = $('#sales_price_type').val();
+			// satuan terkecil dan satuan besar muncul sebagai entri produk terpisah
+			$('#package_id').val(ui.item.package_id || 0);
+			$('#package_conv').val(ui.item.package_conv || 1);
 			temp_price.set(product_price);
 			$('#temp_qty').val(1);
 			temp_total.set(product_price);
@@ -516,25 +521,27 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 	}
 
 
-	function edit_temp(id)
+	function edit_temp(id, package_id)
 	{
 		$.ajax({
 			type: "POST",
 			url: "<?php echo base_url(); ?>Sales/get_edit_temp_sales",
 			dataType: "json",
-			data: {id:id},
+			data: {id:id, package_id:package_id},
 			success : function(data){
 				if (data.code == "200"){
-					console.log(data);
 					var row = data.result[0];
-					$("#product_name").val(row.product_name);
+					let conv = parseInt(row.temp_package_conv) || 1;
+					$("#product_name").val(row.product_code + ' - ' + row.product_name + ' - ' + (row.temp_package_id > 0 && row.package_name ? row.package_name : row.unit_name));
 					$("#product_id").val(row.temp_product_id);
+					$("#package_id").val(row.temp_package_id);
+					$("#package_conv").val(conv);
 					temp_price.set(row.temp_sales_price);
 					$("#temp_qty").val(row.temp_sales_qty);
 					$("#desc_item").val(row.temp_desc_item);
 					temp_discount.set(row.temp_sales_discount);
 					temp_total.set(row.temp_sales_total);
-					$('#curent_stock').val(data.stock[0].stock);
+					$('#curent_stock').val(Math.floor(data.stock[0].stock / conv));
 				}
 			}
 		});  
@@ -551,6 +558,8 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		temp_total.set(0);
 		$('#desc_item').val("");
 		$('#curent_stock').val(0);
+		$('#package_id').val(0);
+		$('#package_conv').val(1);
 		footer_total_discount.set(0);
 		edit_footer_discount_percentage1.set(0);
 		edit_footer_discount_percentage2.set(0);
@@ -572,13 +581,14 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		var temp_discount_val       = parseInt(temp_discount.get());
 		var temp_total_val          = parseInt(temp_total.get());
 		var desc_item               = $("#desc_item").val();
+		var package_id              = $("#package_id").val() || 0;
 
 		if($('#formaddtemp').parsley().validate({force: true})){
 			$.ajax({
 				type: "POST",
 				url: "<?php echo base_url(); ?>Sales/add_temp_sales",
 				dataType: "json",
-				data: {warehouse_id:warehouse_id, product_id:product_id, temp_price_val:temp_price_val, temp_qty:temp_qty, temp_discount_val:temp_discount_val, temp_total_val:temp_total_val, desc_item:desc_item},
+				data: {warehouse_id:warehouse_id, product_id:product_id, temp_price_val:temp_price_val, temp_qty:temp_qty, temp_discount_val:temp_discount_val, temp_total_val:temp_total_val, desc_item:desc_item, package_id:package_id},
 				success : function(data){
 					if (data.code == "200"){
 						let title = 'Tambah Data';
@@ -742,7 +752,7 @@ function check_tempt_data()
 	});
 }
 
-function deletes(id)
+function deletes(id, package_id)
 {
 	Swal.fire({
 		title: 'Konfirmasi?',
@@ -758,7 +768,7 @@ function deletes(id)
 				type: "POST",
 				url: "<?php echo base_url(); ?>Sales/delete_temp_sales",
 				dataType: "json",
-				data: {id:id},
+				data: {id:id, package_id:package_id},
 				success : function(data){
 					if (data.code == "200"){
 						$('#temp-sales-list').DataTable().ajax.reload();

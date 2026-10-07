@@ -109,6 +109,7 @@ function pos_category_icon($name){
 	#pos-cart thead th { background: #f6f8fa; color: #4b5563; font-size: .72rem; text-transform: uppercase; font-weight: 700; padding: 10px 8px; position: sticky; top: 0; z-index: 1; white-space: nowrap; }
 	#pos-cart tbody td { padding: 8px; border-top: 1px solid var(--pos-border); vertical-align: middle; }
 	#pos-cart .cart-name { font-weight: 600; color: var(--pos-text); line-height: 1.2; }
+	.prod-unit { font-size: .7rem; font-weight: 700; color: #0b6b4a; background: #e3f5ee; border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
 	.prod-cost { font-size: .72rem; font-weight: 500; color: #d93025; white-space: nowrap; }
 	#pos-cart .cart-sub { font-size: .72rem; color: var(--pos-muted); }
 	#pos-cart .cart-input { width: 100%; min-width: 50px; text-align: right; border: 1px solid #dfe4ea; border-radius: 6px; padding: 3px 6px; font-size: .82rem; }
@@ -383,9 +384,9 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 			let img = p.image ? '<img src="'+p.image+'" alt="" loading="lazy">' : '<div class="no-img"><i class="fas fa-box"></i></div>';
 			html += '<div class="prod-card'+(stock <= 0 ? ' out' : '')+'" data-index="'+i+'" title="'+escapeHtml(p.product_code)+'">'+
 				'<div class="prod-img">'+img+'</div>'+
-				'<div class="prod-name">'+escapeHtml(p.product_name)+' <span class="prod-cost">Modal: '+rupiah(p.modal)+'</span></div>'+
+				'<div class="prod-name">'+escapeHtml(p.product_name)+' <span class="prod-unit">'+escapeHtml(p.unit_name)+(p.conv > 1 ? ' (isi '+p.conv+')' : '')+'</span> <span class="prod-cost">Modal: '+rupiah(p.modal)+'</span></div>'+
 				'<div class="prod-price">'+rupiah(p.product_price)+'</div>'+
-				'<span class="prod-stock'+(stock <= 5 ? ' low' : '')+'">Stok: '+stock+'</span>'+
+				'<span class="prod-stock'+(stock <= 5 ? ' low' : '')+'">Stok: '+stock+' '+escapeHtml(p.unit_name)+'</span>'+
 				'<span class="prod-add"><i class="fas fa-plus"></i></span>'+
 			'</div>';
 		});
@@ -434,8 +435,14 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		if(term == '') return;
 		clearTimeout(searchTimer);
 		load_products(function(list){
+			// satu kode punya beberapa entri (satuan terkecil + satuan besar): scan memilih satuan terkecil
 			let exact = list.filter(function(p){ return String(p.product_code).toLowerCase() == term.toLowerCase(); });
-			let found = exact.length == 1 ? exact[0] : (list.length == 1 ? list[0] : null);
+			let found = null;
+			if(exact.length > 0){
+				found = exact.find(function(p){ return p.package_id == 0; }) || exact[0];
+			}else if(list.length == 1){
+				found = list[0];
+			}
 			if(found){
 				add_to_cart(found);
 				$('#pos_search').val('');
@@ -468,6 +475,16 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		return cart_subtotal() - cart_discount();
 	}
 
+	// total satuan terkecil produk ini di keranjang, tidak menghitung baris yang dikecualikan
+	function cart_base_used(product_id, except_item)
+	{
+		let used = 0;
+		cart.forEach(function(item){
+			if(item.product_id == product_id && item !== except_item) used += item.qty * item.conv;
+		});
+		return used;
+	}
+
 	function render_cart()
 	{
 		let html = '';
@@ -477,7 +494,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		cart.forEach(function(item, i){
 			html += '<tr>'+
 				'<td>'+(i + 1)+'</td>'+
-				'<td><div class="cart-name">'+escapeHtml(item.product_name)+' <span class="prod-cost">Modal: '+rupiah(item.modal)+'</span></div><div class="cart-sub">Stok: '+item.stock+'</div></td>'+
+				'<td><div class="cart-name">'+escapeHtml(item.product_name)+' <span class="prod-unit">'+escapeHtml(item.unit_name)+(item.conv > 1 ? ' (isi '+item.conv+')' : '')+'</span> <span class="prod-cost">Modal: '+rupiah(item.modal)+'</span></div><div class="cart-sub">Stok: '+Math.floor(item.stock / item.conv)+' '+escapeHtml(item.unit_name)+'</div></td>'+
 				'<td class="text-end text-nowrap">'+rupiah(item.price)+'</td>'+
 				'<td><input type="number" min="1" class="cart-input cart-qty" data-index="'+i+'" value="'+item.qty+'"></td>'+
 				'<td><input type="number" min="0" class="cart-input cart-disc" data-index="'+i+'" value="'+item.discount+'"></td>'+
@@ -510,29 +527,34 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 	function add_to_cart(product)
 	{
 		if(!product) return;
-		let stock = parseInt(product.curent_stock) || 0;
+		let conv = parseInt(product.conv) || 1;
+		let package_id = parseInt(product.package_id) || 0;
+		let base_stock = parseInt(product.base_stock) || 0;
 		let price = parseInt(product.product_price) || 0;
 		if(price <= 0){
 			Swal.fire({ icon: 'warning', title: 'Harga Belum Diatur', text: 'Produk ini belum punya harga '+$('#sales_price_type').val()+'.' });
 			return;
 		}
-		let existing = cart.find(function(item){ return item.product_id == product.id; });
-		let new_qty = existing ? existing.qty + 1 : 1;
-		if(new_qty > stock){
-			Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: 'Sisa stok: '+stock });
+		// satu baris per produk + satuan; stok dihitung gabungan dalam satuan terkecil
+		let existing = cart.find(function(item){ return item.product_id == product.id && item.package_id == package_id; });
+		if(cart_base_used(product.id, null) + conv > base_stock){
+			Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: 'Sisa stok: '+Math.floor(base_stock / conv)+' '+product.unit_name });
 			return;
 		}
 		if(existing){
-			existing.qty = new_qty;
+			existing.qty += 1;
 		}else{
 			cart.push({
 				product_id   : product.id,
 				product_name : product.product_name,
 				modal        : product.modal,
 				price        : price,
+				unit_name    : product.unit_name,
+				package_id   : package_id,
+				conv         : conv,
 				qty          : 1,
 				discount     : 0,
-				stock        : stock
+				stock        : base_stock
 			});
 		}
 		render_cart();
@@ -542,9 +564,10 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		let item = cart[$(this).data('index')];
 		let qty = parseInt($(this).val()) || 1;
 		if(qty < 1) qty = 1;
-		if(qty > item.stock){
-			Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: 'Sisa stok: '+item.stock });
-			qty = item.stock;
+		let max_qty = Math.floor((item.stock - cart_base_used(item.product_id, item)) / item.conv);
+		if(qty > max_qty){
+			Swal.fire({ icon: 'warning', title: 'Stok Tidak Cukup', text: 'Sisa stok: '+item.stock+' '+item.unit_name });
+			qty = max_qty;
 		}
 		item.qty = qty;
 		if(item.discount > item.price * item.qty) item.discount = item.price * item.qty;
@@ -611,7 +634,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		}
 
 		let items = cart.map(function(item){
-			return { product_id: item.product_id, product_name: item.product_name, price: item.price, qty: item.qty, discount: item.discount };
+			return { product_id: item.product_id, product_name: item.product_name, package_id: item.package_id, price: item.price, qty: item.qty, discount: item.discount };
 		});
 
 		saving = true;

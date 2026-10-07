@@ -507,6 +507,37 @@ class masterdata_model extends CI_Model {
         $result = $query->result();
         return $result;
     }
+    public function product_code_used($product_code, $except_product_id)
+    {
+        $row = $this->db->query("select product_id from ms_product where product_code = ? and product_id <> ? and is_active = 'Y' limit 1", array($product_code, $except_product_id))->row_array();
+        return $row != null;
+    }
+
+    // satuan besar (package) produk, misal 1 Ball = 10 Pcs
+    public function package_list($product_id)
+    {
+        return $this->db->query("select * from ms_product_package where product_id = ? and is_active = 'Y' order by package_qty asc", array($product_id))->result_array();
+    }
+
+    public function package_exists($product_id, $package_name, $package_qty)
+    {
+        $row = $this->db->query("select package_id from ms_product_package where product_id = ? and is_active = 'Y' and (lower(package_name) = lower(?) or package_qty = ?)", array($product_id, $package_name, $package_qty))->row_array();
+        return $row != null;
+    }
+
+    public function save_package($data_insert)
+    {
+        $this->db->insert('ms_product_package', $data_insert);
+    }
+
+    public function delete_package($package_id, $product_id)
+    {
+        $this->db->set('is_active', 'N');
+        $this->db->where('package_id', $package_id);
+        $this->db->where('product_id', $product_id);
+        $this->db->update('ms_product_package');
+    }
+
     public function get_product_by_id($product_id)
     {
         $query = $this->db->query("select * from ms_product where product_id  = '".$product_id."' and is_active = 'Y'");

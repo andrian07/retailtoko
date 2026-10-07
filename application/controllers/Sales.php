@@ -201,14 +201,18 @@ class Sales extends CI_Controller {
 			$no = $_POST['start'];
 			foreach ($list as $field) {
 
-				$edit = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn" onclick="edit_temp('.$field['temp_product_id'].')"><i class="fas fa-edit sizing-fa"></i></button> ';
-				$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['temp_product_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
+				$edit = '<button type="button" class="btn btn-icon btn-warning btn-sm mb-2-btn" onclick="edit_temp('.$field['temp_product_id'].', '.(int) $field['temp_package_id'].')"><i class="fas fa-edit sizing-fa"></i></button> ';
+				$delete = '<button type="button" class="btn btn-icon btn-danger delete btn-sm mb-2-btn" onclick="deletes('.$field['temp_product_id'].', '.(int) $field['temp_package_id'].')"><i class="fas fa-trash-alt sizing-fa"></i></button> ';
 
 				$no++;
 				$row = array();
 				$row[] 	= $field['product_code'];
 				$row[] 	= $field['product_name'];
-				$row[] 	= $field['temp_sales_qty'];
+				if($field['temp_package_id'] > 0 && $field['package_name'] != null){
+					$row[] 	= $field['temp_sales_qty'].' '.htmlspecialchars($field['package_name']).' <small class="text-muted">('.($field['temp_sales_qty'] * $field['temp_package_conv']).' '.$field['unit_name'].')</small>';
+				}else{
+					$row[] 	= $field['temp_sales_qty'].' '.$field['unit_name'];
+				}
 				$row[] 	= 'Rp. '.number_format($field['temp_sales_price']);
 				$row[] 	= 'Rp. '.number_format($field['temp_sales_discount']);
 				$row[] 	= 'Rp. '.number_format($field['temp_sales_total']);
@@ -245,10 +249,11 @@ class Sales extends CI_Controller {
 		if (!($keyword == '' || $keyword == NULL)) {
 			$find = $this->global_model->search_product_sales($keyword)->result_array();
 			$find_result = [];
+			$packages = $this->sales_model->packages_by_products(array_column($find, 'product_id'));
 			foreach ($find as $row) {
-				$diplay_text = $row['product_code'].' - '.$row['product_name'].' - '.$row['unit_name'];
 				$product_id = $row['product_id'];
 				$stock = $this->global_model->total_stock_search($product_id)->result_array();
+				$base_stock = (int) $stock[0]['curent_stock'];
 				if($pricetype == 'Umum'){
 					$product_price = $row['product_sell_price_1'];
 				}else if($pricetype == 'Toko'){
@@ -260,15 +265,29 @@ class Sales extends CI_Controller {
 				}else if($pricetype == 'Hulu'){
 					$product_price = $row['product_sell_price_5'];
 				}
+				$modal = ((float) $row['product_hpp_discount'] > 0 ? $row['product_hpp_discount'] : $row['product_hpp']);
 
-				$find_result[] = [
-					'id'                  => $row['product_id'],
-					'value'               => $diplay_text,
-					'product_code'        => $row['product_code'],
-					'product_price'       => $product_price,
-					'label'               =>$diplay_text.'  |  Modal: Rp '.number_format(((float) $row['product_hpp_discount'] > 0 ? $row['product_hpp_discount'] : $row['product_hpp']), 0, ',', '.'),
-					'curent_stock'        => $stock[0]['curent_stock']
-				];
+				// satuan terkecil + satu entri untuk tiap satuan besar (muncul sebagai produk terpisah)
+				$units = [['package_id' => 0, 'name' => $row['unit_name'], 'conv' => 1]];
+				if(isset($packages[$product_id])){
+					foreach($packages[$product_id] as $pk){
+						$units[] = ['package_id' => $pk['id'], 'name' => $pk['name'], 'conv' => $pk['qty']];
+					}
+				}
+				foreach($units as $u){
+					$diplay_text = $row['product_code'].' - '.$row['product_name'].' - '.$u['name'];
+					$find_result[] = [
+						'id'                  => $row['product_id'],
+						'value'               => $diplay_text,
+						'product_code'        => $row['product_code'],
+						'product_price'       => $product_price * $u['conv'],
+						'label'               => $diplay_text.($u['conv'] > 1 ? ' (isi '.$u['conv'].' '.$row['unit_name'].')' : '').'  |  Modal: Rp '.number_format($modal * $u['conv'], 0, ',', '.'),
+						'curent_stock'        => (int) floor($base_stock / $u['conv']),
+						'unit_name'           => $u['name'],
+						'package_id'          => $u['package_id'],
+						'package_conv'        => $u['conv']
+					];
+				}
 			}
 			$result = ['success' => TRUE, 'num_product' => count($find_result), 'data' => $find_result, 'message' => ''];
 		}
@@ -288,7 +307,24 @@ class Sales extends CI_Controller {
 			$temp_discount_val 			= $this->input->post('temp_discount_val');
 			$temp_total_val 			= $this->input->post('temp_total_val');
 			$desc_item 					= $this->input->post('desc_item');
+			$package_id 				= (int) $this->input->post('package_id');
 			$user_id 					= $_SESSION['user_id'];
+
+			// satuan besar: qty & harga yang diinput dalam satuan besar, stok dihitung dalam satuan terkecil
+			$package_conv = 1;
+			if($package_id > 0){
+				$package = $this->sales_model->get_package($product_id, $package_id);
+				if($package == null){
+					$msg = "Satuan Besar Tidak Valid";
+					echo json_encode(['code'=>0, 'result'=>$msg]);die();
+				}
+				$package_conv = (int) $package['package_qty'];
+			}
+
+			if((int) $temp_qty <= 0){
+				$msg = "Qty Harus Lebih Dari 0";
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
 
 			if($temp_price_val == null || $temp_price_val == 0){
 				$msg = "Silahkan Masukan Harga";
@@ -304,26 +340,28 @@ class Sales extends CI_Controller {
 			if($check_stock == null){
 				$msg = "Stock Tidak Ada Di Gudang";
 				echo json_encode(['code'=>0, 'result'=>$msg]);die();
-			}else if($check_stock[0]->stock < $temp_qty)
+			}else if($check_stock[0]->stock < $temp_qty * $package_conv + $this->sales_model->temp_base_qty_other($product_id, $user_id, $package_id))
 			{
 				$msg = "Stock Tidak Cukup";
 				echo json_encode(['code'=>0, 'result'=>$msg]);die();
 			}
 			
 
-			$check_temp_sales_input = $this->sales_model->check_temp_sales_input($product_id, $user_id);
+			$check_temp_sales_input = $this->sales_model->check_temp_sales_input($product_id, $user_id, $package_id);
 			$data_insert = array(
 				'temp_product_id'			=> $product_id,
 				'temp_sales_price'			=> $temp_price_val,
 				'temp_sales_qty'			=> $temp_qty,
 				'temp_sales_discount'		=> $temp_discount_val,
 				'temp_sales_total'			=> $temp_total_val,
+				'temp_package_id'			=> $package_id,
+				'temp_package_conv'			=> $package_conv,
 				'temp_desc_item'			=> $desc_item,
 				'temp_user_id'				=> $user_id
 			);	
 			$msg = 'Success Tambah';
 			if($check_temp_sales_input != null){
-				$this->sales_model->edit_temp_sales($product_id, $user_id, $data_insert);
+				$this->sales_model->edit_temp_sales($product_id, $user_id, $package_id, $data_insert);
 			}else{
 				$this->sales_model->add_temp_sales($data_insert);
 			}
@@ -339,7 +377,8 @@ class Sales extends CI_Controller {
 		$temp_product_id  	   = $this->input->post('id');
 		$warehouse_id  	  	   = 1;
 		$temp_user_id  	  	   = $_SESSION['user_id'];
-		$check_edit_temp_sales = $this->sales_model->check_edit_temp_sales($temp_product_id, $temp_user_id)->result_array();
+		$temp_package_id 	   = (int) $this->input->post('package_id');
+		$check_edit_temp_sales = $this->sales_model->check_edit_temp_sales($temp_product_id, $temp_user_id, $temp_package_id)->result_array();
 		$check_stock  		   = $this->sales_model->check_stock($temp_product_id, $warehouse_id);
 		echo json_encode(['code'=>200, 'result'=>$check_edit_temp_sales, 'stock'=>$check_stock]);
 		die();
@@ -352,7 +391,8 @@ class Sales extends CI_Controller {
 		if($check_auth['check_access'][0]->add == 'Y'){
 			$product_id  = $this->input->post('id');
 			$user_id 	 = $_SESSION['user_id'];
-			$this->sales_model->delete_temp_sales($product_id, $user_id);
+			$package_id  = (int) $this->input->post('package_id');
+			$this->sales_model->delete_temp_sales($product_id, $user_id, $package_id);
 			$msg = 'Success Delete';
 			echo json_encode(['code'=>200, 'result'=>$msg]);
 			die();
@@ -432,9 +472,15 @@ class Sales extends CI_Controller {
 			}
 			$get_temp_sales_check_stock = $this->sales_model->get_temp_sales($user_id)->result_array();
 	
+			// satu produk bisa ada di beberapa baris (satuan berbeda): jumlahkan dalam satuan terkecil
+			$need_by_product = array();
+			foreach($get_temp_sales_check_stock as $row){
+				$pid = $row['temp_product_id'];
+				$need_by_product[$pid] = (isset($need_by_product[$pid]) ? $need_by_product[$pid] : 0) + $row['temp_sales_qty'] * $row['temp_package_conv'];
+			}
 			foreach($get_temp_sales_check_stock as $row){
 				$product_id 			= $row['temp_product_id'];
-				$qty 					= $row['temp_sales_qty'];
+				$qty 					= $need_by_product[$product_id];
 				$product_name 			= $row['product_name'];
 				$get_last_stock_check 	= $this->global_model->get_last_stock($product_id, $warehouse_id);
 				if($get_last_stock_check == null){
@@ -475,20 +521,28 @@ class Sales extends CI_Controller {
 
 			$get_temp_sales = $this->sales_model->get_temp_sales($user_id)->result_array();
 			foreach($get_temp_sales  as $row){
+				// dt_sales_qty & stok selalu dalam satuan terkecil; harga disimpan per satuan terkecil
+				$conv      = max(1, (int) $row['temp_package_conv']);
+				$base_qty  = $row['temp_sales_qty'] * $conv;
 				$data_insert_detail = array(
 					'hd_sales_id'   	     => $save_sales,
 					'dt_sales_product_id'    => $row['temp_product_id'],
-					'dt_sales_price'         => $row['temp_sales_price'],
-					'dt_sales_qty'           => $row['temp_sales_qty'],
+					'dt_sales_price'         => (int) round($row['temp_sales_price'] / $conv),
+					'dt_sales_qty'           => $base_qty,
 					'dt_sales_discount'      => $row['temp_sales_discount'],
 					'dt_sales_total'         => $row['temp_sales_total'],
 					'dt_sales_desc'          => $row['temp_desc_item']
 				);
+				if($row['temp_package_id'] > 0 && $row['package_name'] != null){
+					$data_insert_detail['dt_sales_package_name']  = $row['package_name'];
+					$data_insert_detail['dt_sales_package_conv']  = $conv;
+					$data_insert_detail['dt_sales_package_count'] = $row['temp_sales_qty'];
+				}
 				$save_detail_sales = $this->sales_model->save_detail_sales($data_insert_detail);
 
 	
 					$product_id 	= $row['temp_product_id'];
-					$qty 			= $row['temp_sales_qty'];
+					$qty 			= $base_qty;
 					$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
 
 					$last_stock 	= $get_last_stock[0]->stock;
@@ -640,24 +694,38 @@ class Sales extends CI_Controller {
 
 			$rows = $this->sales_model->pos_products($keyword, $category_id, $sort, $price_no, 1, 60);
 			$products = array();
+			$packages = $this->sales_model->packages_by_products(array_column($rows, 'product_id'));
 			foreach($rows as $row){
 				$image = null;
 				if($row['product_image'] != '' && file_exists(FCPATH.'assets/products/'.$row['product_image'])){
 					$image = base_url().'assets/products/'.$row['product_image'];
 				}
-				// bentuk data sama seperti search_product supaya bisa langsung masuk keranjang
-				$products[] = array(
-					'id'            => $row['product_id'],
-					'value'         => $row['product_code'].' - '.$row['product_name'].' - '.$row['unit_name'],
-					'product_code'  => $row['product_code'],
-					'product_name'  => $row['product_name'],
-					'unit_name'     => $row['unit_name'],
-					'category_name' => $row['category_name'],
-					'image'         => $image,
-					'product_price' => $row['product_sell_price_'.$price_no],
-					'curent_stock'  => $row['stock'],
-					'modal'         => (float) $row['cost'],
-				);
+				// satuan terkecil + satu kartu untuk tiap satuan besar (muncul sebagai produk terpisah)
+				$units = array(array('package_id' => 0, 'name' => $row['unit_name'], 'conv' => 1));
+				if(isset($packages[$row['product_id']])){
+					foreach($packages[$row['product_id']] as $pk){
+						$units[] = array('package_id' => $pk['id'], 'name' => $pk['name'], 'conv' => $pk['qty']);
+					}
+				}
+				foreach($units as $u){
+					// bentuk data sama seperti search_product supaya bisa langsung masuk keranjang
+					$products[] = array(
+						'id'            => $row['product_id'],
+						'value'         => $row['product_code'].' - '.$row['product_name'].' - '.$u['name'],
+						'product_code'  => $row['product_code'],
+						'product_name'  => $row['product_name'],
+						'unit_name'     => $u['name'],
+						'base_unit_name'=> $row['unit_name'],
+						'package_id'    => $u['package_id'],
+						'conv'          => $u['conv'],
+						'category_name' => $row['category_name'],
+						'image'         => $image,
+						'product_price' => $row['product_sell_price_'.$price_no] * $u['conv'],
+						'curent_stock'  => (int) floor($row['stock'] / $u['conv']),
+						'base_stock'    => (int) $row['stock'],
+						'modal'         => (float) $row['cost'] * $u['conv'],
+					);
+				}
 			}
 			echo json_encode(['code'=>200, 'data'=>$products]);
 		}else{
@@ -695,33 +763,54 @@ class Sales extends CI_Controller {
 			// hitung ulang total di server & cek stok
 			$details   = array();
 			$sub_total = 0;
+			$need_by_product = array();
 			foreach($items as $item){
 				$product_id = (int) $item['product_id'];
-				$qty        = (int) $item['qty'];
+				$count      = (int) $item['qty'];
 				$price      = (int) $item['price'];
 				$discount   = (int) $item['discount'];
-				$total      = $price * $qty - $discount;
+				$total      = $price * $count - $discount;
+
+				// satuan besar: qty & harga dari kasir dalam satuan besar, stok dihitung dalam satuan terkecil
+				$package_id   = isset($item['package_id']) ? (int) $item['package_id'] : 0;
+				$package_name = '';
+				$conv         = 1;
+				if($package_id > 0){
+					$package = $this->sales_model->get_package($product_id, $package_id);
+					if($package == null){
+						$msg = 'Satuan Besar Tidak Valid';
+						echo json_encode(['code'=>0, 'result'=>$msg]);die();
+					}
+					$package_name = $package['package_name'];
+					$conv         = (int) $package['package_qty'];
+				}
+				$qty = $count * $conv;
 
 				if($product_id <= 0 || $qty <= 0 || $price <= 0 || $total < 0){
 					$msg = 'Data Item Tidak Valid';
 					echo json_encode(['code'=>0, 'result'=>$msg]);die();
 				}
 
+				// satu produk bisa ada di beberapa baris (satuan berbeda): jumlahkan dalam satuan terkecil
+				$need_by_product[$product_id] = (isset($need_by_product[$product_id]) ? $need_by_product[$product_id] : 0) + $qty;
 				$get_last_stock_check = $this->global_model->get_last_stock($product_id, $warehouse_id);
 				if($get_last_stock_check == null){
 					$msg = "Tidak Ada Stock ".$item['product_name']." Di Gudang";
 					echo json_encode(['code'=>0, 'result'=>$msg]);die();
-				}else if($get_last_stock_check[0]->stock < $qty){
+				}else if($get_last_stock_check[0]->stock < $need_by_product[$product_id]){
 					$msg = "Stock ".$item['product_name']." Tidak Cukup";
 					echo json_encode(['code'=>0, 'result'=>$msg]);die();
 				}
 
 				$details[] = array(
-					'product_id' => $product_id,
-					'price'      => $price,
-					'qty'        => $qty,
-					'discount'   => $discount,
-					'total'      => $total
+					'product_id'   => $product_id,
+					'price'        => (int) round($price / $conv),
+					'qty'          => $qty,
+					'discount'     => $discount,
+					'total'        => $total,
+					'package_name' => $package_name,
+					'package_conv' => $conv,
+					'package_count'=> $package_id > 0 ? $count : 0
 				);
 				$sub_total += $total;
 			}
@@ -780,6 +869,11 @@ class Sales extends CI_Controller {
 					'dt_sales_total'         => $row['total'],
 					'dt_sales_desc'          => ''
 				);
+				if($row['package_count'] > 0){
+					$data_insert_detail['dt_sales_package_name']  = $row['package_name'];
+					$data_insert_detail['dt_sales_package_conv']  = $row['package_conv'];
+					$data_insert_detail['dt_sales_package_count'] = $row['package_count'];
+				}
 				$this->sales_model->save_detail_sales($data_insert_detail);
 
 				$product_id 	= $row['product_id'];
