@@ -1,0 +1,262 @@
+/*
+    Tampilan halaman daftar (list) - dipakai bersama partial
+    application/views/Pages/Layout/list_header.php
+    Kotak cari DataTables dipindah ke area tombol (.list-actions) oleh script di footer.php
+*/
+
+:root {
+    --lp-green: #0f8a5f;
+    --lp-green-dark: #0b6b4a;
+    --lp-green-soft: #e3f5ee;
+    --lp-text: #1f2937;
+    --lp-muted: #6b7280;
+    --lp-border: #edf0f3;
+    --lp-head: #f8fafc;
+}
+
+/* ===== Kartu ===== */
+.list-card {
+    border: 1px solid var(--lp-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px rgba(16, 24, 40, .05) !important;
+    overflow: hidden;
+}
+
+.list-card > .card-header.list-card-header {
+    background: #fff;
+    border-bottom: 1px solid var(--lp-border) !important;
+    padding: 18px 22px !important;
+}
+
+.list-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.list-title { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+.list-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--lp-green-soft);
+    color: var(--lp-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.list-title h3 { margin: 0; font-size: 1.35rem; font-weight: 800; color: var(--lp-text); line-height: 1.2; }
+.list-title p { margin: 2px 0 0; color: var(--lp-muted); font-size: .88rem; }
+
+/* ===== Toolbar kanan: cari + tombol ===== */
+.list-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.list-actions .dataTables_filter { margin: 0; }
+.list-actions .dataTables_filter label { margin: 0; display: block; }
+.list-actions .dataTables_filter input {
+    width: 260px !important;
+    height: 40px !important;
+    margin: 0 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    padding: 0 14px 0 38px !important;
+    font-size: .88rem !important;
+    color: var(--lp-text);
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='16.5' y1='16.5' x2='21' y2='21'/%3E%3C/svg%3E") no-repeat 14px center !important;
+    box-shadow: none !important;
+}
+.list-actions .dataTables_filter input:focus {
+    outline: none;
+    border-color: var(--lp-green) !important;
+    box-shadow: 0 0 0 3px rgba(15, 138, 95, .12) !important;
+}
+
+/* tombol sekunder (Reload, Excel, Filter, dll) = putih bergaris */
+.list-actions > .btn,
+.list-actions > .btn-group > .btn,
+.list-actions > a > .btn {
+    height: 40px;
+    border-radius: 10px !important;
+    padding: 0 16px !important;
+    font-weight: 700 !important;
+    font-size: .88rem !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    background: #fff !important;
+    border: 1px solid #e5e7eb !important;
+    color: var(--lp-text) !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04) !important;
+}
+.list-actions > .btn:hover,
+.list-actions > .btn-group > .btn:hover,
+.list-actions > a > .btn:hover { background: #f8fafc !important; }
+
+.list-actions .btn .btn-label { margin-right: 2px; }
+.list-actions .btn-info i { color: #2563eb; }
+.list-actions .btn-success i { color: #16a34a; }
+.list-actions .btn-warning i { color: #d97706; }
+
+/* tombol utama (Tambah) = hijau */
+.list-actions > .btn-primary,
+.list-actions > a > .btn-primary {
+    background: linear-gradient(135deg, #0f8a5f, #0b6b4a) !important;
+    border-color: #0b6b4a !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(15, 138, 95, .3) !important;
+}
+.list-actions > .btn-primary i { color: #fff !important; }
+.list-actions > .btn-primary:hover,
+.list-actions > a > .btn-primary:hover { background: linear-gradient(135deg, #10a06d, #0b6b4a) !important; }
+.list-actions > .btn-primary:disabled { opacity: .55; }
+
+/* ===== Body & tabel ===== */
+.list-card > .card-body { padding: 10px 12px 14px !important; }
+
+/* dropdown "Show entries" tidak dipakai di desain ini */
+.list-card .dataTables_length { display: none; }
+.list-card .dataTables_wrapper > .row:first-child { margin: 0; }
+
+.list-card .table-responsive { border-radius: 12px; }
+
+.list-card table.table {
+    border: none !important;
+    border-collapse: collapse !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+.list-card table.table > :not(caption) > * > * { box-shadow: none !important; }
+
+.list-card table.table thead th {
+    background: var(--lp-head) !important;
+    color: #374151 !important;
+    font-size: .72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .06em !important;
+    padding: 12px 14px !important;
+    border: none !important;
+    border-bottom: 1px solid var(--lp-border) !important;
+    height: auto !important;
+    white-space: nowrap;
+    vertical-align: middle !important;
+}
+
+/* ikon urut abu-abu, rata tengah vertikal */
+.list-card table.dataTable thead .sorting,
+.list-card table.dataTable thead .sorting_asc,
+.list-card table.dataTable thead .sorting_desc { padding-right: 28px !important; }
+.list-card table.dataTable thead .sorting:before,
+.list-card table.dataTable thead .sorting:after,
+.list-card table.dataTable thead .sorting_asc:before,
+.list-card table.dataTable thead .sorting_asc:after,
+.list-card table.dataTable thead .sorting_desc:before,
+.list-card table.dataTable thead .sorting_desc:after {
+    color: #9ca3af;
+    opacity: .7;
+    bottom: 50% !important;
+    transform: translateY(50%);
+}
+.list-card table.dataTable thead .sorting_asc:before,
+.list-card table.dataTable thead .sorting_desc:after { color: var(--lp-green); opacity: 1; }
+
+.list-card table.table tbody td {
+    padding: 10px 14px !important;
+    font-size: .88rem !important;
+    color: var(--lp-text);
+    border: none !important;
+    border-bottom: 1px solid var(--lp-border) !important;
+    vertical-align: middle !important;
+    height: auto !important;
+    background: #fff !important;
+}
+.list-card table.table tbody tr:last-child td { border-bottom: none !important; }
+.list-card table.table-hover tbody tr:hover td { background: #f6fbf8 !important; }
+
+.list-card table.table tbody td.dataTables_empty { text-align: center; color: var(--lp-muted); padding: 24px !important; }
+
+/* tombol aksi di tabel: kotak kecil berwarna */
+.list-card table.table tbody td .btn-sm.btn-icon,
+.list-card table.table tbody td .btn-icon.btn-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px !important;
+    font-size: .78rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1px 2px !important;
+    color: #fff !important;
+    border: none !important;
+}
+.list-card table.table tbody td .btn-primary { background: #0ea5e9 !important; }
+.list-card table.table tbody td .btn-info    { background: #0ea5e9 !important; }
+.list-card table.table tbody td .btn-warning { background: #3b82f6 !important; }
+.list-card table.table tbody td .btn-danger  { background: #dc2626 !important; }
+.list-card table.table tbody td .btn-success { background: #16a34a !important; }
+.list-card table.table tbody td .btn:disabled { opacity: .45; }
+
+/* ===== Info & pagination ===== */
+.list-card .dataTables_wrapper > .row:last-child { margin: 0; align-items: center; }
+
+.list-card .dataTables_info {
+    padding: 18px 4px 0 !important;
+    font-size: .8rem;
+    color: var(--lp-muted);
+}
+
+.list-card .dataTables_paginate { padding-top: 12px !important; }
+.list-card .dataTables_paginate .pagination { gap: 6px; margin: 0; justify-content: flex-end; }
+
+.list-card .dataTables_paginate .page-item .page-link {
+    min-width: 34px;
+    height: 34px;
+    border-radius: 9px !important;
+    border: 1px solid #e5e7eb !important;
+    background: #fff;
+    color: var(--lp-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .82rem;
+    padding: 0 10px;
+    margin: 0 !important;
+}
+
+.list-card .dataTables_paginate .page-item.active .page-link {
+    background: var(--lp-green) !important;
+    border-color: var(--lp-green) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(15, 138, 95, .3);
+}
+
+.list-card .dataTables_paginate .page-item.disabled .page-link { opacity: .5; }
+
+.list-card .dataTables_paginate .page-item.previous .page-link,
+.list-card .dataTables_paginate .page-item.next .page-link { font-size: 0; }
+.list-card .dataTables_paginate .page-item.previous .page-link::before,
+.list-card .dataTables_paginate .page-item.next .page-link::before {
+    font-family: 'Font Awesome 5 Solid';
+    font-weight: 900;
+    font-size: .75rem;
+    color: #6b7280;
+}
+.list-card .dataTables_paginate .page-item.previous .page-link::before { content: "\f053"; }
+.list-card .dataTables_paginate .page-item.next .page-link::before { content: "\f054"; }
+
+@media (max-width: 767px) {
+    .list-card > .card-header.list-card-header { padding: 14px !important; }
+    .list-icon { width: 44px; height: 44px; font-size: 1.2rem; }
+    .list-title h3 { font-size: 1.15rem; }
+    .list-actions { width: 100%; }
+    .list-actions .dataTables_filter { width: 100%; }
+    .list-actions .dataTables_filter input { width: 100% !important; }
+}

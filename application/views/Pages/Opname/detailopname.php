@@ -1,144 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+<?php
+$this->load->view('Pages/Layout/detail_layout');
+$h = $data['get_header_opname'][0];
 
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/plugins.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/kaiadmin.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/style.css" />
-  <style type="text/css">
-    .title-detail{
-      text-align: right;
-    }
-    .row {
-      --bs-gutter-x: 0 !important;
-    }
-    body{
-      background: #fff;
-    }
+dt_head('Detail Opname', 'Informasi lengkap penyesuaian stok hasil opname.', 'fas fa-clipboard-check', array(
+  array('Cetak', 'fas fa-print', 'print', true),
+));
 
-    .fancybox__content, 
-    .fancybox__iframe,
-    #fancybox__iframe_1_0{
-      height: 518px !important;
-    }
+dt_cards(array(
+  dt_company_card(),
+  array('icon' => 'far fa-calendar-alt', 'html' =>
+    '<div class="lbl">Tanggal Opname</div><div class="val">'.dt_date($h['opname_date']).'</div>'),
+  array('icon' => 'fas fa-file-alt', 'highlight' => true, 'html' =>
+    '<div class="lbl">No. Opname</div><div class="val">'.dt_e($h['opname_code']).'</div>'.
+    '<div class="dt-meta"><div><span class="lbl">Status</span>'.dt_status($h['opname_status']).'</div></div>'),
+));
 
-    .header-details p{
-      line-height: 10px;
-    }
+$rows = array();
+foreach ($data['get_detail_opname'] as $r) {
+  $rows[] = array(dt_e($r['product_code']), dt_e($r['product_name']), dt_num($r['dt_opname_stock_awal']), dt_num($r['dt_opname_stock_akhir']), dt_num($r['dt_opname_stock_difference']), dt_rp($r['dt_opname_stock_difference_hpp']), dt_e($r['dt_opname_note']));
+}
+dt_table(array(array('Kode Produk'), array('Nama Produk'), array('Stok Sebelum'), array('Stok Sesudah'), array('Selisih'), array('Selisih Rupiah'), array('Catatan')), $rows);
 
-    .header-details{
-      padding-top: 15px;
-      padding-left: 1%;
-    }
-  </style>
-</head>
-<body>
-  <div class="row">
-    <div class="col-md-12 header-detail">
-      <h2>Detail Opname</h2>
-    </div>
-  </div>
+dt_bottom(
+  false,
+  array(array('Dibuat', $h['user_name'], dt_date($h['trx_created_at'], 'd-M-Y H:i'))),
+  array(
+    array('Total Selisih', dt_rp($h['opname_total']), 'fas fa-money-bill-wave', 'grand'),
+  ),
+  'Ringkasan Opname'
+);
 
-  <?php foreach($data['get_header_opname'] as $row){ ?>
-    <div class="row header-details">
-      <div class="col-md-4">
-        <p class="detail-company"><b><?php echo company ?> </b></p>
-        <p><?php echo company_address ?></p>
-        <p><?php echo company_phone ?></p>
-      </div>
-      <div class="col-md-4">
-        <p class="detail-invoice"><?php echo $row['opname_code']; ?></p>
-      </div>
-      <div class="col-md-4">
-        <p>Status: 
-          <b>
-            <?php 
-            if($row['opname_status'] == 'Success'){
-              echo '<span class="badge badge-primary">Success</span>';
-            }else{
-              echo '<span class="badge badge-danger">Cancel</span>';
-            }
-            ?>
-          </b>
-        </p>
-        <p>Tanggal: <b><?php $date = date_create($row['opname_date']);  echo date_format($date,"d-M-Y"); ?></b></p>
-      </div>
-    </div>
-  <?php } ?>
-
-  <div class="row">
-    <div class="col-md-12"> 
-      <table class="table table-striped mt-3" style="border:none !important; font-weight:500;">
-        <thead>
-          <tr>
-            <th scope="col">Kode Produk</th>
-            <th scope="col">Nama Produk</th>
-            <th scope="col">Stok Sebelum</th>
-            <th scope="col">Stok Sesudah</th>
-            <th scope="col">Selisih</th>
-            <th scope="col">Selisih Rupiah</th>
-            <th scope="col">Catatan</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach($data['get_detail_opname'] as $row){ ?>
-            <tr>
-              <td><?php echo $row['product_code']; ?></td>
-              <td><?php echo $row['product_name']; ?></td>
-              <td><?php echo number_format($row['dt_opname_stock_awal']); ?></td>
-              <td><?php echo number_format($row['dt_opname_stock_akhir']); ?></td>
-              <td><?php echo number_format($row['dt_opname_stock_difference']); ?></td>
-              <td><?php echo number_format($row['dt_opname_stock_difference_hpp']); ?></td>
-              <td><?php echo $row['dt_opname_note']; ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <p style="margin-left: 15px; font-size: 15px;">Logs:</p>
-  <div class="row">
-    <div class="col-md-4">
-      <table class="table table-hover" style="border:none !important;">
-        <tbody>
-          <?php foreach($data['get_header_opname'] as $row){ ?>
-            <tr>
-              <td scope="col"><b>Action</b></td>
-              <td scope="col"><b>User</b></td>
-              <td scope="col"><b>Created At</b></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Dibuat</b></td>
-              <td scope="col"><b><?php echo $row['user_name']; ?></b></td>
-              <td scope="col"><b><?php $date = date_create($row['created_at']);  echo date_format($date,"d-M-Y"); ?></b></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="col-md-4">
-
-    </div>
-
-    <div class="col-md-4">
-      <table class="table" style="border:none !important; text-align:right;">
-        <tbody>
-          <?php foreach($data['get_header_opname'] as $row){ ?>
-            <tr>
-              <td scope="col"><b>Total: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row['opname_total']); ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</body>
-
-</html>
+dt_foot();

@@ -1,187 +1,44 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+<?php
+$this->load->view('Pages/Layout/detail_layout');
+$h = $data['header_po'][0];
 
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/plugins.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/kaiadmin.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/style.css" />
-  <style type="text/css">
-    .title-detail{
-      text-align: right;
-    }
-    .row {
-      --bs-gutter-x: 0 !important;
-    }
-    body{
-      background: #fff;
-    }
+dt_head('Detail PO', 'Informasi lengkap purchase order.', 'fas fa-file-alt', array(
+  array('Cetak PO', 'fas fa-print', base_url().'Purchase/printpo?id='.$h['hd_po_id'], true),
+));
 
-    .fancybox__content, 
-    .fancybox__iframe,
-    #fancybox__iframe_1_0{
-      height: 518px !important;
-    }
+dt_cards(array(
+  dt_company_card(),
+  array('icon' => 'fas fa-truck', 'html' =>
+    '<div class="lbl">Supplier</div><div class="val">'.dt_e($h['supplier_name']).'</div>'.
+    '<div class="dt-meta"><div><span class="lbl">Golongan</span>'.($h['hd_po_tax'] == 'Y' ? '<span class="dt-badge">BKP</span>' : '<span class="dt-badge danger">NON BKP</span>').'</div>'.
+    '<div><span class="lbl">Metode Bayar</span><span class="val">'.dt_e($h['payment_name']).'</span></div></div>'),
+  array('icon' => 'far fa-calendar-alt', 'html' =>
+    '<div class="lbl">Tanggal</div><div class="val">'.dt_date($h['hd_po_date']).'</div>'.
+    '<div class="lbl mt-1">Jatuh Tempo</div><div class="val">'.dt_date($h['hd_po_due_date']).'</div>'),
+  array('icon' => 'fas fa-file-alt', 'highlight' => true, 'html' =>
+    '<div class="lbl">No. PO</div><div class="val">'.dt_e($h['hd_po_invoice']).'</div>'.
+    '<div class="dt-meta"><div><span class="lbl">Status</span>'.dt_status($h['hd_po_status']).'</div>'.
+    '<div><span class="lbl">Gudang</span><span class="val"><i class="fas fa-warehouse" style="color:#0f8a5f;"></i> '.dt_e($h['warehouse_name']).'</span></div></div>'),
+));
 
-    .header-details p{
-      line-height: 10px;
-    }
+$rows = array();
+foreach ($data['detail_po'] as $r) {
+  $rows[] = array(dt_e($r['product_code']), dt_e($r['product_name']), dt_e($r['unit_name']), dt_rp($r['dt_po_price']), dt_num($r['dt_po_qty']), dt_rp($r['dt_po_total']));
+}
+dt_table(array(array('SKU'), array('Produk'), array('Satuan'), array('Harga Beli'), array('Qty'), array('Total')), $rows);
 
-    .header-details{
-      padding-top: 15px;
-      padding-left: 1%;
-    }
-  </style>
-</head>
-<body>
-  <div class="row">
-    <div class="col-md-12 header-detail">
-      <h2>Detail PO</h2>
-    </div>
-  </div>
+dt_bottom(
+  $h['hd_po_note'],
+  array(array('Dibuat', $h['user_name'], dt_date($h['tanggal_po'], 'd-M-Y H:i'))),
+  array(
+    array('Sub Total', dt_rp($h['hd_po_sub_total']), 'fas fa-coins'),
+    array('Diskon 1 <small>('.dt_e($h['hd_po_disc_percentage1']).'%)</small>', dt_rp($h['hd_po_disc_1']), 'fas fa-tag" style="color:#f59e0b'),
+    array('Diskon 2 <small>('.dt_e($h['hd_po_disc_percentage2']).'%)</small>', dt_rp($h['hd_po_disc_2']), 'fas fa-tag" style="color:#f59e0b'),
+    array('Diskon 3 <small>('.dt_e($h['hd_po_disc_percentage3']).'%)</small>', dt_rp($h['hd_po_disc_3']), 'fas fa-tag" style="color:#f59e0b'),
+    array('DPP', dt_rp($h['hd_po_dpp']), 'fas fa-calculator'),
+    array('PPN 11%', dt_rp($h['hd_po_ppn']), 'fas fa-percent" style="color:#0ea5e9'),
+    array('Grand Total', dt_rp($h['hd_po_grand_total']), 'fas fa-money-bill-wave', 'grand'),
+  )
+);
 
-  <?php foreach($data['header_po'] as $row){ ?>
-    <div class="row header-details">
-      <div class="col-md-4">
-        <p class="detail-company"><b><?php echo company ?> </b></p>
-        <p><?php echo company_address ?></p>
-        <p><?php echo company_phone ?></p>
-      </div>
-      <div class="col-md-4">
-        <p class="detail-invoice"><?php echo $row['hd_po_invoice']; ?></p>
-        <p>Supplier: <b><?php echo $row['supplier_name']; ?></b></p>
-        <p>Golongan: 
-          <b>
-            <?php 
-            if($row['hd_po_tax'] == 'Y'){
-              echo '<span class="badge badge-success">BKP</span>';
-            }else{
-              echo '<span class="badge badge-danger">NON BKP</span>';
-            }
-            ?>
-          </b>
-        </p>
-        <p>Metode Bayar: <b><?php echo $row['payment_name']; ?></b></p>
-      </div>
-      <div class="col-md-4">
-        <p>Status: 
-          <b>
-            <?php 
-            if($row['hd_po_status'] == 'Pending'){
-              echo '<span class="badge badge-primary">Pending</span>';
-            }else if($row['hd_po_status'] == 'Success'){
-              echo '<span class="badge badge-success">Success</span>';
-            }else{
-              echo '<span class="badge badge-danfer">Cancel</span>';
-            }
-            ?>
-          </b>
-        </p>
-        <p>Tanggal: <b><?php $date = date_create($row['hd_po_date']);  echo date_format($date,"d-M-Y"); ?></b></p>
-        <p>Jth Tempo: <b><?php $date_tempo = date_create($row['hd_po_due_date']);  echo date_format($date_tempo,"d-M-Y"); ?></b></p>
-        <p>Gudang: <b><?php echo $row['warehouse_name']; ?></b></p>
-      </div>
-    </div>
-  <?php } ?>
-
-  <div class="row">
-    <div class="col-md-12"> 
-      <table class="table table-striped mt-3" style="border:none !important; font-weight:500;">
-        <thead>
-          <tr>
-            <th scope="col">SKU</th>
-            <th scope="col">produk</th>
-            <th scope="col">Satuan</th>
-            <th scope="col">Harga Beli</th>
-            <th scope="col">Qty</th>
-            <th scope="col">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach($data['detail_po'] as $row){ ?>
-            <tr>
-              <td><?php echo $row['product_code']; ?></td>
-              <td><?php echo $row['product_name']; ?></td>
-              <td><?php echo $row['unit_name']; ?></td>
-              <td><?php echo number_format($row['dt_po_price']); ?></td>
-              <td><?php echo $row['dt_po_qty']; ?></td>
-              <td><?php echo number_format($row['dt_po_total']); ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <p style="margin-left: 15px; font-size: 15px;">Logs:</p>
-  <div class="row">
-    <div class="col-md-4">
-      <table class="table table-hover" style="border:none !important;">
-        <tbody>
-          <?php foreach($data['header_po'] as $row){ ?>
-            <tr>
-              <td scope="col"><b>Action</b></td>
-              <td scope="col"><b>User</b></td>
-              <td scope="col"><b>Created At</b></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Dibuat</b></td>
-              <td scope="col"><b><?php echo $row['user_name']; ?></b></td>
-              <td scope="col"><b><?php $date_created = date_create($row['tanggal_po']);  echo date_format($date,"d-M-Y"); ?></b></td>
-            </tr>
-            <tr>
-              <td style="border-bottom: none;"><b>Catatan:</b></td>
-              <td style="border-bottom: none;"><?php echo $row['hd_po_note']; ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="col-md-4">
-
-    </div>
-
-    <div class="col-md-4">
-      <table class="table" style="border:none !important; text-align:right;">
-        <tbody>
-          <?php foreach($data['header_po'] as $row){ ?>
-            <tr>
-              <td scope="col"><b>Sub Total: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_sub_total']); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Diskon 1: (<?php echo $row['hd_po_disc_percentage1']; ?> %)</b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_disc_1']); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Diskon 2: (<?php echo $row['hd_po_disc_percentage2']; ?> %)</b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_disc_2']); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Diskon 3: (<?php echo $row['hd_po_disc_percentage3']; ?> %)</b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_disc_3']); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>DPP: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_dpp']); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>PPN 11%: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_ppn']); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Grand Total: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row['hd_po_grand_total']); ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</body>
-
-</html>
+dt_foot();

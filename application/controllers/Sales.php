@@ -257,6 +257,8 @@ class Sales extends CI_Controller {
 					$product_price = $row['product_sell_price_3'];
 				}else if($pricetype == 'Khusus'){
 					$product_price = $row['product_sell_price_4'];
+				}else if($pricetype == 'Hulu'){
+					$product_price = $row['product_sell_price_5'];
 				}
 
 				$find_result[] = [
@@ -264,6 +266,7 @@ class Sales extends CI_Controller {
 					'value'               => $diplay_text,
 					'product_code'        => $row['product_code'],
 					'product_price'       => $product_price,
+					'label'               =>$diplay_text.'  |  Modal: Rp '.number_format(((float) $row['product_hpp_discount'] > 0 ? $row['product_hpp_discount'] : $row['product_hpp']), 0, ',', '.'),
 					'curent_stock'        => $stock[0]['curent_stock']
 				];
 			}
@@ -517,7 +520,7 @@ class Sales extends CI_Controller {
 			$this->sales_model->clear_temp_sales($user_id);
 
 			$msg = 'Success Tambah';
-			echo json_encode(['code'=>200, 'result'=>$msg]);
+			echo json_encode(['code'=>200, 'result'=>$msg, 'sales_id'=>$save_sales]);
 		}else{
 			$msg = "No Access";
 			echo json_encode(['code'=>0, 'result'=>$msg]);die();
@@ -603,6 +606,240 @@ class Sales extends CI_Controller {
 	}
 
 	// end sales
+
+
+	// start pos
+
+	public function pos()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$customer_list['customer_list'] = $this->masterdata_model->customer_list();
+			$payment_list['payment_list'] = $this->masterdata_model->payment_list();
+			$category_list['category_list'] = $this->sales_model->pos_categories();
+			$check_auth['check_auth'] = $check_auth;
+			$data['data'] = array_merge($customer_list, $payment_list, $category_list, $check_auth);
+			$this->load->view('Pages/Sales/pos', $data);
+		}else{
+			print_r('Tidak Ada Akses');die();
+		}
+	}
+
+	public function pos_products()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$price_types = array('Umum' => 1, 'Toko' => 2, 'Sales' => 3, 'Khusus' => 4, 'Hulu' => 5);
+			$pricetype   = $this->input->get('pricetype');
+			$price_no    = isset($price_types[$pricetype]) ? $price_types[$pricetype] : 1;
+			$keyword     = $this->input->get('keyword');
+			$category_id = $this->input->get('category');
+			$sort        = $this->input->get('sort');
+
+			$rows = $this->sales_model->pos_products($keyword, $category_id, $sort, $price_no, 1, 60);
+			$products = array();
+			foreach($rows as $row){
+				$image = null;
+				if($row['product_image'] != '' && file_exists(FCPATH.'assets/products/'.$row['product_image'])){
+					$image = base_url().'assets/products/'.$row['product_image'];
+				}
+				// bentuk data sama seperti search_product supaya bisa langsung masuk keranjang
+				$products[] = array(
+					'id'            => $row['product_id'],
+					'value'         => $row['product_code'].' - '.$row['product_name'].' - '.$row['unit_name'],
+					'product_code'  => $row['product_code'],
+					'product_name'  => $row['product_name'],
+					'unit_name'     => $row['unit_name'],
+					'category_name' => $row['category_name'],
+					'image'         => $image,
+					'product_price' => $row['product_sell_price_'.$price_no],
+					'curent_stock'  => $row['stock'],
+					'modal'         => (float) $row['cost'],
+				);
+			}
+			echo json_encode(['code'=>200, 'data'=>$products]);
+		}else{
+			echo json_encode(['code'=>0, 'result'=>'No Access']);
+		}
+	}
+
+	public function save_pos()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->add == 'Y'){
+			$sales_customer = $this->input->post('sales_customer');
+			$sales_payment  = $this->input->post('sales_payment');
+			$items          = json_decode($this->input->post('items'), true);
+			$warehouse_id   = 1;
+			$sales_date     = date('Y-m-d');
+			$user_id        = $_SESSION['user_id'];
+
+			if($sales_customer == null){
+				$msg = 'Silahkan Pilih Customer';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if($sales_payment == null){
+				$msg = 'Silahkan Pilih Metode Bayar';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			if(empty($items) || !is_array($items)){
+				$msg = 'Keranjang Masih Kosong';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			// hitung ulang total di server & cek stok
+			$details   = array();
+			$sub_total = 0;
+			foreach($items as $item){
+				$product_id = (int) $item['product_id'];
+				$qty        = (int) $item['qty'];
+				$price      = (int) $item['price'];
+				$discount   = (int) $item['discount'];
+				$total      = $price * $qty - $discount;
+
+				if($product_id <= 0 || $qty <= 0 || $price <= 0 || $total < 0){
+					$msg = 'Data Item Tidak Valid';
+					echo json_encode(['code'=>0, 'result'=>$msg]);die();
+				}
+
+				$get_last_stock_check = $this->global_model->get_last_stock($product_id, $warehouse_id);
+				if($get_last_stock_check == null){
+					$msg = "Tidak Ada Stock ".$item['product_name']." Di Gudang";
+					echo json_encode(['code'=>0, 'result'=>$msg]);die();
+				}else if($get_last_stock_check[0]->stock < $qty){
+					$msg = "Stock ".$item['product_name']." Tidak Cukup";
+					echo json_encode(['code'=>0, 'result'=>$msg]);die();
+				}
+
+				$details[] = array(
+					'product_id' => $product_id,
+					'price'      => $price,
+					'qty'        => $qty,
+					'discount'   => $discount,
+					'total'      => $total
+				);
+				$sub_total += $total;
+			}
+
+			$get_warehouse_code = $this->masterdata_model->get_warehouse_code($warehouse_id);
+			$warehouse_code     = $get_warehouse_code[0]->warehouse_code;
+			$warehouse_name     = $get_warehouse_code[0]->warehouse_name;
+
+			$get_customer_code = $this->masterdata_model->get_customer_code($sales_customer);
+			$customer_code     = $get_customer_code[0]->customer_code;
+
+			$this->db->trans_start();
+
+			$maxCode  = $this->sales_model->last_sales_inv();
+			$inv_code = 'PJ/'.$customer_code.'/'.$warehouse_code.'/'.date("d/m/Y").'/';
+			if ($maxCode == NULL) {
+				$last_code = $inv_code.'000001';
+			} else {
+				$maxCode   = $maxCode[0]->hd_sales_inv;
+				$last_code = substr($maxCode, -6);
+				$last_code = $inv_code.substr('000000' . strval(floatval($last_code) + 1), -6);
+			}
+
+			// POS selalu lunas: tanpa jatuh tempo, dp, ppn, dan diskon footer
+			$data_insert = array(
+				'hd_sales_inv'            	=> $last_code,
+				'hd_sales_customer'     	=> $sales_customer,
+				'hd_sales_payment'      	=> $sales_payment,
+				'hd_sales_due_date'			=> $sales_date,
+				'hd_sales_date'       		=> $sales_date,
+				'hd_sales_warehouse'      	=> $warehouse_id,
+				'hd_sales_sub_total'      	=> $sub_total,
+				'hd_sales_percentage1'    	=> 0,
+				'hd_sales_percentage2'    	=> 0,
+				'hd_sales_percentage3'    	=> 0,
+				'hd_sales_disc1'        	=> 0,
+				'hd_sales_disc2'        	=> 0,
+				'hd_sales_disc3'        	=> 0,
+				'hd_sales_total_discount'   => 0,
+				'hd_sales_ppn'          	=> 0,
+				'hd_sales_total'        	=> $sub_total,
+				'hd_sales_dp'         		=> $sub_total,
+				'hd_sales_remaining_debt'   => 0,
+				'hd_sales_note'       		=> 'POS',
+				'created_by'            	=> $user_id
+			);
+			$save_sales = $this->sales_model->save_sales($data_insert);
+
+			foreach($details as $row){
+				$data_insert_detail = array(
+					'hd_sales_id'   	     => $save_sales,
+					'dt_sales_product_id'    => $row['product_id'],
+					'dt_sales_price'         => $row['price'],
+					'dt_sales_qty'           => $row['qty'],
+					'dt_sales_discount'      => $row['discount'],
+					'dt_sales_total'         => $row['total'],
+					'dt_sales_desc'          => ''
+				);
+				$this->sales_model->save_detail_sales($data_insert_detail);
+
+				$product_id 	= $row['product_id'];
+				$qty 			= $row['qty'];
+				$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);
+				$last_stock 	= $get_last_stock[0]->stock;
+				$new_stock 		= $last_stock - $qty;
+				$this->global_model->update_stock($product_id, $warehouse_id, $new_stock);
+
+				$movement_stock = array(
+					'stock_movement_product_id'		=> $product_id,
+					'stock_movement_qty'			=> $qty,
+					'stock_movement_before_stock'	=> $last_stock,
+					'stock_movement_new_stock'		=> $new_stock,
+					'stock_movement_desc'			=> 'Penjualan POS',
+					'stock_movement_inv'			=> $last_code,
+					'stock_movement_calculate'		=> 'Minus',
+					'stock_movement_date'			=> $sales_date,
+					'stock_movement_creted_by'		=> $user_id,
+				);
+				$this->global_model->insert_movement_stock($movement_stock);
+			}
+
+			$data_insert_act = array(
+				'activity_table_desc'        => 'Tambah Penjualan POS Cabang '.$warehouse_name.' '.$last_code.'',
+				'activity_table_user'        => $user_id,
+			);
+			$this->global_model->save($data_insert_act);
+
+			$this->db->trans_complete();
+
+			if($this->db->trans_status() === FALSE){
+				$msg = 'Gagal Menyimpan Transaksi';
+				echo json_encode(['code'=>0, 'result'=>$msg]);die();
+			}
+
+			echo json_encode(['code'=>200, 'result'=>'Success Tambah', 'sales_id'=>$save_sales, 'invoice'=>$last_code]);
+		}else{
+			$msg = "No Access";
+			echo json_encode(['code'=>0, 'result'=>$msg]);die();
+		}
+	}
+
+	public function printpos()
+	{
+		$modul = 'Sales';
+		$check_auth = $this->check_auth($modul);
+		if($check_auth['check_access'][0]->view == 'Y'){
+			$hd_sales_id  = $this->input->get('sales_id');
+			$header_sales['header_sales'] = $this->sales_model->header_sales($hd_sales_id);
+			$detail_sales['detail_sales'] = $this->sales_model->detail_sales($hd_sales_id);
+			$pay['pay'] = (int) $this->input->get('pay');
+			$data['data'] = array_merge($header_sales, $detail_sales, $pay);
+			$this->load->view('Pages/Sales/printnotalunas', $data);
+		}else{
+			print_r('Tidak Ada Akses');die();
+		}
+	}
+
+	// end pos
 
 
 	// retur sales

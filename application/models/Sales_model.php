@@ -63,7 +63,7 @@ class sales_model extends CI_Model {
 
      public function header_sales($hd_sales_id)
     {
-        $query = $this->db->query("select * from hd_sales a, ms_warehouse b, ms_customer c, ms_user d, ms_payment e where a.hd_sales_warehouse = b.warehouse_id and a.hd_sales_customer = c.customer_id and a.hd_sales_payment = e.payment_id and a.created_by = d.user_id and hd_sales_id = '".$hd_sales_id."'");
+        $query = $this->db->query("select *, a.created_at as trx_created_at from hd_sales a, ms_warehouse b, ms_customer c, ms_user d, ms_payment e where a.hd_sales_warehouse = b.warehouse_id and a.hd_sales_customer = c.customer_id and a.hd_sales_payment = e.payment_id and a.created_by = d.user_id and hd_sales_id = '".$hd_sales_id."'");
         $result = $query->result();
         return $result;
     }
@@ -84,8 +84,10 @@ class sales_model extends CI_Model {
         $this->db->join('ms_user', 'temp_sales.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_sales.created_at', 'desc');
         $this->db->limit($length);
@@ -103,8 +105,10 @@ class sales_model extends CI_Model {
         $this->db->join('ms_user', 'temp_sales.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_sales.created_at', 'desc');
         $query = $this->db->get();
@@ -198,8 +202,19 @@ class sales_model extends CI_Model {
         return  $insert_id;
     }
 
+    // modal per unit: pakai product_hpp_discount kalau diisi, kalau kosong pakai product_hpp
+    public function get_unit_cost($product_id)
+    {
+        $row = $this->db->query("select coalesce(nullif(product_hpp_discount, 0), product_hpp) as cost from ms_product where product_id = ?", array($product_id))->row_array();
+        return $row ? (float) $row['cost'] : 0;
+    }
+
     public function save_detail_sales($data_insert_detail)
     {
+        // simpan modal & laba saat transaksi: laba = (harga jual - diskon item) - modal x qty
+        $cost = $this->get_unit_cost($data_insert_detail['dt_sales_product_id']);
+        $data_insert_detail['dt_sales_cost']   = $cost;
+        $data_insert_detail['dt_sales_profit'] = $data_insert_detail['dt_sales_total'] - ($data_insert_detail['dt_sales_qty'] * $cost);
         $this->db->insert('dt_sales', $data_insert_detail);
     }
 
@@ -221,8 +236,10 @@ class sales_model extends CI_Model {
         $this->db->join('ms_customer', 'hd_retur_sales.hd_retur_sales_customer_id = ms_customer.customer_id');
         $this->db->join('ms_user', 'hd_retur_sales.created_by = ms_user.user_id');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('hd_retur_sales.hd_retur_sales_inv like "%'.$search.'%"');
             $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_retur_sales.created_at', 'desc');
         $this->db->limit($length);
@@ -238,8 +255,10 @@ class sales_model extends CI_Model {
         $this->db->join('ms_customer', 'hd_retur_sales.hd_retur_sales_customer_id = ms_customer.customer_id');
         $this->db->join('ms_user', 'hd_retur_sales.created_by = ms_user.user_id');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('hd_retur_sales.hd_retur_sales_inv like "%'.$search.'%"');
             $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $query = $this->db->get();
         return $query;
@@ -247,7 +266,7 @@ class sales_model extends CI_Model {
 
      public function header_retur_sales($retur_sales_id)
     {
-        $query = $this->db->query("select * from hd_retur_sales a, ms_customer c, ms_user d where a.hd_retur_sales_customer_id = c.customer_id and a.created_by = d.user_id and hd_retur_sales_id  = '".$retur_sales_id."'");
+        $query = $this->db->query("select *, a.created_at as trx_created_at from hd_retur_sales a, ms_customer c, ms_user d where a.hd_retur_sales_customer_id = c.customer_id and a.created_by = d.user_id and hd_retur_sales_id  = '".$retur_sales_id."'");
         $result = $query->result();
         return $result;
     }
@@ -293,8 +312,10 @@ class sales_model extends CI_Model {
         $this->db->join('ms_user', 'temp_retur_sales.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_retur_sales.created_at', 'desc');
         $this->db->limit($length);
@@ -312,8 +333,10 @@ class sales_model extends CI_Model {
         $this->db->join('ms_user', 'temp_retur_sales.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_retur_sales.created_at', 'desc');
         $query = $this->db->get();
@@ -414,8 +437,49 @@ class sales_model extends CI_Model {
 
     // end retur sales
 
+    // start pos
 
-    
-}   
+    public function pos_categories()
+    {
+        $query = $this->db->query("select a.category_id, a.category_name, count(b.product_id) as total_product from ms_category a left join ms_product b on b.product_category = a.category_id and b.is_active = 'Y' where a.is_active = 'Y' group by a.category_id order by a.category_name");
+        return $query->result_array();
+    }
+
+    public function pos_products($keyword, $category_id, $sort, $price_no, $warehouse_id, $limit)
+    {
+        $price_col = 'a.product_sell_price_'.(in_array($price_no, array(1, 2, 3, 4, 5)) ? $price_no : 1);
+        $sql = "select a.product_id, a.product_code, a.product_name, a.product_image, a.product_sell_price_1, a.product_sell_price_2, a.product_sell_price_3, a.product_sell_price_4, a.product_sell_price_5, coalesce(nullif(a.product_hpp_discount, 0), a.product_hpp) as cost, b.unit_name, c.category_name, coalesce(d.stock, 0) as stock
+                from ms_product a
+                join ms_unit b on a.product_unit = b.unit_id
+                left join ms_category c on a.product_category = c.category_id
+                left join ms_product_stock d on d.product_id = a.product_id and d.warehouse_id = ?
+                where a.is_active = 'Y'";
+        $params = array($warehouse_id);
+
+        if($category_id != null){
+            $sql .= " and a.product_category = ?";
+            $params[] = $category_id;
+        }
+        if($keyword != null){
+            $sql .= " and (a.product_name like ? or a.product_code like ?)";
+            $params[] = '%'.$keyword.'%';
+            $params[] = '%'.$keyword.'%';
+        }
+
+        $order = array(
+            'name'       => 'a.product_name asc',
+            'price_asc'  => $price_col.' asc',
+            'price_desc' => $price_col.' desc',
+            'stock'      => 'stock desc',
+        );
+        $sql .= " order by ".(isset($order[$sort]) ? $order[$sort] : 'a.product_id desc');
+        $sql .= " limit ".(int) $limit;
+
+        return $this->db->query($sql, $params)->result_array();
+    }
+
+    // end pos
+
+}
 
 ?>

@@ -127,6 +127,20 @@ require DOC_ROOT_PATH . $this->config->item('header');
                                 </div>
                               </div>
                             </div>
+
+
+                            <div class="form-group form-inline">
+                              <label for="inlineinput" class="col-md-3 col-form-label">Harga Hulu</label>
+                              <div class="row">
+                                <div class="col-sm-4">
+                                  <input id="item_price_5_percentage" name="item_price_5_percentage" type="text" class="form-control text-right" value="0">
+                                </div>
+
+                                <div class="col-sm-8">
+                                  <input id="item_price_5" name="item_price_5" type="text" class="form-control text-right" value="0">
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
                           <div class="col-md-4 border-right">
@@ -325,6 +339,19 @@ require DOC_ROOT_PATH . $this->config->item('header');
                           <td><?php echo $row->product_disc_percentage; ?> %</td>
                           <td><span class="badge badge-warning"><?php echo number_format($row->product_sell_price_4 - ($row->product_sell_price_4 * $row->product_disc_percentage / 100)); ?></span></td>
                         </tr>
+                        <tr>
+                          <th scope="col" rowspan="2">Hulu</th>
+                          <td>Margin</td>
+                          <td>Hrg.Jual</td>
+                          <td>Diskon(%)</td>
+                          <td>Diskon(Rp)</td>
+                        </tr>
+                        <tr>
+                          <td><?php echo $row->product_sell_percentage_5; ?> %</td>
+                          <td><span class="badge badge-primary"><?php echo number_format($row->product_sell_price_5); ?></span></td>
+                          <td><?php echo $row->product_disc_percentage; ?> %</td>
+                          <td><span class="badge badge-warning"><?php echo number_format($row->product_sell_price_5 - ($row->product_sell_price_5 * $row->product_disc_percentage / 100)); ?></span></td>
+                        </tr>
                       </tbody>
                     </table>
                     <table class="table table-head-bg-info">
@@ -411,6 +438,13 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     decimalPlacesShownOnFocus: 0,
     digitGroupSeparator : '.',
   });
+  let item_price_5 = new AutoNumeric('#item_price_5', {
+    currencySymbol : 'Rp. ',
+    decimalCharacter : ',',
+    decimalPlaces: 0,
+    decimalPlacesShownOnFocus: 0,
+    digitGroupSeparator : '.',
+  });
 
   let item_price_1_percentage = new AutoNumeric('#item_price_1_percentage', {
     suffixText: "%",
@@ -428,6 +462,11 @@ require DOC_ROOT_PATH . $this->config->item('footer');
   });
 
   let item_price_4_percentage = new AutoNumeric('#item_price_4_percentage', {
+    suffixText: "%",
+    decimalPlaces: 0,
+  });
+
+  let item_price_5_percentage = new AutoNumeric('#item_price_5_percentage', {
     suffixText: "%",
     decimalPlaces: 0,
   });
@@ -463,10 +502,12 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     var item_price_2_percentage_val   = item_price_2_percentage.get();
     var item_price_3_percentage_val   = item_price_3_percentage.get();
     var item_price_4_percentage_val   = item_price_4_percentage.get();
+    var item_price_5_percentage_val   = item_price_5_percentage.get();
     var item_price_1_val              = item_price_1.get();
     var item_price_2_val              = item_price_2.get();
     var item_price_3_val              = item_price_3.get();
     var item_price_4_val              = item_price_4.get();
+    var item_price_5_val              = item_price_5.get();
     var disc_percentage_val           = disc_percentage.get();
     var start_disc_val                = $("#start_disc").val();
     var end_disc_val                  = $("#end_disc").val();
@@ -475,7 +516,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       type: "POST",
       url: "<?php echo base_url(); ?>Masterdata/edit_price",
       dataType: "json",
-      data: {item_id:item_id, item_purchase_price_val:item_purchase_price_val, item_hpp_val:item_hpp_val, item_price_1_percentage_val:item_price_1_percentage_val, item_price_2_percentage_val:item_price_2_percentage_val, item_price_3_percentage_val:item_price_3_percentage_val, item_price_4_percentage_val:item_price_4_percentage_val, item_price_1_val:item_price_1_val, item_price_2_val:item_price_2_val, item_price_3_val:item_price_3_val, item_price_4_val:item_price_4_val, disc_percentage_val:disc_percentage_val, start_disc_val:start_disc_val, end_disc_val:end_disc_val},
+      data: {item_id:item_id, item_purchase_price_val:item_purchase_price_val, item_hpp_val:item_hpp_val, item_price_1_percentage_val:item_price_1_percentage_val, item_price_2_percentage_val:item_price_2_percentage_val, item_price_3_percentage_val:item_price_3_percentage_val, item_price_4_percentage_val:item_price_4_percentage_val, item_price_5_percentage_val:item_price_5_percentage_val, item_price_1_val:item_price_1_val, item_price_2_val:item_price_2_val, item_price_3_val:item_price_3_val, item_price_4_val:item_price_4_val, item_price_5_val:item_price_5_val, disc_percentage_val:disc_percentage_val, start_disc_val:start_disc_val, end_disc_val:end_disc_val},
       success : function(data){
         if (data.code == "200"){
           window.location.href = "<?php echo base_url(); ?>Masterdata/settingproduct?id="+item_id;
@@ -515,10 +556,12 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           item_price_2.set(row.product_sell_price_2)
           item_price_3.set(row.product_sell_price_3)
           item_price_4.set(row.product_sell_price_4)
+          item_price_5.set(row.product_sell_price_5)
           item_price_1_percentage.set(row.product_sell_percentage_1)
           item_price_2_percentage.set(row.product_sell_percentage_2)
           item_price_3_percentage.set(row.product_sell_percentage_3)
           item_price_4_percentage.set(row.product_sell_percentage_4)
+          item_price_5_percentage.set(row.product_sell_percentage_5)
           disc_percentage.set(row.product_disc_percentage)
           modal.find('#start_disc').val(row.product_disc_start_date)
           modal.find('#end_disc').val(row.product_disc_end_date)
@@ -561,6 +604,13 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     item_price_4.set(item_price_4_cal);
   })
 
+  $('#item_price_5_percentage').on('input', function (event) {
+    let item_price_5_percentage_cal = parseInt(item_price_5_percentage.get());
+    let item_purchase_price_cal = parseInt(item_purchase_price.get());
+    let item_price_5_cal = (item_purchase_price_cal + (item_purchase_price_cal * item_price_5_percentage_cal / 100));
+    item_price_5.set(item_price_5_cal);
+  })
+
 
 
   $('#item_price_1').on('input', function (event) {
@@ -591,20 +641,30 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     item_price_4_percentage.set(item_price_4_percentage_cal);
   })
 
+  $('#item_price_5').on('input', function (event) {
+    let item_price_5_cal = parseInt(item_price_5.get());
+    let item_purchase_price_cal = parseInt(item_purchase_price.get());
+    let item_price_5_percentage_cal = (item_price_5_cal / item_purchase_price_cal * 100) - 100;
+    item_price_5_percentage.set(item_price_5_percentage_cal);
+  })
+
   $('#item_purchase_price').on('input', function (event) {
     let item_purchase_price_cal = parseInt(item_purchase_price.get());
     let item_price_1_percentage_cal = parseInt(item_price_1_percentage.get());
     let item_price_2_percentage_cal = parseInt(item_price_2_percentage.get());
     let item_price_3_percentage_cal = parseInt(item_price_3_percentage.get());
     let item_price_4_percentage_cal = parseInt(item_price_4_percentage.get());
+    let item_price_5_percentage_cal = parseInt(item_price_5_percentage.get());
     let item_price_1_cal = (item_purchase_price_cal + (item_purchase_price_cal * item_price_1_percentage_cal / 100));
     let item_price_2_cal = (item_purchase_price_cal + (item_purchase_price_cal * item_price_2_percentage_cal / 100));
     let item_price_3_cal = (item_purchase_price_cal + (item_purchase_price_cal * item_price_3_percentage_cal / 100));
     let item_price_4_cal = (item_purchase_price_cal + (item_purchase_price_cal * item_price_4_percentage_cal / 100));
+    let item_price_5_cal = (item_purchase_price_cal + (item_purchase_price_cal * item_price_5_percentage_cal / 100));
     item_price_1.set(item_price_1_cal);
-    item_price_2.set(item_price_1_cal);
-    item_price_3.set(item_price_1_cal);
-    item_price_4.set(item_price_1_cal);
+    item_price_2.set(item_price_2_cal);
+    item_price_3.set(item_price_3_cal);
+    item_price_4.set(item_price_4_cal);
+    item_price_5.set(item_price_5_cal);
   })
   
 

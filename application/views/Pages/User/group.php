@@ -11,13 +11,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-left">
-              <div>
-                <h3 class="fw-bold mb-3">Daftar Group Pengguna</h3>
-              </div>
-              <div class="ms-md-auto py-2 py-md-0">
+        <?php $this->load->view('Pages/Layout/list_header', array(
+          'list_icon'     => 'fas fa-user-shield',
+          'list_title'    => 'Daftar Group Pengguna',
+          'list_subtitle' => 'Kelola group dan hak akses pengguna.',
+        )); ?>
                 <button class="btn btn-info" id="btnreload"><span class="btn-label"><i class="fas fa-sync"></i></span> Reload</button>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"><span class="btn-label"><i class="fa fa-plus"></i></span> Tambah</button>
 
@@ -91,6 +89,19 @@ require DOC_ROOT_PATH . $this->config->item('header');
                           <tbody id="temp">
                           </tbody>
                         </table>
+                        <input type="hidden" id="role_id_acc">
+                        <h6 class="fw-bold mt-3 mb-3">Akses Produk</h6>
+                        <div class="row g-2 listcatalog">
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_price_umum"><span>Harga Umum</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_price_toko"><span>Harga Toko</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_price_sales"><span>Harga Sales</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_price_khusus"><span>Harga Khusus</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_purchase_price"><span>Harga Beli</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_stock"><span>Stok</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_supplier"><span>Supplier</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_item_supplier"><span>Item Supplier</span></label></div>
+                          <div class="col-md-4"><label class="summary-option"><input class="form-check-input" type="checkbox" id="access_status"><span>Status</span></label></div>
+                        </div>
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times-circle"></i> Batal</button>
@@ -202,7 +213,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
               Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: data.msg,
+                text: data.result,
               })
             }
           }
@@ -260,16 +271,17 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 
   $('#btneditacc').click(function(e){
     e.preventDefault();
+    let yn = function(el){ return $(el).is(':checked') ? 'Y' : 'N'; };
     let role_id               =  $('#role_id_acc').val();
-    let access_price_umum     =  $('#access_price_umum').val();
-    let access_price_toko     =  $('#access_price_toko').val();
-    let access_price_sales    =  $('#access_price_sales').val();
-    let access_price_khusus   =  $('#access_price_khusus').val();
-    let access_purchase_price =  $('#access_purchase_price').val();
-    let access_stock          =  $('#access_stock').val();
-    let access_supplier       =  $('#access_supplier').val();
-    let access_item_supplier  =  $('#access_item_supplier').val();
-    let access_status         =  $('#access_status').val();
+    let access_price_umum     =  yn('#access_price_umum');
+    let access_price_toko     =  yn('#access_price_toko');
+    let access_price_sales    =  yn('#access_price_sales');
+    let access_price_khusus   =  yn('#access_price_khusus');
+    let access_purchase_price =  yn('#access_purchase_price');
+    let access_stock          =  yn('#access_stock');
+    let access_supplier       =  yn('#access_supplier');
+    let access_item_supplier  =  yn('#access_item_supplier');
+    let access_status         =  yn('#access_status');
     $.ajax({
       type: "POST",
       url: "<?php echo base_url(); ?>User/edit_acc_product",
@@ -365,7 +377,12 @@ require DOC_ROOT_PATH . $this->config->item('footer');
         }
         document.getElementById("temp").innerHTML = text_temp;
 
+        $('#role_id_acc').val(id);
         let product_access = data.data.get_settting_product;
+        if(product_access.length == 0){
+          $('#exampleModalsetting .listcatalog input').prop('checked', false);
+          return;
+        }
         if(product_access[0].access_umum_price == 'Y'){
           $('#access_price_umum').prop('checked', true);
         }else{

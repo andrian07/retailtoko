@@ -18,6 +18,13 @@ class masterdata_model extends CI_Model {
         $this->db->insert('ms_role_permision_product', $data_product_role);
     }
 
+    public function update_acc_product($data_update, $role_id)
+    {
+        $this->db->set($data_update);
+        $this->db->where('role_id', $role_id);
+        $this->db->update('ms_role_permision_product');
+    }
+
     public function get_settting_product($id)
     {
         $this->db->select('*');
@@ -404,11 +411,11 @@ class masterdata_model extends CI_Model {
         $this->db->join('ms_category', 'ms_product.product_category = ms_category.category_id');
         $this->db->where('ms_product.is_active', 'y');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_supplier_name like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_key like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_desc like "%'.$search.'%"');
+            $this->db->group_end();
         }
         if($supplier_filter != null){
             $this->db->where('ms_product.product_supplier_tag like "%'.$supplier_filter.'%"');
@@ -437,11 +444,11 @@ class masterdata_model extends CI_Model {
         $this->db->join('ms_category', 'ms_product.product_category = ms_category.category_id');
         $this->db->where('ms_product.is_active', 'y');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_supplier_name like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_key like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_desc like "%'.$search.'%"');
+            $this->db->group_end();
         }
         if($supplier_filter != null){
             $this->db->where('ms_product.product_supplier_tag like "%'.$supplier_filter.'%"');
@@ -565,6 +572,20 @@ class masterdata_model extends CI_Model {
 
     // search product //
 
+    // pencarian produk: tiap kata harus cocok di nama / kode / supplier / deskripsi (dikelompokkan supaya filter lain tetap berlaku)
+    private function apply_search_key($searchin_key)
+    {
+        $words = preg_split('/\s+/', trim((string) $searchin_key), -1, PREG_SPLIT_NO_EMPTY);
+        foreach($words as $word){
+            $this->db->group_start();
+            $this->db->like('ms_product.product_name', $word);
+            $this->db->or_like('ms_product.product_code', $word);
+            $this->db->or_like('ms_product.product_supplier_tag', $word);
+            $this->db->or_like('ms_product.product_desc', $word);
+            $this->db->group_end();
+        }
+    }
+
     public function search_product_list($searchin_key, $unit, $category, $brand, $supplier, $status, $paket, $ppn, $sort = 'name_asc', $limit = 50, $offset = 0)
     {
         $this->db->select('*, sum(stock) as total_stock');
@@ -595,13 +616,7 @@ class masterdata_model extends CI_Model {
         if($ppn != null) {
             $this->db->where('ms_product.is_ppn', $ppn);
         }   
-        if($searchin_key != null){
-            $this->db->where('ms_product.product_name like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_code like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_supplier_name like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_key like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_desc like "%'.$searchin_key.'%"');
-        }
+        $this->apply_search_key($searchin_key);
         $sort = strtolower($sort);
         switch($sort) {
             case 'name_desc':
@@ -660,13 +675,7 @@ class masterdata_model extends CI_Model {
         if($ppn != null) {
             $this->db->where('ms_product.is_ppn', $ppn);
         }   
-        if($searchin_key != null){
-            $this->db->where('ms_product.product_name like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_code like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_supplier_name like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_key like "%'.$searchin_key.'%"');
-            $this->db->or_where('ms_product.product_desc like "%'.$searchin_key.'%"');
-        }
+        $this->apply_search_key($searchin_key);
         $query = $this->db->get();
         $result = $query->result_array();
         return $result[0]['total'] ?? 0;

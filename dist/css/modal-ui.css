@@ -1,0 +1,143 @@
+/*
+    Tampilan semua modal (popup) aplikasi.
+    Header modal dilengkapi ikon + subjudul otomatis oleh script di footer.php
+    (bisa diatur manual lewat atribut data-icon / data-subtitle pada elemen .modal).
+*/
+
+.modal-backdrop.show { opacity: .45; }
+
+.modal-content {
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 60px rgba(16, 24, 40, .25) !important;
+    overflow: hidden;
+}
+
+/* ===== Header ===== */
+.modal-header {
+    padding: 18px 22px !important;
+    border-bottom: 1px solid #eef0f3 !important;
+    align-items: center !important;
+}
+
+.modal-header .modal-title {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    color: #1f2937;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.modal-head-main { display: flex; align-items: center; gap: 14px; min-width: 0; }
+
+.modal-head-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #e3f5ee;
+    color: #0f8a5f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.modal-subtitle { margin: 3px 0 0; font-size: .85rem; color: #6b7280; }
+
+.modal-header .btn-close { opacity: .45; box-shadow: none !important; }
+.modal-header .btn-close:hover { opacity: .8; }
+
+/* ===== Body & form ===== */
+.modal-body { padding: 18px 22px 8px !important; }
+
+.modal-body .form-group { padding: 0 0 14px !important; margin: 0 !important; display: block !important; }
+
+/* label bawaan "col-md-3 col-form-label" jadi label biasa di atas input */
+.modal-body .form-group > label,
+.modal-body .col-form-label,
+.modal-body .form-label {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    padding: 0 0 6px !important;
+    margin: 0 !important;
+    font-size: .9rem !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+    text-align: left !important;
+}
+
+.modal-body .form-group > div[class*="col-"] { width: 100% !important; max-width: 100% !important; flex: none !important; padding: 0 !important; }
+
+.modal-body .form-control,
+.modal-body .form-select {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    min-height: 42px;
+    font-size: .92rem !important;
+    padding: 8px 12px !important;
+    background-color: #fff;
+    box-shadow: none !important;
+}
+.modal-body textarea.form-control { min-height: 110px; resize: vertical; }
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+    border-color: #0f8a5f !important;
+    box-shadow: 0 0 0 3px rgba(15, 138, 95, .12) !important;
+}
+.modal-body .form-control::placeholder { color: #9ca3af; }
+.modal-body .form-control[readonly], .modal-body .form-control:disabled { background: #f8fafc; }
+
+.modal-body .select2-container .select2-selection--single { height: 42px !important; border: 1px solid #e5e7eb !important; border-radius: 8px !important; }
+.modal-body .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 40px !important; }
+.modal-body .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px !important; }
+
+/* ===== Footer ===== */
+.modal-footer {
+    padding: 14px 22px !important;
+    border-top: 1px solid #eef0f3 !important;
+    gap: 8px;
+}
+.modal-footer > * { margin: 0 !important; }
+
+.modal-footer .btn {
+    height: 42px;
+    border-radius: 10px !important;
+    padding: 0 20px !important;
+    font-weight: 700 !important;
+    font-size: .92rem !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    box-shadow: none !important;
+}
+.modal-footer .btn i { margin: 0 !important; }
+
+/* Batal / Tutup = abu-abu */
+.modal-footer .btn-danger,
+.modal-footer .btn-secondary {
+    background: #eef1f4 !important;
+    border: 1px solid #eef1f4 !important;
+    color: #374151 !important;
+}
+.modal-footer .btn-danger:hover,
+.modal-footer .btn-secondary:hover { background: #e2e6ea !important; }
+
+/* Simpan / Proses = hijau */
+.modal-footer .btn-primary,
+.modal-footer .btn-success {
+    background: linear-gradient(135deg, #0f8a5f, #0b6b4a) !important;
+    border: 1px solid #0b6b4a !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(15, 138, 95, .28) !important;
+}
+.modal-footer .btn-primary:hover,
+.modal-footer .btn-success:hover { background: linear-gradient(135deg, #10a06d, #0b6b4a) !important; }
+.modal-footer .btn:disabled { opacity: .6; }
+
+@media (max-width: 575px) {
+    .modal-head-icon { width: 42px; height: 42px; font-size: 1.1rem; }
+    .modal-header .modal-title { font-size: 1.05rem !important; }
+}

@@ -11,13 +11,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-left">
-              <div>
-                <h3 class="fw-bold mb-3">Pelunasan Hutang</h3>
-              </div>
-              <div class="ms-md-auto py-2 py-md-0">
+        <?php $this->load->view('Pages/Layout/list_header', array(
+          'list_icon'     => 'fas fa-hand-holding-usd',
+          'list_title'    => 'Pelunasan Hutang',
+          'list_subtitle' => 'Kelola pelunasan hutang ke supplier.',
+        )); ?>
                 <button class="btn btn-info" id="btnreload"><span class="btn-label"><i class="fas fa-sync"></i></span> Reload</button>
               </div>
             </div>

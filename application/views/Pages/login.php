@@ -1,301 +1,231 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="./assets/img/favicon.png">
   <link rel="stylesheet" href="<?php echo base_url();?>dist/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <title>Login – CV. Anugrah Harapan Utama</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Login – <?php echo company; ?></title>
   <style>
     :root {
-      --primary: #842029;
-      --primary-dark: #5a1118;
+      --green: #0f8a5f;
+      --green-dark: #0b6b4a;
+      --green-light: #6ee7b7;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-
     html, body { height: 100%; margin: 0; }
 
     body {
+      font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background: #0b4a36 url('<?php echo base_url(); ?>assets/bg_login.png') no-repeat left bottom / cover;
+      min-height: 100vh;
+    }
+
+    .login-wrap {
       min-height: 100vh;
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden;
-      position: relative;
+      justify-content: space-between;
+      gap: 40px;
+      padding: 36px 7vw 36px 11vw;
     }
 
-    body::before, body::after {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      opacity: 0.08;
-      animation: float 8s ease-in-out infinite;
-    }
-    body::before {
-      width: 500px; height: 500px;
-      background: var(--primary);
-      top: -150px; right: -150px;
-    }
-    body::after {
-      width: 400px; height: 400px;
-      background: #e94560;
-      bottom: -100px; left: -100px;
-      animation-delay: -4s;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50%       { transform: translateY(-30px) scale(1.05); }
-    }
-
-    /* ── Card wrapper ── */
-    .login-wrapper {
-      display: flex;
-      width: 900px;
-      max-width: 96vw;
-      min-height: 520px;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ── Left brand panel ── */
-    .login-brand {
-      flex: 1;
-      background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 36px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .login-brand::before {
-      content: '';
-      position: absolute;
-      width: 300px; height: 300px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50%;
-      top: -80px; right: -80px;
-    }
-    .login-brand::after {
-      content: '';
-      position: absolute;
-      width: 200px; height: 200px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50%;
-      bottom: -60px; left: -60px;
-    }
-    .brand-icon {
-      width: 88px; height: 88px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 24px;
-      border: 2px solid rgba(255,255,255,0.25);
-      position: relative; z-index: 1;
-    }
-    .brand-icon i { font-size: 38px; color: #fff; }
-    .login-brand h2 {
+    /* ===== KIRI: branding ===== */
+    .brand-side {
+      align-self: flex-start;
+      max-width: 540px;
       color: #fff;
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      line-height: 1.3;
-      position: relative; z-index: 1;
-    }
-    .login-brand p {
-      color: rgba(255,255,255,0.75);
-      font-size: 0.9rem;
-      line-height: 1.6;
-      position: relative; z-index: 1;
-    }
-    .brand-badge {
-      margin-top: 32px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50px;
-      padding: 8px 20px;
-      color: rgba(255,255,255,0.9);
-      font-size: 0.78rem;
-      position: relative; z-index: 1;
+      padding-top: 0;
+      text-shadow: 0 2px 10px rgba(0,0,0,.25);
     }
 
-    /* ── Right form panel ── */
-    .login-form-panel {
-      flex: 1;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 52px 48px;
+    .brand-logo { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
+    .logo-box {
+      width: 72px; height: 72px; border-radius: 16px;
+      background: linear-gradient(145deg, #16a870, #0f8a5f);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,.25);
     }
-    .login-form-panel h3 {
-      font-weight: 700;
-      font-size: 1.75rem;
-      color: #1a1a2e;
-      margin-bottom: 6px;
+    .brand-logo b { display: block; font-size: 2.3rem; font-weight: 900; line-height: 1; }
+    .brand-logo span { display: block; font-size: 1.35rem; opacity: .9; }
+
+    .brand-side h1 { font-size: 2.8rem; font-weight: 900; line-height: 1.08; margin: 0 0 16px; }
+    .brand-side h1 em { font-style: normal; color: var(--green-light); display: block; }
+    .brand-side .lead-text { font-size: 1.15rem; line-height: 1.45; opacity: .95; margin-bottom: 20px; max-width: 500px; }
+
+    .features { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 34px; max-width: 500px; }
+    .feature { display: flex; align-items: center; gap: 16px; }
+    .feature-icon {
+      width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+      background: linear-gradient(145deg, #16a870, #0f8a5f);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.45rem; color: #fff;
+      box-shadow: 0 6px 16px rgba(0,0,0,.2);
     }
-    .login-form-panel .subtitle {
-      color: #6c757d;
-      font-size: 0.9rem;
-      margin-bottom: 36px;
+    .feature b { display: block; font-size: 1.1rem; }
+    .feature span { display: block; font-size: 1.05rem; opacity: .88; }
+
+    /* ===== KANAN: kartu login ===== */
+    .login-card {
+      width: 100%; max-width: 560px; min-width: 0;
+      background: rgba(255,255,255,.97);
+      border-radius: 26px;
+      padding: 34px 50px 30px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.18);
+      flex-shrink: 1;
     }
-    .form-label {
-      font-weight: 600;
-      font-size: 0.82rem;
-      color: #495057;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
+
+    .card-logo { text-align: center; margin-bottom: 18px; }
+    .card-logo .logo-box { width: 96px; height: 90px; border-radius: 18px; margin: 0 auto 6px; font-size: 2.6rem; }
+    .card-logo b { display: block; font-size: 2.1rem; font-weight: 900; line-height: 1.05; }
+    .card-logo span { display: block; font-size: 1.15rem; color: var(--muted); }
+
+    .welcome { text-align: center; margin-bottom: 30px; }
+    .welcome h2 { font-size: 1.9rem; font-weight: 800; margin: 0 0 6px; }
+    .welcome p { color: var(--muted); margin: 0; font-size: 1.02rem; }
+
+    .form-label { font-weight: 700; font-size: .98rem; margin-bottom: 8px; }
+    .input-icon { position: relative; margin-bottom: 20px; }
+    .input-icon .lead-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 1.05rem; }
+    .input-icon .form-control {
+      height: 50px; border-radius: 10px; border: 1px solid var(--border);
+      background: #f9fafb; padding-left: 54px; padding-right: 50px; font-size: 1rem;
     }
-    .input-icon-wrap { position: relative; }
-    .input-icon-wrap .field-icon {
-      position: absolute;
-      left: 14px; top: 50%;
-      transform: translateY(-50%);
-      color: #adb5bd;
-      font-size: 15px;
-      pointer-events: none;
-      transition: color 0.2s;
-    }
-    .input-icon-wrap .form-control {
-      padding-left: 42px;
-      height: 48px;
-      border: 1.5px solid #dee2e6;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      transition: border-color 0.25s, box-shadow 0.25s;
-      background: #f8f9fa;
-    }
-    .input-icon-wrap .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(132,32,41,0.12);
-      background: #fff;
-      outline: none;
-    }
-    .input-icon-wrap:focus-within .field-icon { color: var(--primary); }
-    .toggle-password {
-      position: absolute;
-      right: 14px; top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #adb5bd;
-      font-size: 15px;
-      transition: color 0.2s;
-    }
-    .toggle-password:hover { color: var(--primary); }
-    .form-check-input:checked {
-      background-color: var(--primary);
-      border-color: var(--primary);
-    }
-    .form-check-label { font-size: 0.88rem; color: #495057; }
+    .input-icon .form-control:focus { border-color: var(--green); background: #fff; box-shadow: 0 0 0 3px rgba(15,138,95,.15); }
+    .toggle-password { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #4b5563; cursor: pointer; font-size: 1.1rem; }
+    .toggle-password:hover { color: var(--green); }
+
+    .form-row-extra { display: flex; justify-content: space-between; align-items: center; margin: -4px 0 20px; }
+    .form-check-input { width: 1.2em; height: 1.2em; margin-top: .15em; border-color: #9ca3af; }
+    .form-check-input:checked { background-color: var(--green); border-color: var(--green); }
+    .form-check-label { font-weight: 600; margin-left: 4px; }
 
     .btn-login {
-      height: 50px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      box-shadow: 0 4px 18px rgba(132,32,41,0.35);
+      width: 100%; height: 56px; border: none; border-radius: 10px;
+      background: linear-gradient(90deg, #0b6b4a, #0f8a5f);
+      color: #fff; font-size: 1.3rem; font-weight: 800;
+      box-shadow: 0 8px 20px rgba(15,138,95,.3);
+      transition: filter .15s, transform .15s;
     }
-    .btn-login:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(132,32,41,0.45);
-      opacity: 0.95;
-      color: #fff;
-    }
-    .btn-login:active { transform: translateY(0); }
-    .btn-login .spinner-border { width: 1.1rem; height: 1.1rem; border-width: 2px; }
+    .btn-login:hover { filter: brightness(1.08); color: #fff; }
+    .btn-login:active { transform: translateY(1px); }
+    .btn-login:disabled { opacity: .75; }
 
-    .login-footer {
-      text-align: center;
-      font-size: 0.78rem;
-      color: #adb5bd;
-      margin-top: 28px;
-    }
+    .copyright { text-align: center; color: var(--muted); font-size: .9rem; margin: 22px 0 0; }
 
-    @media (max-width: 680px) {
-      .login-brand { display: none; }
-      .login-form-panel { padding: 40px 28px; }
-      .login-wrapper { border-radius: 16px; }
+    /* ===== Responsive ===== */
+    /* layar pendek (laptop 768px): blok kiri diringkas supaya tidak menimpa gambar kasir */
+    @media (max-height: 820px) and (min-width: 992px) {
+      .login-wrap { padding-top: 24px; padding-bottom: 24px; }
+      .brand-logo { margin-bottom: 16px; }
+      .brand-logo .logo-box { width: 54px; height: 54px; font-size: 1.5rem; }
+      .brand-logo b { font-size: 1.8rem; }
+      .brand-logo span { font-size: 1.1rem; }
+      .brand-side h1 { font-size: 2.15rem; margin-bottom: 10px; }
+      .brand-side .lead-text { font-size: 1rem; margin-bottom: 14px; max-width: 440px; }
+      .features { gap: 10px 26px; max-width: 440px; }
+      .feature-icon { width: 44px; height: 44px; font-size: 1.1rem; border-radius: 12px; }
+      .feature b, .feature span { font-size: .95rem; }
+      .login-card { padding-top: 26px; padding-bottom: 22px; }
+      .card-logo .logo-box { width: 78px; height: 72px; font-size: 2.1rem; }
+      .welcome { margin-bottom: 20px; }
+    }
+    @media (max-width: 1280px) {
+      .login-wrap { padding: 32px 4vw; }
+      .brand-side h1 { font-size: 2.5rem; }
+      .login-card { max-width: 480px; padding: 30px 36px; }
+    }
+    @media (max-width: 991px) {
+      body { background-position: 30% bottom; }
+      .login-wrap { justify-content: center; padding: 24px 16px; }
+      .brand-side { display: none; }
+      .login-card { padding: 28px 22px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="login-wrapper">
+  <div class="login-wrap">
 
-    <!-- Left brand panel -->
-    <div class="login-brand">
-      <div class="brand-icon">
-        <i class="fas fa-store"></i>
+    <!-- ===== Kiri ===== -->
+    <div class="brand-side">
+      <div class="brand-logo">
+        <div class="logo-box"><i class="fas fa-cart-shopping"></i></div>
+        <div><b>POS</b><span>Point of Sale</span></div>
       </div>
-      <h2>CV. Anugrah<br>Harapan Utama</h2>
-      <p>Sistem Manajemen Retail</p>
-      <div class="brand-badge">
-        <i class="fas fa-shield-alt"></i>&nbsp;Inventory Stok &amp; System Penjualan
+
+      <h1>Kelola Penjualan<em>Lebih Mudah</em><em>dan Efisien</em></h1>
+      <p class="lead-text">Solusi lengkap untuk mengelola stok, transaksi, pelanggan dan laporan penjualan dalam satu sistem.</p>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon"><i class="fas fa-cube"></i></div>
+          <div><b>Manajemen</b><span>Stok Produk</span></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><i class="fas fa-cart-shopping"></i></div>
+          <div><b>Transaksi</b><span>Lebih Cepat</span></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><i class="fas fa-chart-simple"></i></div>
+          <div><b>Laporan</b><span>Real-time</span></div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"><i class="fas fa-users"></i></div>
+          <div><b>Data Pelanggan</b><span>Terintegrasi</span></div>
+        </div>
       </div>
     </div>
 
-    <!-- Right form panel -->
-    <div class="login-form-panel">
-      <h3>Selamat Datang</h3>
-      <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+    <!-- ===== Kanan: form login ===== -->
+    <div class="login-card">
+      <div class="card-logo">
+        <div class="logo-box"><i class="fas fa-cart-shopping"></i></div>
+        <b>POS</b>
+        <span>Point of Sale</span>
+      </div>
 
-      <form autocomplete="off">
-        <div class="mb-4">
-          <label class="form-label" for="username">Username</label>
-          <div class="input-icon-wrap">
-            <input type="text" class="form-control" id="username"
-                   placeholder="Masukkan username" autocomplete="username">
-            <i class="fas fa-user field-icon"></i>
-          </div>
+      <div class="welcome">
+        <h2>Selamat Datang</h2>
+        <p>Masuk ke akun Anda untuk melanjutkan</p>
+      </div>
+
+      <form id="login-form" autocomplete="on" onsubmit="return false;">
+        <label class="form-label" for="username">Username</label>
+        <div class="input-icon">
+          <i class="fas fa-user lead-icon"></i>
+          <input type="text" class="form-control" id="username" placeholder="Masukkan username" autocomplete="username" autofocus>
         </div>
 
-        <div class="mb-4">
-          <label class="form-label" for="password">Password</label>
-          <div class="input-icon-wrap">
-            <input type="password" class="form-control" id="password"
-                   placeholder="Masukkan password" autocomplete="current-password">
-            <i class="fas fa-lock field-icon"></i>
-            <i class="fas fa-eye toggle-password" id="togglePassword"></i>
-          </div>
+        <label class="form-label" for="password">Password</label>
+        <div class="input-icon">
+          <i class="fas fa-lock lead-icon"></i>
+          <input type="password" class="form-control" id="password" placeholder="Masukkan password" autocomplete="current-password">
+          <i class="fas fa-eye toggle-password" id="togglePassword" title="Tampilkan password"></i>
         </div>
 
-        <div class="d-flex align-items-center justify-content-between mb-4">
-          <div class="form-check mb-0">
+        <div class="form-row-extra">
+          <div class="form-check m-0">
             <input class="form-check-input" type="checkbox" id="remember_me">
             <label class="form-check-label" for="remember_me">Ingat saya</label>
           </div>
         </div>
 
-        <div class="d-grid">
-          <button type="button" id="login" class="btn btn-login">
-            <span id="btn-text"><i class="fas fa-sign-in-alt me-2"></i>Masuk</span>
-            <span id="btn-loading" class="d-none">
-              <span class="spinner-border spinner-border-sm me-2" role="status"></span>Memproses...
-            </span>
-          </button>
-        </div>
+        <button type="submit" class="btn-login" id="login">
+          <span id="btn-text"><i class="fas fa-right-to-bracket me-2"></i>Masuk</span>
+          <span id="btn-loading" class="d-none"><span class="spinner-border spinner-border-sm me-2"></span>Memproses...</span>
+        </button>
       </form>
 
-      <div class="login-footer">
-        &copy; <?php echo date('Y'); ?> All rights reserved.
-      </div>
+      <p class="copyright">&copy; <?php echo date('Y'); ?> POS - Point of Sale. All rights reserved.</p>
     </div>
 
   </div>
@@ -303,15 +233,15 @@
   <script src="<?php echo base_url(); ?>dist/jquery.min.js"></script>
   <script src="<?php echo base_url(); ?>dist/sweetalert2.js"></script>
   <script>
-    // Toggle password visibility
+    // Tampilkan / sembunyikan password
     $('#togglePassword').on('click', function () {
       var isPassword = $('#password').attr('type') === 'password';
       $('#password').attr('type', isPassword ? 'text' : 'password');
       $(this).toggleClass('fa-eye fa-eye-slash');
     });
 
-    // Login submit
-    $('#login').on('click', function (e) {
+    // Proses login
+    $('#login-form').on('submit', function (e) {
       e.preventDefault();
 
       var username = $('#username').val().trim();
@@ -323,7 +253,7 @@
           icon: 'warning',
           title: 'Perhatian',
           text: 'Username dan password tidak boleh kosong.',
-          confirmButtonColor: '#842029'
+          confirmButtonColor: '#0f8a5f'
         });
         return;
       }
@@ -345,7 +275,7 @@
               icon: 'error',
               title: 'Login Gagal',
               text: data.msg,
-              confirmButtonColor: '#842029'
+              confirmButtonColor: '#0f8a5f'
             });
             resetBtn();
           }
@@ -355,7 +285,7 @@
             icon: 'error',
             title: 'Kesalahan Jaringan',
             text: 'Tidak dapat terhubung ke server. Silakan coba lagi.',
-            confirmButtonColor: '#842029'
+            confirmButtonColor: '#0f8a5f'
           });
           resetBtn();
         }
@@ -367,11 +297,6 @@
       $('#btn-loading').addClass('d-none');
       $('#login').prop('disabled', false);
     }
-
-    // Enter key submit
-    $(document).on('keypress', function (e) {
-      if (e.which === 13) { $('#login').trigger('click'); }
-    });
   </script>
 </body>
 </html>

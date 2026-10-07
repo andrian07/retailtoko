@@ -6,7 +6,7 @@
     <style>
         body{
             font-family: "Courier New", monospace;
-            font-size:13px;
+            font-size:11px;
             margin:0;
             padding:0;
         }
@@ -55,9 +55,28 @@
         page-break-after:always;
     }
 
+    /* pengaturan kertas sama dengan nota normal (Sales/printnotanormal):
+       kertas 24.1 x 13.97 cm, konten 21.3 cm ditengahkan (1.4cm kiri/kanan)
+       karena printer dot matrix tidak bisa mencetak sampai tepi kertas */
+    @page{
+        size:24.1cm 13.97cm;
+        margin:0;
+    }
+
+    :root{
+        --print-shift-down:0cm;
+        --print-shift-left:0cm;
+    }
+
     @media print{
-        @page{
-            margin:5mm;
+        html, body{
+            margin:0;
+            padding:0;
+        }
+
+        .container{
+            width:21.3cm;
+            margin:calc(0.3cm + var(--print-shift-down)) 0 0 calc(1.4cm - var(--print-shift-left));
         }
     }
 </style>
@@ -71,10 +90,9 @@
 <table>
     <tr>
         <td width="60%">
-            <b style="font-size:20px;">TOKO PIONIR SUDIRMAN</b><br>
-            JL NUSA INDAH 2 BLOCK D5 NO.10-11<br>
-            PONTIANAK<br>
-            (0561) 731219
+            <b style="font-size:20px;"><?php echo company; ?></b><br>
+            <?php echo company_address; ?><br>
+            <?php echo company_phone; ?>
         </td>
 
         <td width="40%">

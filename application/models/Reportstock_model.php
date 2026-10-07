@@ -56,7 +56,7 @@ class reportstock_model extends CI_Model {
 
     public function get_total_hpp($start_date, $end_date)
     {
-        $sql = "SELECT IFNULL(SUM(ds.dt_sales_qty * p.product_hpp), 0) AS total
+        $sql = "SELECT IFNULL(SUM(ds.dt_sales_qty * ds.dt_sales_cost), 0) AS total
                 FROM dt_sales ds
                 JOIN hd_sales hs ON ds.hd_sales_id = hs.hd_sales_id
                 JOIN ms_product p  ON ds.dt_sales_product_id = p.product_id
@@ -67,7 +67,7 @@ class reportstock_model extends CI_Model {
 
     public function get_total_hpp_retur($start_date, $end_date)
     {
-        $sql = "SELECT IFNULL(SUM(drs.dt_retur_sales_qty * p.product_hpp), 0) AS total
+        $sql = "SELECT IFNULL(SUM(drs.dt_retur_sales_qty * COALESCE(NULLIF(p.product_hpp_discount, 0), p.product_hpp)), 0) AS total
                 FROM dt_retur_sales drs
                 JOIN hd_retur_sales hrs ON drs.hd_retur_sales_id = hrs.hd_retur_sales_id
                 JOIN ms_product p        ON drs.dt_retur_sales_product_id = p.product_id
@@ -81,12 +81,11 @@ class reportstock_model extends CI_Model {
         $sql = "SELECT
                     p.product_code,
                     p.product_name,
-                    p.product_hpp,
+                    COALESCE(NULLIF(p.product_hpp_discount, 0), p.product_hpp) AS product_hpp,
                     IFNULL(SUM(ds.dt_sales_qty), 0)                       AS qty_jual,
                     IFNULL(SUM(ds.dt_sales_total), 0)                     AS total_jual,
-                    IFNULL(SUM(ds.dt_sales_qty * p.product_hpp), 0)       AS total_hpp,
-                    IFNULL(SUM(ds.dt_sales_total), 0)
-                      - IFNULL(SUM(ds.dt_sales_qty * p.product_hpp), 0)   AS laba
+                    IFNULL(SUM(ds.dt_sales_qty * ds.dt_sales_cost), 0)    AS total_hpp,
+                    IFNULL(SUM(ds.dt_sales_profit), 0)                    AS laba
                 FROM dt_sales ds
                 JOIN hd_sales  hs ON ds.hd_sales_id         = hs.hd_sales_id
                 JOIN ms_product p  ON ds.dt_sales_product_id = p.product_id
@@ -96,6 +95,26 @@ class reportstock_model extends CI_Model {
                 ORDER BY laba DESC";
         return $this->db->query($sql, [$start_date, $end_date])->result_array();
     }
+    // total laba per bulan: jumlah laba tiap transaksi (disimpan saat transaksi) dikurangi laba retur
+    public function get_laba_per_bulan($start_date, $end_date)
+    {
+        $sql = "SELECT bulan, SUM(laba) AS laba FROM (
+                    SELECT DATE_FORMAT(hs.hd_sales_date, '%Y-%m') AS bulan, ds.dt_sales_profit AS laba
+                    FROM dt_sales ds
+                    JOIN hd_sales hs ON ds.hd_sales_id = hs.hd_sales_id
+                    WHERE hs.hd_sales_status = 'Success'
+                      AND hs.hd_sales_date BETWEEN ? AND ?
+                    UNION ALL
+                    SELECT DATE_FORMAT(hrs.hd_retur_sales_date, '%Y-%m') AS bulan,
+                           -(drs.dt_retur_sales_total - drs.dt_retur_sales_qty * COALESCE(NULLIF(p.product_hpp_discount, 0), p.product_hpp)) AS laba
+                    FROM dt_retur_sales drs
+                    JOIN hd_retur_sales hrs ON drs.hd_retur_sales_id = hrs.hd_retur_sales_id
+                    JOIN ms_product p       ON drs.dt_retur_sales_product_id = p.product_id
+                    WHERE hrs.hd_retur_sales_status = 'Success'
+                      AND hrs.hd_retur_sales_date BETWEEN ? AND ?
+                ) t
+                GROUP BY bulan
+                ORDER BY bulan";
+        return $this->db->query($sql, [$start_date, $end_date, $start_date, $end_date])->result_array();
+    }
 }
-
-?>

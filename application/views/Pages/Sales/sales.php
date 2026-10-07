@@ -12,13 +12,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
     <div class="row">
 
       <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-left">
-              <div>
-                <h3 class="fw-bold mb-3">Daftar Penjualan</h3>
-              </div>
-              <div class="ms-md-auto py-2 py-md-0">
+        <?php $this->load->view('Pages/Layout/list_header', array(
+          'list_icon'     => 'fas fa-shopping-cart',
+          'list_title'    => 'Daftar Penjualan',
+          'list_subtitle' => 'Daftar transaksi penjualan.',
+        )); ?>
                 <button class="btn btn-info" id="reload"><span class="btn-label"><i class="fas fa-sync"></i></span> Reload</button>
                 <?php if($data['check_auth']['check_access'][0]->add == 'Y'){ ?>
                 <a href="<?php echo base_url(); ?>Sales/addsales"><button class="btn btn-primary"><span class="btn-label"><i class="fa fa-plus"></i></span>Tambah</button></a>
@@ -95,6 +93,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                           <option value="">-- Pilih Jenis Print --</option>
                           <option value="1">Nota</option>
                           <option value="2">Surat Jalan</option>
+                          <option value="3">Struk (Nota Kecil)</option>
                         </select>
 
                         <input type="hidden" id="sales_id" name="sales_id" value="">
@@ -242,6 +241,10 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       let url = '<?php echo base_url(); ?>Sales/printnota?';
       url += '&print_type=' + print_type;
       url += '&sales_id=' + sales_id;
+      if(print_type == '3') {
+        // struk kecil (72mm) memakai printpos
+        url = '<?php echo base_url(); ?>Sales/printpos?sales_id=' + sales_id;
+      }
       window.open(url, '_blank');
     }else{
       Swal.fire({

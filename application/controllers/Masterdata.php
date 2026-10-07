@@ -830,6 +830,9 @@ class Masterdata extends CI_Controller {
 			$product_type 				= $this->input->post('product_type');
 			$product_min_stock			= $this->input->post('product_min_stock');
 			$product_description		= $this->input->post('product_description');
+			$product_hpp_discount		= $this->input->post('product_hpp_discount');
+			$product_hpp_discount		= ($product_hpp_discount === '' || $product_hpp_discount === null) ? null : $product_hpp_discount; // kosong = pakai product_hpp
+			$product_hpp				= (int) $this->input->post('product_hpp');
 			$user_id 					= $_SESSION['user_id'];
 			$product_supplier_id_tag 	= implode(",",$product_supplier);
 
@@ -869,6 +872,8 @@ class Masterdata extends CI_Controller {
 				'is_ppn'					=> $product_tax,
 				'product_min_stock'			=> $product_min_stock,
 				'product_desc'				=> $product_description,
+				'product_hpp'				=> $product_hpp,
+				'product_hpp_discount'		=> $product_hpp_discount,
 				'product_image'				=> $new_image_name
 			);
 
@@ -922,6 +927,9 @@ class Masterdata extends CI_Controller {
 			$product_type 				= $this->input->post('product_type_edit');
 			$product_min_stock			= $this->input->post('product_min_stock_edit');
 			$product_description		= $this->input->post('product_description_edit');
+			$product_hpp_discount		= $this->input->post('product_hpp_discount_edit');
+			$product_hpp_discount		= ($product_hpp_discount === '' || $product_hpp_discount === null) ? null : $product_hpp_discount; // kosong = pakai product_hpp
+			$product_hpp				= (int) $this->input->post('product_hpp_edit');
 			$product_status				= $this->input->post('product_status_edit');
 			$user_id 					= $_SESSION['user_id'];
 			$product_supplier_id_tag 	= implode(",",$product_supplier);
@@ -976,6 +984,8 @@ class Masterdata extends CI_Controller {
 				'is_ppn'					=> $product_tax,
 				'product_min_stock'			=> $product_min_stock,
 				'product_desc'				=> $product_description,
+				'product_hpp'				=> $product_hpp,
+				'product_hpp_discount'		=> $product_hpp_discount,
 				'product_image' 			=> $new_image_name,
 				'product_status'			=> $product_status
 			);	
@@ -1021,10 +1031,12 @@ class Masterdata extends CI_Controller {
 			$item_price_2_percentage_val 	= $this->input->post('item_price_2_percentage_val');
 			$item_price_3_percentage_val	= $this->input->post('item_price_3_percentage_val');
 			$item_price_4_percentage_val 	= $this->input->post('item_price_4_percentage_val');
+			$item_price_5_percentage_val 	= (int) $this->input->post('item_price_5_percentage_val');
 			$item_price_1_val      			= $this->input->post('item_price_1_val');
 			$item_price_2_val  				= $this->input->post('item_price_2_val');
 			$item_price_3_val 				= $this->input->post('item_price_3_val');
 			$item_price_4_val 				= $this->input->post('item_price_4_val');
+			$item_price_5_val 				= (int) $this->input->post('item_price_5_val');
 			$disc_percentage_val 			= $this->input->post('disc_percentage_val');
 			$start_disc_val					= $this->input->post('start_disc_val');
 			$end_disc_val					= $this->input->post('end_disc_val');
@@ -1037,10 +1049,12 @@ class Masterdata extends CI_Controller {
 				'product_sell_percentage_2'	=> $item_price_2_percentage_val,
 				'product_sell_percentage_3'	=> $item_price_3_percentage_val,
 				'product_sell_percentage_4'	=> $item_price_4_percentage_val,
+				'product_sell_percentage_5'	=> $item_price_5_percentage_val,
 				'product_sell_price_1'		=> $item_price_1_val,
 				'product_sell_price_2'		=> $item_price_2_val,
 				'product_sell_price_3'		=> $item_price_3_val,
 				'product_sell_price_4'		=> $item_price_4_val,
+				'product_sell_price_5'		=> $item_price_5_val,
 				'product_disc_percentage'	=> $disc_percentage_val,
 				'product_disc_start_date'	=> $start_disc_val,
 				'product_disc_end_date'		=> $end_disc_val,
@@ -1183,7 +1197,19 @@ class Masterdata extends CI_Controller {
 	if($check_auth['check_access'][0]->add == 'Y'){
 		if(isset($_FILES["file"]["name"])){
 			$path = $_FILES["file"]["tmp_name"];
-			$object = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+			// tampilkan error DB sebagai pesan JSON (bukan halaman error), dan batalkan semua kalau ada yang gagal
+				$this->db->db_debug = FALSE;
+				$this->db->trans_begin();
+				$row = 0;
+				try {
+				$object = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+				$num = function($v){
+					if(is_numeric($v)) return $v + 0;
+					$v = trim(str_ireplace(array('Rp', ' '), '', (string) $v));
+					if(preg_match('/^\d{1,3}(\.\d{3})+(,\d+)?$/', $v)){ $v = str_replace(',', '.', str_replace('.', '', $v)); }
+					$v = preg_replace('/[^0-9.\-]/', '', $v);
+					return is_numeric($v) ? $v + 0 : 0;
+				};
 			foreach($object->getWorksheetIterator() as $worksheet){
 				$highestRow = $worksheet->getHighestRow();
 				$highestColumn = $worksheet->getHighestColumn();
@@ -1197,13 +1223,32 @@ class Masterdata extends CI_Controller {
 					$product_unit = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
 					$product_paket = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
 					$product_ppn = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
-					$product_desc = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+					// kolom "Keterangan" di Excel diisi ke product_hpp_discount
+					$product_hpp_discount = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
 					$product_cogs = $worksheet->getCellByColumnAndRow(10, $row)->getValue();
 					$product_price_umum = $worksheet->getCellByColumnAndRow(11, $row)->getValue();
 					$product_price_toko = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
 					$product_price_sales = $worksheet->getCellByColumnAndRow(13, $row)->getValue();
 					$product_price_khusus = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
 					$stock_awal = $worksheet->getCellByColumnAndRow(15, $row)->getValue();
+					$product_price_hulu = $worksheet->getCellByColumnAndRow(16, $row)->getValue(); // opsional
+
+					// baris kosong dilewati
+					if(trim((string) $product_name) === ''){ continue; }
+
+					$product_cogs         = $num($product_cogs);
+					$product_price_umum   = $num($product_price_umum);
+					$product_price_toko   = $num($product_price_toko);
+					$product_price_sales  = $num($product_price_sales);
+					$product_price_khusus = $num($product_price_khusus);
+					$stock_awal           = $num($stock_awal);
+					$product_price_hulu   = $num($product_price_hulu);
+
+					// kolom enum: nilai kosong / tidak dikenal dianggap Tidak
+					$paket_val = strtoupper(trim((string) $product_paket));
+					$product_paket = in_array($paket_val, array('Y', 'YA', 'YES', '1')) ? 'Y' : 'N';
+					$ppn_val = strtoupper(trim((string) $product_ppn));
+					$product_ppn = in_array($ppn_val, array('PPN', 'Y', 'YA', 'YES', '1')) ? 'PPN' : 'NON PPN';
 
 					if($product_code == null){
 						$product_code = strtoupper(substr($product_name, 0, 3));
@@ -1213,50 +1258,53 @@ class Masterdata extends CI_Controller {
 						$last_code = $product_code;
 					}
 					
-					$check_product_brand = $this->masterdata_model->check_product_brand($product_brand);
-					if(!$check_product_brand){
-						$data_insert_brand = array(
-						'brand_name' => $product_brand
-						);
-						$product_brand_id = $this->masterdata_model->save_brand($data_insert_brand);
-					}else{
-						$product_brand_id = $check_product_brand[0]->brand_id;
-					}
+					// brand selalu ID 1 untuk semua produk hasil import (isi kolom brand di Excel diabaikan)
+					$product_brand_id = 1;
 
 					$check_product_category = $this->masterdata_model->check_product_category($product_category);
 					if(!$check_product_category){
 						$data_insert_category = array(
-						'category_name' => $product_category
+						'category_name' => $product_category,
+						'category_desc' => '',
+						'is_active' => 'Y'
 						);
 						$product_category_id = $this->masterdata_model->save_category($data_insert_category);
 					}else{
 						$product_category_id = $check_product_category[0]->category_id;
 					}
 
+					// satuan selalu DUS untuk semua produk hasil import (isi kolom satuan di Excel diabaikan)
+					$product_unit = 'DUS';
 					$check_product_unit = $this->masterdata_model->check_product_unit($product_unit);
 					if(!$check_product_unit){
 						$data_insert_unit = array(
-						'unit_name' => $product_unit
+						'unit_name' => $product_unit,
+						'is_active' => 'Y'
 						);
 						$product_unit_id = $this->masterdata_model->save_unit($data_insert_unit);
 					}else{
 						$product_unit_id = $check_product_unit[0]->unit_id;
 					}
 
+					// supplier kosong di Excel -> pakai supplier DEMO (dibuat otomatis kalau belum ada)
+					if(trim((string) $product_supplier) === ''){ $product_supplier = 'DEMO'; }
+
 					$check_product_supplier = $this->masterdata_model->check_product_supplier($product_supplier);
 					if(!$check_product_supplier){
 						$data_insert_supplier = array(
 						'supplier_code' => strtoupper(substr($product_supplier, 0, 3)).$this->generateRandomStringproduct(),
-						'supplier_name' => $product_supplier
+						'supplier_name' => $product_supplier,
+						'supplier_address' => '',
+						'supplier_phone' => ''
 						);
 						$product_supplier_id = $this->masterdata_model->save_supplier($data_insert_supplier);
 					}else{
 						$product_supplier_id = $check_product_supplier[0]->supplier_id;
 					}
 
-					if($product_desc == null){
-						$product_desc = ' - ';
-					}	
+					// kosong / bukan angka = NULL, artinya pakai product_hpp
+					$product_hpp_discount = is_numeric($product_hpp_discount) ? $product_hpp_discount : null;
+					$product_desc = ' - ';	
 
 					$insert_product = array(
 						'product_code' => strtoupper($last_code),
@@ -1266,22 +1314,34 @@ class Masterdata extends CI_Controller {
 						'product_category' => strtoupper($product_category_id),
 						'product_supplier_id_tag' => strtoupper($product_supplier_id),
 						'product_supplier_tag' => strtoupper($product_supplier),
-						'is_package' => strtoupper($product_paket),
-						'is_ppn' => strtoupper($product_ppn),
+						'is_package' => $product_paket,
+						'is_ppn' => $product_ppn,
 						'product_desc' => strtoupper($product_desc),
-						'product_price' => strtoupper($product_cogs),
-						'product_hpp' => strtoupper($product_cogs),
-						'product_sell_percentage_1' => strtoupper($product_price_umum / $product_cogs * 100),
-						'product_sell_percentage_2' => strtoupper($product_price_toko / $product_cogs * 100),
-						'product_sell_percentage_3' => strtoupper($product_price_sales / $product_cogs * 100),
-						'product_sell_percentage_4' => strtoupper($product_price_khusus / $product_cogs * 100),
-						'product_sell_price_1' => strtoupper($product_price_umum),
-						'product_sell_price_2' => strtoupper($product_price_toko),
-						'product_sell_price_3' => strtoupper($product_price_sales),
-						'product_sell_price_4' => strtoupper($product_price_khusus)
+						'product_hpp_discount' => $product_hpp_discount,
+						'product_min_stock' => 0,
+						'product_image' => 'default.png',
+						'product_disc_percentage' => 0,
+						'product_disc_start_date' => date('Y-m-d'),
+						'product_disc_end_date' => date('Y-m-d'),
+						'product_price' => $product_cogs,
+						'product_hpp' => $product_cogs,
+						'product_sell_percentage_1' => $product_cogs > 0 ? $product_price_umum / $product_cogs * 100 : 0,
+						'product_sell_percentage_2' => $product_cogs > 0 ? $product_price_toko / $product_cogs * 100 : 0,
+						'product_sell_percentage_3' => $product_cogs > 0 ? $product_price_sales / $product_cogs * 100 : 0,
+						'product_sell_percentage_4' => $product_cogs > 0 ? $product_price_khusus / $product_cogs * 100 : 0,
+						'product_sell_price_1' => $product_price_umum,
+						'product_sell_price_2' => $product_price_toko,
+						'product_sell_price_3' => $product_price_sales,
+						'product_sell_price_4' => $product_price_khusus,
+						'product_sell_percentage_5' => $product_cogs > 0 ? $product_price_hulu / $product_cogs * 100 : 0,
+						'product_sell_price_5' => $product_price_hulu
 					);
 					
 					$product_id = $this->masterdata_model->save_product($insert_product);
+					if(!$product_id){
+						$err = $this->db->error();
+						throw new Exception('Gagal simpan produk '.$product_name.' - '.$err['message']);
+					}
 
 					$insert_supplier = array(
 						'product_id' => $product_id,
@@ -1310,10 +1370,15 @@ class Masterdata extends CI_Controller {
 					$this->global_model->insert_movement_stock($movement_stock);
 				}
 
-				$msg = "Succes Import";
-				echo json_encode(['code'=>200, 'result'=>$msg]);die();
+				$this->db->trans_commit();
+					$msg = "Succes Import";
+					echo json_encode(['code'=>200, 'result'=>$msg]);die();
+				}
+				} catch(\Throwable $e){
+					$this->db->trans_rollback();
+					echo json_encode(['code'=>0, 'result'=>'Import gagal di baris '.$row.': '.$e->getMessage()]);die();
+				}
 			}
-		}
 	}
 }
 
@@ -1352,7 +1417,7 @@ class Masterdata extends CI_Controller {
 			}
 			$insert = array(
 				'payment_name'	       => $payment_name,
-				'payment_rek'	       => $payment_rek,
+				'payment_no_rek'	   => (string) $payment_rek, // tidak wajib, kolom NOT NULL jadi simpan string kosong
 			);
 			$this->masterdata_model->save_payment($insert);
 
@@ -1387,7 +1452,7 @@ class Masterdata extends CI_Controller {
 
 			$update = array(
 				'payment_name'	       => $payment_name,
-				'payment_no_rek'	   => $payment_rek,
+				'payment_no_rek'	   => (string) $payment_rek,
 			);
 
 			$this->masterdata_model->update_payment($update, $payment_id);

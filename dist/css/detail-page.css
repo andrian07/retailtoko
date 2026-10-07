@@ -1,0 +1,106 @@
+/*
+    Tampilan popup detail transaksi (dibuka di iframe fancybox).
+    Dipakai oleh application/views/Pages/Layout/detail_layout.php
+*/
+
+:root {
+    --dt-green: #0f8a5f;
+    --dt-green-dark: #0b6b4a;
+    --dt-green-soft: #e3f5ee;
+    --dt-green-bg: #eef8f4;
+    --dt-text: #1f2937;
+    --dt-muted: #6b7280;
+    --dt-line: #e9edf1;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #fff; }
+body { font-family: 'Public Sans', 'Segoe UI', Arial, sans-serif; color: var(--dt-text); font-size: 14px; }
+
+.dt-wrap { padding: 0 22px 22px; }
+.mt-1 { margin-top: 6px; }
+
+/* ===== Header ===== */
+.dt-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 18px 22px; margin: 0 -22px 18px; border-bottom: 1px solid var(--dt-line);
+}
+.dt-head-title { display: flex; align-items: center; gap: 16px; }
+.dt-head-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--dt-green-soft); color: var(--dt-green); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+.dt-head h2 { margin: 0; font-size: 1.55rem; font-weight: 800; color: #111827; }
+.dt-head p { margin: 2px 0 0; color: var(--dt-muted); font-size: .92rem; }
+.dt-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-right: 34px; }
+.dt-btn {
+    height: 40px; padding: 0 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: .88rem; text-decoration: none; cursor: pointer;
+    background: #f1f6fd; border: 1px solid #d6e3f5; color: #1e3a5f;
+}
+.dt-btn:hover { background: #e5eefb; color: #1e3a5f; }
+.dt-btn.primary { background: linear-gradient(135deg, #0f8a5f, #0b6b4a); border-color: #0b6b4a; color: #fff; box-shadow: 0 4px 12px rgba(15, 138, 95, .25); }
+.dt-btn.primary:hover { filter: brightness(1.08); color: #fff; }
+
+/* ===== Kartu info ===== */
+.dt-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.dt-card { display: flex; gap: 14px; border: 1px solid var(--dt-line); border-radius: 12px; padding: 14px 16px; min-width: 0; background: #fff; }
+.dt-card.highlight { background: var(--dt-green-bg); border-color: #dcefe6; }
+.dt-card-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--dt-green-soft); color: var(--dt-green); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+.dt-card-body { min-width: 0; flex: 1; font-size: .9rem; line-height: 1.45; color: #374151; }
+.dt-card-body .lbl { font-size: .8rem; color: var(--dt-muted); }
+.dt-card-body .val { font-size: 1rem; font-weight: 800; color: #111827; word-break: break-word; }
+.dt-card-body .val.lg { font-size: 1.05rem; }
+.dt-meta { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.dt-meta > div { min-width: 0; }
+.dt-meta .lbl { display: block; }
+.dt-meta .val { font-size: .92rem; }
+
+.dt-badge { display: inline-block; padding: 3px 14px; border-radius: 6px; font-size: .8rem; font-weight: 700; color: #fff; background: var(--dt-green); }
+.dt-badge.danger { background: #dc2626; }
+.dt-badge.warning { background: #f59e0b; }
+.dt-badge.info { background: #0ea5e9; }
+.dt-badge.muted { background: #9ca3af; }
+
+/* ===== Tabel ===== */
+.dt-table-wrap { border: 1px solid var(--dt-line); border-radius: 12px; overflow: auto; margin-bottom: 18px; }
+.dt-table { width: 100%; border-collapse: collapse; }
+.dt-table th { background: var(--dt-green-bg); color: #111827; font-size: .86rem; font-weight: 700; text-align: left; padding: 13px 16px; white-space: nowrap; border-right: 1px solid var(--dt-line); }
+.dt-table td { padding: 12px 16px; font-size: .9rem; border-top: 1px solid var(--dt-line); border-right: 1px solid var(--dt-line); white-space: nowrap; }
+.dt-table th:last-child, .dt-table td:last-child { border-right: none; }
+.dt-table td.num, .dt-table th.num { text-align: right; }
+.dt-table tbody tr:hover td { background: #f9fcfb; }
+.dt-table .dt-empty { text-align: center; color: var(--dt-muted); padding: 24px; }
+
+/* ===== Bagian bawah ===== */
+.dt-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.dt-box { border: 1px solid var(--dt-line); border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; }
+.dt-box:last-child { margin-bottom: 0; }
+.dt-box h6 { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; font-size: .95rem; font-weight: 800; color: #111827; }
+.dt-box h6 i { color: #374151; font-size: 1.05rem; }
+.dt-note { background: #f3f5f7; border-radius: 8px; padding: 12px 14px; min-height: 70px; color: #374151; font-size: .9rem; white-space: pre-wrap; }
+.dt-note.empty { color: #9ca3af; font-style: italic; }
+
+.dt-logs { width: 100%; border-collapse: collapse; border: 1px solid var(--dt-line); border-radius: 8px; overflow: hidden; }
+.dt-logs th { background: #f8fafc; text-align: left; font-size: .84rem; font-weight: 700; padding: 10px 14px; border-right: 1px solid var(--dt-line); }
+.dt-logs td { padding: 10px 14px; font-size: .88rem; border-top: 1px solid var(--dt-line); border-right: 1px solid var(--dt-line); }
+.dt-logs th:last-child, .dt-logs td:last-child { border-right: none; }
+
+.dt-sum-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f1f3f5; font-size: .92rem; }
+.dt-sum-row > span { display: flex; align-items: center; gap: 14px; }
+.dt-sum-row > span i { width: 18px; text-align: center; color: #374151; }
+.dt-sum-row > span small { color: var(--dt-muted); }
+.dt-sum-row b { font-weight: 600; }
+.dt-sum-row.grand { background: var(--dt-green-bg); border-radius: 10px; padding: 12px 14px; margin: 8px -4px; border: none; }
+.dt-sum-row.grand > span { font-size: 1.05rem; font-weight: 800; color: var(--dt-green-dark); }
+.dt-sum-row.grand > span i { color: var(--dt-green); }
+.dt-sum-row.grand b { font-size: 1.3rem; font-weight: 800; color: var(--dt-green-dark); }
+.dt-sum-row.soft { background: #eef4fb; border-radius: 10px; padding: 10px 14px; margin: 6px -4px 0; border: none; font-weight: 700; }
+.dt-sum-row.soft b { font-weight: 800; }
+.dt-sum-row:last-child { border-bottom: none; }
+
+@media (max-width: 860px) {
+    .dt-bottom { grid-template-columns: 1fr; }
+    .dt-actions { margin-right: 0; }
+}
+@media print {
+    .dt-actions { display: none; }
+    .dt-head { margin-top: 0; }
+}

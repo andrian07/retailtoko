@@ -18,15 +18,15 @@ require DOC_ROOT_PATH . $this->config->item('header');
     align-items: center;
     gap: 8px;
   }
-  .po-section-title i { color: #0d6efd; font-size: 0.9rem; }
+  .po-section-title i { color: #0f8a5f; font-size: 0.9rem; }
   .card.po-header-card, .card.po-detail-card { border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.07); border-radius: 12px; }
   .card.po-header-card .card-body, .card.po-detail-card .card-body { padding: 24px 28px; }
   .po-field-group { margin-bottom: 12px; }
   .po-field-group label { font-size: 0.78rem; font-weight:600; color:#495057; margin-bottom:6px; display:block; }
   .po-field-group .form-control { border-radius:8px; }
   .input-temp-wrapper-po {
-    background: linear-gradient(135deg, #f0f7ff 0%, #f8fbff 100%);
-    border: 1.5px dashed #90c0f8;
+    background: linear-gradient(135deg, #f0faf5 0%, #f6fcf9 100%);
+    border: 1.5px dashed #9fd9bf;
     border-radius: 10px;
     padding: 18px 20px 8px 20px;
     margin-bottom: 20px;
@@ -37,12 +37,12 @@ require DOC_ROOT_PATH . $this->config->item('header');
   .po-summary-card .summary-row:last-child { border-bottom:none; }
   .po-summary-card .summary-row .summary-label { color:#6c757d; font-weight:600; }
   .po-summary-card .summary-row .summary-input { background:#fff; border:1px solid #ced4da; border-radius:6px; color:#343a40; text-align:right; font-weight:600; width:170px; padding:4px 10px; }
-  .po-summary-card .summary-row.grand-total-row .summary-input { font-size:1rem; background:#e9ecef; border-color:#adb5bd; color:#0d6efd; }
+  .po-summary-card .summary-row.grand-total-row .summary-input { font-size:1rem; background:#e9ecef; border-color:#adb5bd; color:#0f8a5f; }
   .po-page-title-bar { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
-  .po-page-title-bar .title-icon { width:42px; height:42px; background:linear-gradient(135deg,#0d6efd,#0a58ca); border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.1rem; }
+  .po-page-title-bar .title-icon { width:42px; height:42px; background:linear-gradient(135deg,#0f8a5f,#0b6b4a); border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.1rem; }
   .po-page-title-bar h3 { margin:0; font-size:1.25rem; font-weight:700; color:#2d3748; }
-  .supplier-highlight-po { border-left:4px solid #0d6efd; padding-left:12px; }
-  #temp-retur-purchase-list thead th { background:#0d6efd; color:#fff; font-size:0.78rem; text-transform:uppercase; }
+  .supplier-highlight-po { border-left:4px solid #0f8a5f; padding-left:12px; }
+  #temp-retur-purchase-list thead th { background:#0f8a5f; color:#fff; font-size:0.78rem; text-transform:uppercase; }
 </style>
 
 <div class="container">
@@ -461,7 +461,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       text: "Apakah Anda Yakin Menghapus Data ?",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
+      confirmButtonColor: '#0f8a5f',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Hapus'
     }).then((result) => {

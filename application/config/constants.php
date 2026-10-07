@@ -86,5 +86,5 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 
 
 define('company', 'CV. Anugrah Harapan Utama');
-define('company_address', 'Jl. Nusa Indah 2');
-define('company_phone', '0561-731219');
+define('company_address', 'Jl. Pahlawan Komp. Ruko Flamboyan (samping hasil panen)');
+define('company_phone', '0858 4986 0554');

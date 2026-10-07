@@ -1,423 +1,291 @@
-<?php 
+<?php
 define('DOC_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 require DOC_ROOT_PATH . $this->config->item('header');
 ?>
 </div>
+<link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/form-page.css?v=<?php echo @filemtime(FCPATH.'dist/css/form-page.css'); ?>">
 
-<style>
-	/* ===== Page Layout ===== */
-	.sales-page-wrapper { background: #f0f4f8; min-height: 100vh; padding-bottom: 40px; }
-	.page-title-bar { margin-top: 84px; background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%); color: #fff; padding: 18px 28px; border-radius: 12px; margin-bottom: 22px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 15px rgba(30,58,95,0.25); }
-	.page-title-bar i { font-size: 1.8rem; opacity: .9; }
-	.page-title-bar h4 { margin: 0; font-weight: 700; font-size: 1.25rem; letter-spacing: .3px; }
-	.page-title-bar small { opacity: .75; font-size: .8rem; }
+<div class="container">
+<div class="page-inner fp-page">
 
-	/* ===== Cards ===== */
-	.sales-card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); margin-bottom: 20px; overflow: visible; }
-	.sales-card .card-header { border-radius: 12px 12px 0 0 !important; padding: 12px 20px; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .95rem; border-bottom: none; }
-	.sales-card .card-header i { font-size: 1rem; }
-	.sales-card .card-body { padding: 20px 24px; }
-	.header-blue  { background: linear-gradient(135deg, #1e3a5f, #2d6a9f); color: #fff; }
-	.header-teal  { background: linear-gradient(135deg, #0f766e, #0d9488); color: #fff; }
-	.header-amber { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
-
-	/* ===== Priority Badges ===== */
-	.priority-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #1e3a5f; color: #fff; font-size: .7rem; font-weight: 700; margin-right: 5px; flex-shrink: 0; vertical-align: middle; }
-	.section-pill { border-radius: 8px; padding: 4px 12px; font-size: .75rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 14px; }
-	.pill-required { background: #dbeafe; color: #1d4ed8; }
-	.pill-auto    { background: #dcfce7; color: #15803d; }
-	.info-divider { border-right: 2px dashed #e5e7eb; }
-	.auto-input-wrap .form-control-custom[readonly] { background: #f0fdf4; color: #374151; border-color: #bbf7d0; }
-	.field-required-star::after { content: " *"; color: #dc2626; }
-
-	/* ===== Form Styling ===== */
-	.form-label-custom { font-size: .82rem; font-weight: 600; color: #374151; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: .4px; }
-	.form-control-custom { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 8px 12px; font-size: .9rem; transition: border-color .2s, box-shadow .2s; background: #fff; }
-	.form-control-custom:focus { border-color: #2d6a9f; box-shadow: 0 0 0 3px rgba(45,106,159,.12); outline: none; }
-	.form-control-custom[readonly] { background: #f8fafc; color: #6b7280; }
-	.select2-container .select2-selection--single { height: 40px !important; border: 1.5px solid #e5e7eb !important; border-radius: 8px !important; }
-	.select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 38px !important; font-size: .9rem; }
-	.select2-container--default .select2-selection--single .select2-selection__arrow { height: 38px !important; }
-	.input-group-text-custom { background: #f1f5f9; border: 1.5px solid #e5e7eb; border-right: none; border-radius: 8px 0 0 8px; padding: 8px 12px; color: #6b7280; font-size: .85rem; }
-
-	/* ===== Product Input Panel ===== */
-	.product-input-panel { background: linear-gradient(135deg, #f8fafc, #eef2ff); border: 1.5px dashed #93c5fd; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
-
-	/* ===== Table ===== */
-	#temp-sales-list thead th { background: #1e3a5f; color: #fff; font-size: .82rem; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; border: none; padding: 10px 12px; }
-	#temp-sales-list tbody tr:hover { background: #eff6ff; }
-	#temp-sales-list tbody td { vertical-align: middle; font-size: .88rem; padding: 9px 12px; border-color: #e5e7eb; }
-
-	/* ===== Summary Card ===== */
-	.summary-card { background: #fff; border-radius: 12px; border: none; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-	.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f3f4f6; }
-	.summary-row:last-child { border-bottom: none; }
-	.summary-label { color: #6b7280; font-size: .88rem; font-weight: 500; }
-	.summary-value input { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 6px 10px; font-size: .88rem; text-align: right; background: #f8fafc; width: 160px; }
-	.summary-value input:focus { border-color: #2d6a9f; outline: none; box-shadow: 0 0 0 3px rgba(45,106,159,.12); }
-	.summary-grand { background: linear-gradient(135deg, #1e3a5f, #2d6a9f); border-radius: 10px; padding: 12px 16px; margin: 10px 0; }
-	.summary-grand .summary-label { color: #bfdbfe; font-weight: 600; }
-	.summary-grand input { background: transparent; border: 1.5px solid rgba(255,255,255,.35) !important; color: #fff; font-size: 1.05rem; font-weight: 700; }
-	.ppn-row { align-items: center; gap: 8px; }
-	.ppn-check { width: 20px; height: 20px; accent-color: #2d6a9f; cursor: pointer; }
-
-	/* ===== Dropship card ===== */
-	#dropship-container .card { border: 1.5px dashed #f97316; border-radius: 12px; }
-	#dropship-container .card-header { background: linear-gradient(135deg, #c2410c, #ea580c); color: #fff; border-radius: 10px 10px 0 0; font-weight: 600; }
-
-	/* ===== Buttons ===== */
-	.btn-save-main { background: linear-gradient(135deg, #059669, #10b981); color: #fff; border: none; border-radius: 10px; padding: 10px 28px; font-weight: 600; font-size: .95rem; transition: all .2s; }
-	.btn-save-main:hover { background: linear-gradient(135deg, #047857, #059669); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,.3); }
-	.btn-cancel-main { background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 10px; padding: 10px 28px; font-weight: 600; font-size: .95rem; transition: all .2s; }
-	.btn-cancel-main:hover { background: #dc2626; color: #fff; transform: translateY(-1px); }
-	.btn-add-item { background: linear-gradient(135deg, #1e3a5f, #2d6a9f); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-weight: 600; font-size: .88rem; white-space: nowrap; }
-	.btn-add-item:hover { background: linear-gradient(135deg, #1e3a5f, #1d4ed8); color: #fff; }
-
-	/* ===== Modal ===== */
-	.modal-header-disc { background: linear-gradient(135deg, #1e3a5f, #2d6a9f); color: #fff; border-radius: 10px 10px 0 0; }
-	.modal-header-disc .btn-close { filter: invert(1); }
-	.disc-group-label { font-size: .78rem; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
-	.disc-badge { background: #eff6ff; color: #1d4ed8; border-radius: 6px; padding: 3px 8px; font-size: .75rem; font-weight: 600; }
-
-	/* Hidden inputs */
-	#sales_id, #sales_order_id, #sales_rate_customer, #hd_sales_type, #product_id { display: none; }
-</style>
-
-<div class="sales-page-wrapper">
-<div class="container-fluid px-4">
-
-	<!-- Page Title -->
-	<div class="page-title-bar">
-		<i class="fas fa-shopping-cart"></i>
-		<div>
-			<h4>Tambah Penjualan</h4>
-			<small>Buat transaksi penjualan baru</small>
+	<!-- ===== Judul ===== -->
+	<div class="fp-hero">
+		<div class="fp-hero-title">
+			<div class="fp-hero-icon"><i class="fas fa-shopping-cart"></i></div>
+			<div>
+				<h3>Tambah Penjualan</h3>
+				<p>Buat transaksi penjualan baru dengan mudah dan cepat.</p>
+			</div>
+		</div>
+		<div class="fp-breadcrumb">
+			<a href="<?php echo base_url(); ?>Dashboard"><i class="fas fa-home"></i></a>
+			<i class="fas fa-chevron-right sep"></i>
+			<a href="<?php echo base_url(); ?>Sales/salespage">Penjualan</a>
+			<i class="fas fa-chevron-right sep"></i>
+			<span>Tambah Penjualan</span>
 		</div>
 	</div>
 
-	<!-- ===== ROW 1: Info Header ===== -->
-	<div class="sales-card card">
-		<div class="card-header header-blue">
-			<i class="fas fa-file-invoice"></i> Informasi Transaksi
-		</div>
-		<div class="card-body pb-3">
-			<div class="row g-0">
+	<!-- ===== Informasi Transaksi ===== -->
+	<div class="fp-card">
+		<div class="fp-section"><i class="fas fa-file-invoice"></i> Informasi Transaksi</div>
 
-				<!-- ── LEFT: Wajib Diisi ─────────────────────────────── -->
-				<div class="col-lg-7 pe-lg-4 info-divider">
-					<span class="section-pill pill-required"><i class="fas fa-pencil-alt"></i> Wajib Diisi</span>
-					<div class="row g-3">
+		<!-- hidden meta inputs -->
+		<input id="sales_id" name="sales_id" type="hidden">
+		<input id="sales_order_id" name="sales_order_id" type="hidden">
+		<input id="sales_rate_customer" name="sales_rate_customer" type="hidden">
+		<input id="hd_sales_type" name="hd_sales_type" type="hidden">
 
-						<!-- 1. Customer -->
-						<div class="col-md-6">
-							<label class="form-label-custom field-required-star">
-								<span class="priority-badge">1</span> Customer
-							</label>
-							<select class="form-control form-control-custom js-example-basic-single" id="sales_customer" name="sales_customer">
-								<option value="">-- Pilih Customer --</option>
-								<?php foreach ($data['customer_list'] as $row) { ?>
-									<option value="<?php echo $row->customer_id; ?>"><?php echo $row->customer_name; ?></option>
-								<?php } ?>
-							</select>
-						</div>
-
-
-						<!-- 2. Jatuh Tempo -->
-						<div class="col-md-6">
-							<label class="form-label-custom field-required-star">
-								<span class="priority-badge">2</span> Jatuh Tempo
-								<small class="text-muted fw-normal text-lowercase ms-1" style="font-size:.72rem;"></small>
-							</label>
-							<input id="sales_due_date" name="sales_due_date" type="date" class="form-control form-control-custom">
-						</div>
-
-						<!-- 3. Metode Bayar -->
-						<div class="col-md-6">
-							<label class="form-label-custom field-required-star">
-								<span class="priority-badge">3</span> Metode Bayar
-							</label>
-							<select class="form-control form-control-custom js-example-basic-single" id="sales_payment" name="sales_payment">
-								<option value="">-- Pilih Metode Bayar --</option>
-								<?php foreach ($data['payment_list'] as $row) { ?>
-									<option value="<?php echo $row->payment_id; ?>"><?php echo $row->payment_name; ?></option>
-								<?php } ?>
-							</select>
-						</div>
-
-						<!-- 4. Jenis Harga -->
-						<div class="col-md-6">
-							<label class="form-label-custom field-required-star">
-								<span class="priority-badge">4</span> Jenis Harga
-							</label>
-							<select class="form-control form-control-custom js-example-basic-single" id="sales_price_type" name="sales_price_type">
-								<option value="">-- Pilih Jenis Harga --</option>
-								<option value="Umum">Umum</option>
-								<option value="Toko">Toko</option>
-								<option value="Sales">Sales</option>
-								<option value="Khusus">Khusus</option>
-							</select>
-						</div>
-
+		<div class="fp-grid fp-cols-3">
+			<div class="fp-field">
+				<label><i class="fas fa-user-tag"></i> Customer <span class="req">*</span></label>
+				<div class="fp-ig">
+					<span class="fp-ig-icon"><i class="fas fa-user"></i></span>
+					<select class="form-control js-example-basic-single" id="sales_customer" name="sales_customer">
+						<option value="">-- Pilih Customer --</option>
+						<?php foreach ($data['customer_list'] as $row) { ?>
+							<option value="<?php echo $row->customer_id; ?>"><?php echo $row->customer_name; ?></option>
+						<?php } ?>
+					</select>
+				</div>
+			</div>
+			<div class="fp-grid fp-cols-2">
+				<div class="fp-field">
+					<label><i class="fas fa-cart-arrow-down"></i> Tanggal Transaksi</label>
+					<div class="fp-ig">
+						<span class="fp-ig-icon"><i class="far fa-calendar-alt"></i></span>
+						<input id="sales_date" name="sales_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>" readonly>
 					</div>
 				</div>
-
-				<!-- ── RIGHT: Otomatis ───────────────────────────────── -->
-				<div class="col-lg-5 ps-lg-4 mt-4 mt-lg-0 auto-input-wrap">
-					<span class="section-pill pill-auto"><i class="fas fa-magic"></i> Terisi Otomatis</span>
-
-					<!-- hidden meta inputs -->
-					<input id="sales_id" name="sales_id" type="hidden">
-					<input id="sales_order_id" name="sales_order_id" type="hidden">
-					<input id="sales_rate_customer" name="sales_rate_customer" type="hidden">
-					<input id="hd_sales_type" name="hd_sales_type" type="hidden">
-
-					<div class="row g-3">
-
-						<!-- No Invoice -->
-						<div class="col-12">
-							<label class="form-label-custom">
-								<i class="fas fa-lock fa-xs me-1 text-muted"></i> No Invoice
-							</label>
-							<div class="input-group">
-								<span class="input-group-text" style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-right:none;border-radius:8px 0 0 8px;color:#15803d;font-size:.8rem;">AUTO</span>
-								<input id="sales_invoice" name="sales_invoice" type="text" class="form-control form-control-custom" style="border-radius:0 8px 8px 0;border-left:none;" value="AUTO" readonly="">
-							</div>
-						</div>
-
-						<!-- Tanggal + Jatuh Tempo -->
-						<div class="col-6">
-							<label class="form-label-custom">
-								<i class="fas fa-lock fa-xs me-1 text-muted"></i> Tanggal
-							</label>
-							<input id="sales_date" name="sales_date" type="date" class="form-control form-control-custom" value="<?php echo date('Y-m-d'); ?>" readonly>
-						</div>
-						
-
-						<!-- User -->
-						<div class="col-6">
-							<label class="form-label-custom">
-								<i class="fas fa-lock fa-xs me-1 text-muted"></i> User
-							</label>
-							<input id="po_user_id" name="po_user_id" type="text" class="form-control form-control-custom" value="<?php echo $_SESSION['user_name']; ?>" readonly="">
-						</div>
-
+				<div class="fp-field">
+					<label><i class="far fa-calendar-check"></i> Jatuh Tempo <span class="req">*</span></label>
+					<div class="fp-ig">
+						<span class="fp-ig-icon"><i class="far fa-calendar-alt"></i></span>
+						<input id="sales_due_date" name="sales_due_date" type="date" class="form-control">
 					</div>
 				</div>
+			</div>
+			<div class="fp-field fp-divider-l">
+				<label><i class="far fa-file-alt"></i> No Invoice</label>
+				<div class="fp-ig">
+					<span class="fp-ig-icon"><i class="fas fa-hashtag"></i></span>
+					<div class="fp-auto">
+						<span class="fp-auto-badge">AUTO</span>
+						<span>Dibuat otomatis saat disimpan</span>
+						<input id="sales_invoice" name="sales_invoice" type="text" value="AUTO" readonly="">
+					</div>
+				</div>
+			</div>
 
+			<div class="fp-field">
+				<label><i class="far fa-credit-card"></i> Metode Bayar <span class="req">*</span></label>
+				<div class="fp-ig">
+					<span class="fp-ig-icon"><i class="far fa-credit-card"></i></span>
+					<select class="form-control js-example-basic-single" id="sales_payment" name="sales_payment">
+						<option value="">-- Pilih Metode Bayar --</option>
+						<?php foreach ($data['payment_list'] as $row) { ?>
+							<option value="<?php echo $row->payment_id; ?>"><?php echo $row->payment_name; ?></option>
+						<?php } ?>
+					</select>
+				</div>
+			</div>
+			<div class="fp-field">
+				<label><i class="fas fa-tag"></i> Jenis Harga <span class="req">*</span></label>
+				<div class="fp-ig">
+					<span class="fp-ig-icon"><i class="fas fa-tags"></i></span>
+					<select class="form-control js-example-basic-single" id="sales_price_type" name="sales_price_type">
+						<option value="">-- Pilih Jenis Harga --</option>
+						<option value="Umum">Umum</option>
+						<option value="Toko">Toko</option>
+						<option value="Sales">Sales</option>
+						<option value="Khusus">Khusus</option>
+						<option value="Hulu">Hulu</option>
+					</select>
+				</div>
+			</div>
+			<div class="fp-field fp-divider-l">
+				<label><i class="fas fa-user"></i> User</label>
+				<div class="fp-ig">
+					<span class="fp-ig-icon"><i class="fas fa-user"></i></span>
+					<input id="po_user_id" name="po_user_id" type="text" class="form-control" value="<?php echo $_SESSION['user_name']; ?>" readonly="">
+				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- ===== Dropship (hidden by default) ===== -->
+	<!-- ===== Dropship (tersembunyi, sama seperti sebelumnya) ===== -->
 	<div style="display:none;" id="dropship-container">
-		<div class="card sales-card">
-			<div class="card-header" style="background:linear-gradient(135deg,#c2410c,#ea580c);color:#fff;border-radius:12px 12px 0 0;padding:12px 20px;display:flex;align-items:center;gap:10px;font-weight:600;">
-				<i class="fas fa-shipping-fast"></i> Informasi Dropship
-			</div>
-			<div class="card-body">
-				<div class="row g-3">
-					<div class="col-md-4">
-						<label class="form-label-custom">Nama Penerima</label>
-						<input id="dropship_name" name="dropship_name" type="text" class="form-control form-control-custom" placeholder="Nama Dropship Pelanggan">
-					</div>
-					<div class="col-md-4">
-						<label class="form-label-custom">No Telp</label>
-						<input id="dropship_phone" name="dropship_phone" type="text" class="form-control form-control-custom" placeholder="Telp Dropship Pelanggan">
-					</div>
-					<div class="col-md-4">
-						<label class="form-label-custom">Alamat</label>
-						<textarea id="dropship_address" name="dropship_address" class="form-control form-control-custom" placeholder="Alamat Dropship" maxlength="500" rows="2"></textarea>
-					</div>
+		<div class="fp-card">
+			<div class="fp-section"><i class="fas fa-shipping-fast"></i> Informasi Dropship</div>
+			<div class="fp-grid fp-cols-3">
+				<div class="fp-field">
+					<label><i class="fas fa-user"></i> Nama Penerima</label>
+					<div class="fp-ig"><span class="fp-ig-icon"><i class="fas fa-user"></i></span><input id="dropship_name" name="dropship_name" type="text" class="form-control" placeholder="Nama Dropship Pelanggan"></div>
+				</div>
+				<div class="fp-field">
+					<label><i class="fas fa-phone"></i> No Telp</label>
+					<div class="fp-ig"><span class="fp-ig-icon"><i class="fas fa-phone"></i></span><input id="dropship_phone" name="dropship_phone" type="text" class="form-control" placeholder="Telp Dropship Pelanggan"></div>
+				</div>
+				<div class="fp-field">
+					<label><i class="fas fa-map-marker-alt"></i> Alamat</label>
+					<div class="fp-ig"><span class="fp-ig-icon"><i class="fas fa-map-marker-alt"></i></span><textarea id="dropship_address" name="dropship_address" class="form-control" placeholder="Alamat Dropship" maxlength="500" rows="2"></textarea></div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- ===== ROW 2: Tambah Item ===== -->
-	<div class="sales-card card">
-		<div class="card-header header-teal">
-			<i class="fas fa-boxes"></i> Detail Barang
+	<!-- ===== Detail Barang ===== -->
+	<div class="fp-card">
+		<div class="fp-section"><i class="fas fa-box-open"></i> Detail Barang</div>
+
+		<form id="formaddtemp">
+			<div class="fp-grid" style="grid-template-columns: 2.2fr 1.1fr 1fr .8fr 1.1fr;">
+				<div class="fp-field">
+					<label><i class="fas fa-info-circle"></i> Cari Produk (Nama / SKU / Barcode)</label>
+					<div class="fp-ig">
+						<span class="fp-ig-icon"><i class="fas fa-search"></i></span>
+						<input id="product_name" name="product_name" type="text" class="form-control ui-autocomplete-input" placeholder="Ketik nama produk, SKU atau scan barcode..." value="" required="" autocomplete="off" data-parsley-required data-parsley-required-message="*Masukan Nama Produk">
+					</div>
+					<input id="product_id" type="hidden" name="product_id">
+				</div>
+				<div class="fp-field">
+					<label>Harga Jual / Unit</label>
+					<input id="temp_price" name="temp_price" class="form-control text-end" value="0" required="">
+				</div>
+				<div class="fp-field">
+					<label>Stok Gudang</label>
+					<input id="curent_stock" name="curent_stock" class="form-control text-end" value="0" required="" readonly>
+				</div>
+				<div class="fp-field">
+					<label>Qty</label>
+					<input id="temp_qty" name="temp_qty" type="text" class="form-control text-end" value="0" required="">
+				</div>
+				<div class="fp-field">
+					<label>Discount</label>
+					<input id="temp_discount" name="temp_discount" type="text" class="form-control text-end" value="0">
+				</div>
+			</div>
+			<div class="fp-grid mt-3" style="grid-template-columns: 2.2fr 1.9fr 1.9fr;">
+				<div class="fp-field">
+					<label><i class="far fa-sticky-note"></i> Keterangan</label>
+					<div class="fp-ig"><span class="fp-ig-icon"><i class="far fa-sticky-note"></i></span><input id="desc_item" name="desc_item" class="form-control" placeholder="Keterangan item (opsional)"></div>
+				</div>
+				<div class="fp-field">
+					<label>Total</label>
+					<input id="temp_total" name="temp_total" type="text" class="form-control text-end fw-bold" value="0" readonly="">
+				</div>
+				<div class="fp-field">
+					<button id="btnadd_temp" class="fp-btn-add btn-add-temp" title="Tambah Item"><i class="fas fa-plus-circle"></i> Tambah</button>
+				</div>
+			</div>
+		</form>
+
+		<div class="table-responsive fp-table">
+			<table id="temp-sales-list" class="display table table-hover" style="width:100%">
+				<thead>
+					<tr>
+						<th>SKU</th>
+						<th>Produk</th>
+						<th>Qty</th>
+						<th>Harga Satuan</th>
+						<th>Discount</th>
+						<th>Total</th>
+						<th style="text-align:center;">Aksi</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
 		</div>
-		<div class="card-body">
 
-			<!-- Product Input Panel -->
-			<form id="formaddtemp">
-				<div class="product-input-panel">
-					<div class="row g-3 align-items-end">
-						<div class="col-md-4">
-							<label class="form-label-custom">Produk</label>
-							<input id="product_name" name="product_name" type="text" class="form-control form-control-custom ui-autocomplete-input" placeholder="Ketikkan nama produk..." value="" required="" autocomplete="off" data-parsley-required data-parsley-required-message="*Masukan Nama Produk">
-							<input id="product_id" type="hidden" name="product_id">
-						</div>
-						<div class="col-md-2">
-							<label class="form-label-custom">Harga Jual / Unit</label>
-							<input id="temp_price" name="temp_price" class="form-control form-control-custom text-end" value="0" required="">
-						</div>
-						<div class="col-md-2">
-							<label class="form-label-custom">Stok Gudang</label>
-							<input id="curent_stock" name="curent_stock" class="form-control form-control-custom text-end" value="0" required="" readonly>
-						</div>
-						<div class="col-md-1">
-							<label class="form-label-custom">Qty</label>
-							<input id="temp_qty" name="temp_qty" type="text" class="form-control form-control-custom text-end" value="0" required="">
-						</div>
-						<div class="col-md-2">
-							<label class="form-label-custom">Discount</label>
-							<input id="temp_discount" name="temp_discount" type="text" class="form-control form-control-custom text-end" value="0">
-						</div>
-						<div class="col-md-4">
-							<label class="form-label-custom">Keterangan</label>
-							<input id="desc_item" name="desc_item" class="form-control form-control-custom">
-						</div>
-						<div class="col-md-4">
-							<label class="form-label-custom">Total</label>
-							<input id="temp_total" name="temp_total" type="text" class="form-control form-control-custom text-end fw-bold" value="0" readonly="">
-						</div>
-						<div class="col-md-2 d-flex align-items-end">
-							<button id="btnadd_temp" class="btn btn-primary btn-add-temp" title="Tambah Item"><i class="fas fa-plus"></i></button>
-						</div>
-					</div>
-				</div>
-			</form>
-
-			<!-- Items Table -->
-			<div class="table-responsive">
-				<table id="temp-sales-list" class="display table table-hover" style="width:100%">
-					<thead>
-						<tr>
-							<th>SKU</th>
-							<th>Produk</th>
-							<th>Qty</th>
-							<th>Harga Satuan</th>
-							<th>Discount</th>
-							<th>Total</th>
-							<th style="text-align:center;">Aksi</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
+		<!-- ===== Catatan + ringkasan ===== -->
+		<div class="fp-bottom">
+			<div class="fp-note">
+				<h6><i class="far fa-file-alt"></i> Catatan</h6>
+				<textarea id="sales_remark" name="sales_remark" class="form-control" placeholder="Tulis catatan transaksi di sini..." maxlength="500" rows="9"></textarea>
 			</div>
 
-			<!-- ===== Footer: Notes + Summary ===== -->
-			<div class="row mt-4 g-4">
+			<div>
+				<div class="fp-summary">
+					<!-- hidden discount inputs -->
+					<input id="footer_discount1" name="footer_discount1" type="hidden" value="Rp 0.00">
+					<input id="footer_discount2" name="footer_discount2" type="hidden" value="Rp 0.00">
+					<input id="footer_discount3" name="footer_discount3" type="hidden" value="Rp 0.00">
+					<input id="footer_discount_percentage1" name="footer_discount_percentage1" type="hidden" value="0.00%">
+					<input id="footer_discount_percentage2" name="footer_discount_percentage2" type="hidden" value="0.00%">
+					<input id="footer_discount_percentage3" name="footer_discount_percentage3" type="hidden" value="0.00%">
 
-				<!-- Catatan -->
-				<div class="col-lg-5">
-					<label class="form-label-custom mb-2"><i class="fas fa-sticky-note me-1"></i> Catatan</label>
-					<textarea id="sales_remark" name="sales_remark" class="form-control form-control-custom" placeholder="Tulis catatan transaksi di sini..." maxlength="500" rows="9"></textarea>
-				</div>
-
-				<!-- Summary -->
-				<div class="col-lg-7">
-					<div class="summary-card p-4">
-						<!-- hidden discount inputs -->
-						<input id="footer_discount1" name="footer_discount1" type="hidden" value="Rp 0.00">
-						<input id="footer_discount2" name="footer_discount2" type="hidden" value="Rp 0.00">
-						<input id="footer_discount3" name="footer_discount3" type="hidden" value="Rp 0.00">
-						<input id="footer_discount_percentage1" name="footer_discount_percentage1" type="hidden" value="0.00%">
-						<input id="footer_discount_percentage2" name="footer_discount_percentage2" type="hidden" value="0.00%">
-						<input id="footer_discount_percentage3" name="footer_discount_percentage3" type="hidden" value="0.00%">
-
-						<div class="summary-row">
-							<span class="summary-label"><i class="fas fa-receipt me-2 text-secondary"></i>Sub Total</span>
-							<div class="summary-value">
-								<input id="footer_sub_total" name="footer_sub_total" type="text" value="0" readonly="">
-							</div>
-						</div>
-
-						<div class="summary-row">
-							<span class="summary-label"><i class="fas fa-tag me-2 text-warning"></i>Discount
-								<small class="text-muted ms-1" style="font-size:.75rem;">(klik untuk ubah)</small>
-							</span>
-							<div class="summary-value">
-								<input id="footer_total_discount" name="footer_total_discount" data-bs-toggle="modal" data-bs-target="#footerdiscount" type="text" value="0" readonly="" style="cursor:pointer;border-color:#fbbf24;">
-							</div>
-						</div>
-
-						<div class="summary-row ppn-row d-flex justify-content-between">
-							<span class="summary-label"><i class="fas fa-percent me-2 text-info"></i>PPN 11%</span>
-							<div class="d-flex align-items-center gap-2">
-								<input class="ppn-check" type="checkbox" id="ppnchecked">
-								<div class="summary-value">
-									<input id="footer_total_ppn" name="footer_total_ppn" type="text" value="0" readonly="">
-								</div>
-							</div>
-						</div>
-
-						<div class="summary-grand my-2">
-							<div class="d-flex justify-content-between align-items-center">
-								<span class="summary-label fs-6"><i class="fas fa-money-bill-wave me-2"></i>Grand Total</span>
-								<div class="summary-value">
-									<input id="footer_total_invoice" name="footer_total_invoice" type="text" value="0" readonly="" style="width:180px;">
-								</div>
-							</div>
-						</div>
-
-						<div class="summary-row">
-							<span class="summary-label"><i class="fas fa-hand-holding-usd me-2 text-success"></i>Down Payment (DP)</span>
-							<div class="summary-value">
-								<input id="footer_dp" name="footer_dp" type="text" value="0" style="background:#fff;border-color:#d1d5db;">
-							</div>
-						</div>
-
-						<div class="summary-row">
-							<span class="summary-label"><i class="fas fa-credit-card me-2 text-danger"></i>Kredit / Sisa</span>
-							<div class="summary-value">
-								<input id="footer_remaining_debt" name="footer_remaining_debt" type="text" value="0" readonly="">
-							</div>
-						</div>
-
-						<!-- Action Buttons -->
-						<div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
-							<button id="btncancel" class="btn btn-cancel-main">
-								<i class="fas fa-times-circle me-2"></i> Batal
-							</button>
-							<button id="btnsave" class="btn btn-save-main button-header-custom-save">
-								<i class="fas fa-save me-2"></i> Simpan Transaksi
-							</button>
-						</div>
+					<div class="fp-sum-row">
+						<span><i class="fas fa-receipt" style="color:#4b5563;"></i> Sub Total</span>
+						<input id="footer_sub_total" name="footer_sub_total" type="text" value="0" readonly="">
+					</div>
+					<div class="fp-sum-row">
+						<span><i class="fas fa-tag" style="color:#f59e0b;"></i> Discount <small>(klik untuk ubah)</small></span>
+						<input id="footer_total_discount" name="footer_total_discount" class="fp-sum-click" data-bs-toggle="modal" data-bs-target="#footerdiscount" type="text" value="0" readonly="">
+					</div>
+					<div class="fp-sum-row">
+						<span><i class="fas fa-percent" style="color:#4b5563;"></i> PPN 11%</span>
+						<span class="fp-sum-val">
+							<input type="checkbox" id="ppnchecked">
+							<input id="footer_total_ppn" name="footer_total_ppn" type="text" value="0" readonly="">
+						</span>
+					</div>
+					<div class="fp-sum-row fp-sum-grand">
+						<span><i class="fas fa-money-bill-wave"></i> Grand Total</span>
+						<input id="footer_total_invoice" name="footer_total_invoice" type="text" value="0" readonly="">
+					</div>
+					<div class="fp-sum-row">
+						<span><i class="fas fa-hand-holding-usd" style="color:#0f8a5f;"></i> Down Payment (DP)</span>
+						<input id="footer_dp" name="footer_dp" type="text" value="0">
+					</div>
+					<div class="fp-sum-row">
+						<span><i class="far fa-credit-card" style="color:#dc2626;"></i> Kredit / Sisa</span>
+						<input id="footer_remaining_debt" name="footer_remaining_debt" type="text" value="0" readonly="">
 					</div>
 				</div>
 
+				<div class="fp-actions">
+					<button id="btncancel" class="btn fp-btn-cancel"><i class="fas fa-times-circle"></i> Batal</button>
+					<button id="btnsave" class="btn fp-btn-save button-header-custom-save"><i class="fas fa-save"></i> Simpan Transaksi</button>
+				</div>
 			</div>
+		</div>
 
-			<!-- Footer Modal Discount -->
-			<div class="modal fade" id="footerdiscount" tabindex="-1" aria-labelledby="exampleModaleditLabel" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content" style="border-radius:12px;overflow:hidden;border:none;">
-						<div class="modal-header modal-header-disc">
-							<h5 class="modal-title" id="title-frmfooterdiscount"><i class="fas fa-tag me-2"></i>Atur Diskon</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<form id="frmfooterdiscount" class="form-horizontal">
-							<div class="modal-body p-4">
-								<?php foreach ([1,2,3] as $n) : ?>
-								<div class="mb-3 p-3" style="background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
-									<div class="disc-group-label">Diskon <?php echo $n; ?> <span class="disc-badge">Tier <?php echo $n; ?></span></div>
-									<div class="row g-2">
-										<div class="col-6">
-											<label class="form-label-custom" style="font-size:.75rem;">Persentase (%)</label>
-											<input type="text" class="form-control form-control-custom" id="edit_footer_discount_percentage<?php echo $n; ?>" name="edit_footer_discount_percentage<?php echo $n; ?>" value="0">
-										</div>
-										<div class="col-6">
-											<label class="form-label-custom" style="font-size:.75rem;">Nilai (Rp)</label>
-											<input type="text" class="form-control form-control-custom" id="edit_footer_discount<?php echo $n; ?>" name="edit_footer_discount<?php echo $n; ?>" value="0" readonly>
-										</div>
+		<!-- Footer Modal Discount -->
+		<div class="modal fade" id="footerdiscount" tabindex="-1" aria-labelledby="exampleModaleditLabel" aria-hidden="true" data-icon="fas fa-tag" data-subtitle="Atur diskon bertingkat untuk transaksi ini.">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="title-frmfooterdiscount">Atur Diskon</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<form id="frmfooterdiscount" class="form-horizontal">
+						<div class="modal-body">
+							<?php foreach ([1,2,3] as $n) : ?>
+							<div class="mb-3 p-3" style="background:#f6fcf9;border-radius:10px;border:1px solid #e0efe8;">
+								<div class="mb-2" style="font-weight:700;font-size:.85rem;">Diskon <?php echo $n; ?> <span class="badge" style="background:#e3f5ee;color:#0b6b4a;">Tier <?php echo $n; ?></span></div>
+								<div class="row g-2">
+									<div class="col-6">
+										<label class="form-label">Persentase (%)</label>
+										<input type="text" class="form-control" id="edit_footer_discount_percentage<?php echo $n; ?>" name="edit_footer_discount_percentage<?php echo $n; ?>" value="0">
+									</div>
+									<div class="col-6">
+										<label class="form-label">Nilai (Rp)</label>
+										<input type="text" class="form-control" id="edit_footer_discount<?php echo $n; ?>" name="edit_footer_discount<?php echo $n; ?>" value="0" readonly>
 									</div>
 								</div>
-								<?php endforeach; ?>
 							</div>
-							<div class="modal-footer" style="border-top:1px solid #e5e7eb;">
-								<button type="button" class="btn btn-cancel-main btn-sm" data-bs-dismiss="modal"><i class="fas fa-times-circle me-1"></i> Batal</button>
-								<button type="button" id="btneditdisc" class="btn btn-save-main btn-sm"><i class="fas fa-check me-1"></i> Terapkan</button>
-							</div>
-						</form>
-					</div>
+							<?php endforeach; ?>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fas fa-times-circle"></i> Batal</button>
+							<button type="button" id="btneditdisc" class="btn btn-primary"><i class="fas fa-check"></i> Terapkan</button>
+						</div>
+					</form>
 				</div>
 			</div>
-			<!-- /Footer Modal Discount -->
-
 		</div>
+		<!-- /Footer Modal Discount -->
+
 	</div>
 
 </div>
@@ -751,6 +619,8 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 		var footer_remaining_debt_val                = parseInt(footer_remaining_debt.get());
 		var sales_remark                             = $("#sales_remark").val();
 		var sales_date                               = $("#sales_date").val();
+		// buka jendela print sekarang (di dalam klik) supaya tidak diblokir popup blocker
+		var print_win = window.open('', '_blank');
 		$.ajax({
 			type: "POST",
 			url: "<?php echo base_url(); ?>Sales/save_sales",
@@ -758,14 +628,21 @@ require DOC_ROOT_PATH . $this->config->item('footer');
 			data: {sales_customer:sales_customer, sales_payment:sales_payment, sales_due_date:sales_due_date, footer_sub_total_submit:footer_sub_total_submit, footer_total_discount_submit:footer_total_discount_submit, edit_footer_discount_percentage1_submit:edit_footer_discount_percentage1_submit, edit_footer_discount_percentage2_submit:edit_footer_discount_percentage2_submit, edit_footer_discount_percentage3_submit:edit_footer_discount_percentage3_submit, edit_footer_discount1_submit:edit_footer_discount1_submit, edit_footer_discount2_submit:edit_footer_discount2_submit, edit_footer_discount3_submit:edit_footer_discount3_submit, footer_total_ppn_val:footer_total_ppn_val, footer_total_invoice_val:footer_total_invoice_val, footer_dp_val:footer_dp_val, footer_remaining_debt_val:footer_remaining_debt_val, sales_remark:sales_remark, sales_date:sales_date},
 			success : function(data){
 				if (data.code == "200"){
+					if (print_win) {
+						print_win.location.href = "<?php echo base_url(); ?>Sales/printnota?print_type=1&sales_id=" + data.sales_id;
+					}
 					window.location.href = "<?php echo base_url(); ?>/Sales/salespage";
 				} else {
+					if (print_win) { print_win.close(); }
 					Swal.fire({
 						icon: 'error',
 						title: 'Oops...',
 						text: data.result,
 					})
 				}
+			},
+			error: function(){
+				if (print_win) { print_win.close(); }
 			}
 		});
 	});
@@ -872,7 +749,7 @@ function deletes(id)
 		text: "Apakah Anda Yakin Menghapus Data?",
 		icon: 'warning',
 		showCancelButton: true,
-		confirmButtonColor: '#3085d6',
+		confirmButtonColor: '#0f8a5f',
 		cancelButtonColor: '#d33',
 		confirmButtonText: 'Hapus'
 	}).then((result) => {
@@ -909,7 +786,7 @@ $("#btncancel").click(function (e) {
 		text: "Apakah Anda Yakin Membatalkan Inputan",
 		icon: 'warning',
 		showCancelButton: true,
-		confirmButtonColor: '#3085d6',
+		confirmButtonColor: '#0f8a5f',
 		cancelButtonColor: '#d33',
 		confirmButtonText: 'Hapus'
 	}).then((result) => {

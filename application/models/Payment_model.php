@@ -12,8 +12,10 @@ class payment_model extends CI_Model {
         $this->db->join('ms_supplier', 'hd_purchase.hd_purchase_supplier = ms_supplier.supplier_id');
         $this->db->where('hd_purchase_status NOT Like "Cancel"');
         if($search != null){
-            $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_supplier.supplier_name like "%'.$search.'%"');
             $this->db->or_where('ms_supplier.supplier_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->group_by('hd_purchase.hd_purchase_supplier');
         $this->db->order_by('ms_supplier.supplier_name', 'desc');
@@ -30,8 +32,10 @@ class payment_model extends CI_Model {
         $this->db->join('ms_supplier', 'hd_purchase.hd_purchase_supplier = ms_supplier.supplier_id');
         $this->db->where('hd_purchase_status NOT Like "Cancel"');
         if($search != null){
-            $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_supplier.supplier_name like "%'.$search.'%"');
             $this->db->or_where('ms_supplier.supplier_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->group_by('hd_purchase.hd_purchase_supplier');
         $this->db->order_by('ms_supplier.supplier_name', 'desc');
@@ -192,9 +196,11 @@ class payment_model extends CI_Model {
         $this->db->join('ms_supplier', 'hd_payment_debt.payment_debt_supplier_id = ms_supplier.supplier_id');
         $this->db->join('ms_payment', 'hd_payment_debt.payment_debt_method_id = ms_payment.payment_id');
         if($search != null){
-            $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_supplier.supplier_name like "%'.$search.'%"');
             $this->db->or_where('ms_supplier.supplier_code like "%'.$search.'%"');
-            $this->db->or_where('ms_supplier.payment_debt_invoice like "%'.$search.'%"');
+            $this->db->or_where('hd_payment_debt.payment_debt_invoice like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('payment_debt_id ', 'desc');
         $this->db->limit($length);
@@ -210,9 +216,11 @@ class payment_model extends CI_Model {
         $this->db->join('ms_supplier', 'hd_payment_debt.payment_debt_supplier_id = ms_supplier.supplier_id');
         $this->db->join('ms_payment', 'hd_payment_debt.payment_debt_method_id = ms_payment.payment_id');
         if($search != null){
-            $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_supplier.supplier_name like "%'.$search.'%"');
             $this->db->or_where('ms_supplier.supplier_code like "%'.$search.'%"');
-            $this->db->or_where('ms_supplier.payment_debt_invoice like "%'.$search.'%"');
+            $this->db->or_where('hd_payment_debt.payment_debt_invoice like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('payment_debt_id ', 'desc');
         $query = $this->db->get();
@@ -221,7 +229,7 @@ class payment_model extends CI_Model {
 
     public function header_debt_payment($payment_debt_id)
     {
-        $query = $this->db->query("select * from hd_payment_debt a, ms_supplier b, ms_payment c, ms_user d where a.payment_debt_supplier_id = b.supplier_id and  a.payment_debt_method_id = c.payment_id and a.user_id = d.user_id and payment_debt_id  = '".$payment_debt_id."'");
+        $query = $this->db->query("select *, a.created_at as trx_created_at from hd_payment_debt a, ms_supplier b, ms_payment c, ms_user d where a.payment_debt_supplier_id = b.supplier_id and  a.payment_debt_method_id = c.payment_id and a.user_id = d.user_id and payment_debt_id  = '".$payment_debt_id."'");
         $result = $query->result();
         return $result;
     }
@@ -244,8 +252,10 @@ class payment_model extends CI_Model {
         $this->db->join('ms_customer', 'hd_sales.hd_sales_customer = ms_customer.customer_id');
         $this->db->where('hd_sales_status NOT Like "Cancel"');
         if($search != null){
-            $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_customer.customer_name like "%'.$search.'%"');
             $this->db->or_where('ms_customer.customer_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->group_by('hd_sales.hd_sales_customer');
         $this->db->order_by('ms_customer.customer_name', 'desc');
@@ -262,8 +272,10 @@ class payment_model extends CI_Model {
         $this->db->join('ms_customer', 'hd_sales.hd_sales_customer = ms_customer.customer_id');
         $this->db->where('hd_sales_status NOT Like "Cancel"');
         if($search != null){
-            $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_customer.customer_name like "%'.$search.'%"');
             $this->db->or_where('ms_customer.customer_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->group_by('hd_sales.hd_sales_customer');
         $this->db->order_by('ms_customer.customer_name', 'desc');
@@ -278,9 +290,11 @@ class payment_model extends CI_Model {
         $this->db->join('ms_customer', 'hd_payment_receivable.payment_receivable_customer_id = ms_customer.customer_id');
         $this->db->join('ms_payment', 'hd_payment_receivable.payment_receivable_method_id = ms_payment.payment_id');
         if($search != null){
-            $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_customer.customer_name like "%'.$search.'%"');
             $this->db->or_where('ms_customer.customer_code like "%'.$search.'%"');
-            $this->db->or_where('ms_customer.payment_receivable_invoice like "%'.$search.'%"');
+            $this->db->or_where('hd_payment_receivable.payment_receivable_invoice like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('payment_receivable_id', 'desc');
         $this->db->limit($length);
@@ -296,9 +310,11 @@ class payment_model extends CI_Model {
         $this->db->join('ms_customer', 'hd_payment_receivable.payment_receivable_customer_id = ms_customer.customer_id');
         $this->db->join('ms_payment', 'hd_payment_receivable.payment_receivable_method_id = ms_payment.payment_id');
         if($search != null){
-            $this->db->or_where('ms_customer.customer_name like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('ms_customer.customer_name like "%'.$search.'%"');
             $this->db->or_where('ms_customer.customer_code like "%'.$search.'%"');
-            $this->db->or_where('ms_customer.payment_receivable_invoice like "%'.$search.'%"');
+            $this->db->or_where('hd_payment_receivable.payment_receivable_invoice like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('payment_receivable_id', 'desc');
         $query = $this->db->get();
@@ -345,7 +361,7 @@ class payment_model extends CI_Model {
         $this->db->from('temp_payment_receivable');
         $this->db->join('hd_sales', 'temp_payment_receivable.temp_payment_receivable_sales_id = hd_sales.hd_sales_id');
         if($search != null){
-            $this->db->where('hd_sales.hd_sales_invoice like "%'.$search.'%"');
+            $this->db->where('hd_sales.hd_sales_inv like "%'.$search.'%"');
         }
         $this->db->where('temp_payment_receivable.temp_payment_receivable_user_id', $user);
         $this->db->limit($length);
@@ -360,7 +376,7 @@ class payment_model extends CI_Model {
         $this->db->from('temp_payment_receivable');
         $this->db->join('hd_sales', 'temp_payment_receivable.temp_payment_receivable_sales_id = hd_sales.hd_sales_id');
         if($search != null){
-            $this->db->where('hd_sales.hd_sales_invoice like "%'.$search.'%"');
+            $this->db->where('hd_sales.hd_sales_inv like "%'.$search.'%"');
         }
         $this->db->where('temp_payment_receivable.temp_payment_receivable_user_id', $user);
         $query = $this->db->get();
@@ -452,7 +468,7 @@ class payment_model extends CI_Model {
 
     public function header_receivable_payment($payment_receivable_id)
     {
-        $query = $this->db->query("select * from hd_payment_receivable a, ms_customer b, ms_payment c, ms_user d where a.payment_receivable_customer_id = b.customer_id and  a.payment_receivable_method_id = c.payment_id and a.user_id = d.user_id and payment_receivable_id   = '".$payment_receivable_id."'");
+        $query = $this->db->query("select *, a.created_at as trx_created_at from hd_payment_receivable a, ms_customer b, ms_payment c, ms_user d where a.payment_receivable_customer_id = b.customer_id and  a.payment_receivable_method_id = c.payment_id and a.user_id = d.user_id and payment_receivable_id   = '".$payment_receivable_id."'");
         $result = $query->result();
         return $result;
     }

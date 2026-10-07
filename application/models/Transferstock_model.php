@@ -14,12 +14,12 @@ class transferstock_model extends CI_Model {
         $this->db->join('ms_warehouse AS to', 'dt_transfer_stock.dt_transfer_stock_warehouse_to = to.warehouse_id');
         $this->db->join('ms_user', 'hd_transfer_stock.user_id = ms_user.user_id');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('hd_transfer_stock.hd_transfer_stock_code like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_supplier_name like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_key like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_desc like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_transfer_stock.created_at', 'desc');
         $this->db->limit($length);
@@ -59,12 +59,12 @@ class transferstock_model extends CI_Model {
         $this->db->join('ms_warehouse AS to', 'dt_transfer_stock.dt_transfer_stock_warehouse_to = to.warehouse_id');
         $this->db->join('ms_user', 'hd_transfer_stock.user_id = ms_user.user_id');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('hd_transfer_stock.hd_transfer_stock_code like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_supplier_name like "%'.$search.'%"');
-            $this->db->or_where('ms_product.product_key like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_desc like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $query = $this->db->get();
         return $query;
@@ -90,8 +90,10 @@ class transferstock_model extends CI_Model {
         $this->db->join('ms_user', 'temp_transfer_stock.user_id = ms_user.user_id');
         $this->db->where('temp_transfer_stock.user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_transfer_stock.created_at', 'desc');
         $this->db->limit($length);
@@ -111,8 +113,10 @@ class transferstock_model extends CI_Model {
         $this->db->join('ms_user', 'temp_transfer_stock.user_id = ms_user.user_id');
         $this->db->where('temp_transfer_stock.user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_transfer_stock.created_at', 'desc');
         $query = $this->db->get();
@@ -206,7 +210,7 @@ class transferstock_model extends CI_Model {
 
     public function header_transfer_stock($hd_transfer_id)
     {   
-        $query = $this->db->query("select * from hd_transfer_stock a, ms_user b where a.user_id = b.user_id and hd_transfer_stock_id   = '".$hd_transfer_id."'");
+        $query = $this->db->query("select *, a.created_at as trx_created_at from hd_transfer_stock a, ms_user b where a.user_id = b.user_id and hd_transfer_stock_id   = '".$hd_transfer_id."'");
         $result = $query->result();
         return $result;
     }

@@ -1,220 +1,157 @@
-<?php 
+<?php
 define('DOC_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 require DOC_ROOT_PATH . $this->config->item('header');
 ?>
 </div>
+<link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/payment-form.css?v=<?php echo @filemtime(FCPATH.'dist/css/payment-form.css'); ?>">
 
 <div class="container">
-  <div class="page-inner">
-    <div class="page-header">
+  <div class="page-inner pay-page">
 
-    </div>
-    <div class="row">
-      <h3 class="fw-bold mb-3">Pelunasan Piutang</h3>
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-body">
-            <div class="form-group row">
-              <div class="row">
-                <div class="col-sm-12 col-md-3">
-                  <input id="customer_id" name="customer_id" type="hidden" class="form-control text-right" value="<?php echo $_GET['id']; ?>" readonly="">
-
-                  <!-- text input -->
-                  <div class="form-group">
-                    <label>Nama Supplier</label>
-                    <input id="customer_name" name="customer_name" type="text" class="form-control" readonly="">
-                  </div>
-                </div>
-                <div class="col-sm-12 col-md-2">
-                  <!-- text input -->
-                  <div class="form-group">
-                    <label>Tanggal Pembayaran</label>
-                    <input id="repayment_date" name="repayment_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
-                  </div>
-                </div>
-
-                <div class="col-sm-12 col-md-3">
-                  <!-- text input -->
-                  <div class="form-group">
-                    <label>Metode Pembayaran</label>
-                    <select class="form-control input-full js-example-basic-single" id="payment_method_id" name="payment_method_id">
-                      <option value="">-- Pilih Metode Bayar --</option>
-                      <?php foreach ($data['payment_list'] as $row) { ?>
-                        <option value="<?php echo $row->payment_id; ?>"><?php echo $row->payment_name; ?></option>  
-                      <?php } ?>
-                    </select>
-
-                  </div>
-                </div>
-
-
-                <div class="col-sm-12 col-md-2">
-                  <!-- text input -->
-                  <div class="form-group">
-                    <label>User</label>
-                    <input id="display_user" type="text" class="form-control" value="<?php echo $_SESSION['user_name']; ?>" readonly="">
-                  </div>
-                </div>
-                <div class="col-sm-12 col-md-2">
-                  <!-- text input -->
-                  <div class="form-group">
-                    <label>Total Hutang</label>
-                    <input id="supplier_total_receivable" name="supplier_total_receivable" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- ===== Judul ===== -->
+    <div class="pay-hero">
+      <div class="pay-hero-title">
+        <div class="pay-hero-icon"><i class="fas fa-hand-holding-usd"></i></div>
+        <div>
+          <h3>Pelunasan Piutang</h3>
+          <p>Kelola penerimaan pembayaran piutang dari customer.</p>
         </div>
       </div>
+      <div class="pay-breadcrumb">
+        <a href="<?php echo base_url(); ?>Dashboard"><i class="fas fa-home"></i></a>
+        <i class="fas fa-chevron-right sep"></i>
+        <a href="<?php echo base_url(); ?>Payment/receivable">Pelunasan</a>
+        <i class="fas fa-chevron-right sep"></i>
+        <span class="current">Piutang</span>
+      </div>
+    </div>
 
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-body">
-            <form id="formaddtemp">
-              <div class="row well well-sm input-temp">
-
-                <div class="col-sm-4">
-                  <div class="form-group">
-                    <label>No Invoice Pembelian</label>
-                    <input id="sales_inv" name="sales_inv" type="text" class="form-control ui-autocomplete-input" placeholder="ketikkan No Invoice" value="" required="" autocomplete="off"  data-parsley-required data-parsley-required-message="*Masukan Nama Produk">
-                    <input id="sales_id" type="hidden" name="sales_id">
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Tgl Invoice</label>
-                    <input id="sales_invoice_date" name="sales_invoice_date" type="date" class="form-control ui-autocomplete-input">
-                  </div>
-                </div>
-
-                <div class="col-sm-6">
-                  <div class="form-group">
-                    <label>Keterangan</label>
-                    <input id="receivable_desc" name="receivable_desc" type="text" class="form-control">
-                  </div>
-                </div>
-
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Saldo Hutang</label>
-                    <input id="receivable_nominal" name="receivable_nominal" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Total Retur</label>
-                    <input id="receivable_retur" name="receivable_retur" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Pembayaran</label>
-                    <input id="receivable_payment" name="receivable_payment" type="text" class="form-control text-right" value="0">
-                  </div>
-                </div>
-
-                <div class="col-sm-2">
-                  <div class="form-group">
-                    <label>Pembulatan / Disc</label>
-                    <input id="receivable_disc" name="receivable_disc" type="text" class="form-control text-right" value="0">
-                  </div>
-                </div>
-
-                <div class="col-sm-3">
-                  <div class="form-group">
-                    <label>Remaining receivable</label>
-                    <input id="new_remaining_receivable" name="new_remaining_receivable" type="text" class="form-control text-right" value="0" readonly>
-                  </div>
-                </div>
-
-
-                <div class="col-sm-1" style="padding-right: 62px;">
-
-                  <!-- text input -->
-
-                  <label>&nbsp;</label>
-
-                  <div class="form-group">
-
-                    <button id="btnadd_temp" class="btn btn-md btn-primary rounded-circle float-right btn-add-temp"><i class="fas fa-plus"></i></button>
-
-                  </div>
-
-                </div>
-
-              </div>
-            </form>
-
-            <div class="table-responsive">
-              <table id="temp-receivable-list" class="display table table-striped table-hover" >
-                <thead>
-                  <tr>
-                    <th>No Invoice</th>
-                    <th>Tgl Invoice</th>
-                    <th>Saldo Hutang</th>
-                    <th>Pembulatan/Disc</th>
-                    <th>Total Retur</th>
-                    <th>Pembayaran</th>
-                    <th>Sisa Hutang</th>
-                    <th>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="row form-space">
-              <div class="col-lg-6">
-                <div class="form-group">
-                  <div class="col-sm-12">
-                    <textarea id="sales_retur_remark" name="sales_retur_remark" class="form-control" placeholder="Catatan" maxlength="500" rows="8"></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-lg-6 text-right">
-                <div class="form-group row">
-                  <label for="footer_total_invoice" class="col-sm-7 col-form-label text-right:">Total Pembayaran:</label>
-                  <div class="col-sm-5">
-                    <input id="footer_total_pay" name="footer_total_pay" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_discount" class="col-sm-7 col-form-label text-right:">Total Discount:</label>
-                  <div class="col-sm-5">
-                    <input id="footer_total_discount" name="footer_total_discount" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_retur" class="col-sm-7 col-form-label text-right:">Total Retur:</label>
-                  <div class="col-sm-5">
-                    <input id="footer_total_retur" name="footer_total_retur" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="footer_total_invoice" class="col-sm-7 col-form-label text-right:">Total Nota:</label>
-                  <div class="col-sm-5">
-                    <input id="footer_total_nota" name="footer_total_nota" type="text" class="form-control text-right" value="0" readonly="">
-                  </div>
-                </div>
-                <div class="form-group row" style="margin-top: 20px;">
-                  <div class="col-sm-12">
-                    <button id="btncancel" class="btn btn-danger"><i class="fas fa-times-circle"></i> Batal</button>
-                    <button id="btnsave" class="btn btn-success button-header-custom-save"><i class="fas fa-save"></i> Simpan</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- ===== Info pembayaran ===== -->
+    <div class="pay-card">
+      <input id="customer_id" name="customer_id" type="hidden" value="<?php echo htmlspecialchars(isset($_GET['id']) ? $_GET['id'] : ''); ?>" readonly="">
+      <div class="pay-grid pay-grid-head">
+        <div class="pay-field">
+          <label><i class="fas fa-user"></i> Nama Customer</label>
+          <div class="pay-input"><i class="fas fa-user"></i><input id="customer_name" name="customer_name" type="text" class="form-control" readonly=""></div>
+        </div>
+        <div class="pay-field">
+          <label>Tanggal Pembayaran</label>
+          <div class="pay-input"><i class="far fa-calendar-alt"></i><input id="repayment_date" name="repayment_date" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>"></div>
+        </div>
+        <div class="pay-field">
+          <label>Metode Pembayaran</label>
+          <div class="pay-input"><i class="far fa-credit-card"></i>
+            <select class="form-control input-full js-example-basic-single" id="payment_method_id" name="payment_method_id">
+              <option value="">-- Pilih Metode Bayar --</option>
+              <?php foreach ($data['payment_list'] as $row) { ?>
+                <option value="<?php echo $row->payment_id; ?>"><?php echo $row->payment_name; ?></option>
+              <?php } ?>
+            </select>
+          </div>
+        </div>
+        <div class="pay-field">
+          <label>User</label>
+          <div class="pay-input"><i class="far fa-user"></i><input id="display_user" type="text" class="form-control" value="<?php echo $_SESSION['user_name']; ?>" readonly=""></div>
+        </div>
+        <div class="pay-total">
+          <div class="pay-total-icon"><i class="fas fa-coins"></i></div>
+          <div style="min-width:0;">
+            <label>Total Piutang Customer</label>
+            <input id="supplier_total_receivable" name="supplier_total_receivable" type="text" class="form-control" value="0" readonly="">
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ===== Input invoice ===== -->
+    <div class="pay-card">
+      <form id="formaddtemp">
+        <div class="pay-grid pay-grid-inv">
+          <div class="pay-field">
+            <label>No Invoice Penjualan</label>
+            <div class="pay-input"><i class="fas fa-search"></i>
+              <input id="sales_inv" name="sales_inv" type="text" class="form-control ui-autocomplete-input" placeholder="Ketikkan No Invoice..." value="" required="" autocomplete="off" data-parsley-required data-parsley-required-message="*Masukan No Invoice">
+              <input id="sales_id" type="hidden" name="sales_id">
+            </div>
+          </div>
+          <div class="pay-field">
+            <label>Tgl Invoice</label>
+            <div class="pay-input"><i class="far fa-calendar-alt"></i><input id="sales_invoice_date" name="sales_invoice_date" type="date" class="form-control ui-autocomplete-input"></div>
+          </div>
+          <div class="pay-field">
+            <label>Keterangan</label>
+            <div class="pay-input"><i class="far fa-sticky-note"></i><input id="receivable_desc" name="receivable_desc" type="text" class="form-control" placeholder="Keterangan (opsional)"></div>
+          </div>
+        </div>
+
+        <div class="pay-grid pay-grid-money">
+          <div class="pay-field">
+            <label>Saldo Piutang</label>
+            <div class="pay-input"><i class="fas fa-coins"></i><input id="receivable_nominal" name="receivable_nominal" type="text" class="form-control text-right" value="0" readonly></div>
+          </div>
+          <div class="pay-field">
+            <label>Total Retur</label>
+            <div class="pay-input"><i class="fas fa-undo"></i><input id="receivable_retur" name="receivable_retur" type="text" class="form-control text-right" value="0" readonly></div>
+          </div>
+          <div class="pay-field">
+            <label>Pembayaran</label>
+            <div class="pay-input"><i class="far fa-credit-card"></i><input id="receivable_payment" name="receivable_payment" type="text" class="form-control text-right" value="0"></div>
+          </div>
+          <div class="pay-field">
+            <label>Pembulatan / Disc</label>
+            <div class="pay-input"><i class="fas fa-percent"></i><input id="receivable_disc" name="receivable_disc" type="text" class="form-control text-right" value="0"></div>
+          </div>
+          <div class="pay-field">
+            <label>Sisa Piutang</label>
+            <div class="pay-input"><i class="far fa-clock"></i><input id="new_remaining_receivable" name="new_remaining_receivable" type="text" class="form-control text-right" value="0" readonly></div>
+          </div>
+          <div class="pay-field">
+            <button id="btnadd_temp" class="btn-pay-add btn-add-temp" title="Tambah ke daftar"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- ===== Daftar invoice + ringkasan ===== -->
+    <div class="pay-card">
+      <div class="table-responsive pay-table">
+        <table id="temp-receivable-list" class="display table table-hover">
+          <thead>
+            <tr>
+              <th>No Invoice</th>
+              <th>Tgl Invoice</th>
+              <th>Saldo Piutang</th>
+              <th>Pembulatan/Disc</th>
+              <th>Total Retur</th>
+              <th>Pembayaran</th>
+              <th>Sisa Piutang</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pay-bottom">
+        <div class="pay-note">
+          <h6><i class="far fa-edit"></i>Catatan</h6>
+          <textarea id="sales_retur_remark" name="sales_retur_remark" class="form-control" placeholder="Tambahkan catatan..." maxlength="500" rows="4"></textarea>
+        </div>
+        <div class="pay-summary">
+          <div class="pay-sum-row"><span><i class="fas fa-coins"></i>Total Pembayaran</span><input id="footer_total_pay" name="footer_total_pay" type="text" value="0" readonly=""></div>
+          <div class="pay-sum-row"><span><i class="fas fa-percent"></i>Total Discount</span><input id="footer_total_discount" name="footer_total_discount" type="text" value="0" readonly=""></div>
+          <div class="pay-sum-row"><span><i class="fas fa-undo"></i>Total Retur</span><input id="footer_total_retur" name="footer_total_retur" type="text" value="0" readonly=""></div>
+          <div class="pay-sum-row pay-sum-total"><span><i class="fas fa-file-invoice-dollar"></i>Total Nota</span><input id="footer_total_nota" name="footer_total_nota" type="text" value="0" readonly=""></div>
+        </div>
+      </div>
+
+      <div class="pay-actions">
+        <button id="btncancel" class="btn btn-cancel"><i class="far fa-times-circle"></i> Batal</button>
+        <button id="btnsave" class="btn btn-save"><i class="fas fa-save"></i> Simpan Pembayaran</button>
+      </div>
+    </div>
+
   </div>
 </div>
 

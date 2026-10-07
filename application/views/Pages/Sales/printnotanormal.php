@@ -1,519 +1,1370 @@
+<?php
+
+/*
+    Faktur Penjualan / Surat Jalan untuk printer dot matrix.
+
+    Satu halaman = kertas continuous 24.1 x 13.97 cm, konten dicetak di lebar 21.3cm bagian tengah, 9 item per halaman.
+
+    Header toko + info faktur dicetak ulang di setiap halaman.
+
+    $print_mode : 'invoice' (default) atau 'dispatch' (surat jalan, tanpa harga)
+*/
+
+$print_mode = isset($print_mode) ? $print_mode : 'invoice';
+
+$is_invoice = $print_mode == 'invoice';
+
+
+$header = $data['header_sales'][0];
+
+$items  = $data['detail_sales'];
+
+
+// setiap 9 item dipotong ke halaman baru
+
+$rows_per_page = 9;
+
+$pages      = $items ? array_chunk($items, $rows_per_page) : array(array());
+
+$total_page = count($pages);
+
+
+if (!function_exists('print_terbilang')) {
+
+    function print_terbilang($n)
+    {
+        $n = abs((int) $n);
+
+        $w = array(
+            '',
+            'satu',
+            'dua',
+            'tiga',
+            'empat',
+            'lima',
+            'enam',
+            'tujuh',
+            'delapan',
+            'sembilan',
+            'sepuluh',
+            'sebelas'
+        );
+
+        if ($n < 12) {
+            return $w[$n];
+        }
+
+        if ($n < 20) {
+            return print_terbilang($n - 10) . ' belas';
+        }
+
+        if ($n < 100) {
+            return print_terbilang(intdiv($n, 10)) . ' puluh ' . print_terbilang($n % 10);
+        }
+
+        if ($n < 200) {
+            return 'seratus ' . print_terbilang($n - 100);
+        }
+
+        if ($n < 1000) {
+            return print_terbilang(intdiv($n, 100)) . ' ratus ' . print_terbilang($n % 100);
+        }
+
+        if ($n < 2000) {
+            return 'seribu ' . print_terbilang($n - 1000);
+        }
+
+        if ($n < 1000000) {
+            return print_terbilang(intdiv($n, 1000)) . ' ribu ' . print_terbilang($n % 1000);
+        }
+
+        if ($n < 1000000000) {
+            return print_terbilang(intdiv($n, 1000000)) . ' juta ' . print_terbilang($n % 1000000);
+        }
+
+        return print_terbilang(intdiv($n, 1000000000)) . ' milyar ' . print_terbilang($n % 1000000000);
+    }
+
+}
+
+
+if (!function_exists('print_money')) {
+
+    function print_money($n)
+    {
+        return number_format((float) $n, 0, ',', '.');
+    }
+
+    function print_date($d)
+    {
+        return $d && $d != '0000-00-00'
+            ? date('d-m-Y', strtotime($d))
+            : '-';
+    }
+
+}
+
+
+$customer_address = trim(
+    $header->customer_address . ' ' .
+    ($header->customer_address_blok != '' ? 'Blok ' . $header->customer_address_blok . ' ' : '') .
+    ($header->customer_address_no != '' ? 'No. ' . $header->customer_address_no : '')
+);
+
+
+$discount     = (int) $header->hd_sales_total_discount;
+
+$ppn          = (int) $header->hd_sales_ppn;
+
+$has_due_date = $header->hd_sales_due_date != $header->hd_sales_date &&
+                $header->hd_sales_due_date != '0000-00-00';
+
+$note         = trim($header->hd_sales_note) == 'POS'
+                ? ''
+                : trim($header->hd_sales_note);
+
+$doc_title    = $is_invoice ? 'FAKTUR PENJUALAN' : 'SURAT JALAN';
+
+$col_count    = $is_invoice ? 8 : 6;
+
+
+$total_qty = 0;
+
+foreach ($items as $it) {
+    $total_qty += $it->dt_sales_qty;
+}
+
+?>
+
 <!DOCTYPE html>
+
 <html>
+
 <head>
-    <title>Faktur Penjualan</title>
+
+    <meta charset="utf-8">
+
+    <title><?php echo $doc_title . ' ' . $header->hd_sales_inv; ?></title>
 
     <style>
+
+        /* =========================================
+           RESET
+        ========================================= */
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        /*
-            DOT MATRIX LANDSCAPE
-            Ukuran kertas continuous form sekitar 9.5 x 5.5 inch
-        */
+
+        /* =========================================
+           UKURAN KERTAS
+
+           Kertas fisik (paper size aktif di driver):
+           24.1 x 13.97 cm
+
+           Lebar KONTEN sengaja dibuat lebih sempit
+           (21.3cm) dari lebar kertas fisik (24.1cm),
+           menyisakan +/- 1.4cm kosong di kiri & kanan.
+           Ini WAJIB untuk printer dot matrix: print
+           head/pita tidak bisa mencetak sampai ke tepi
+           kertas, apalagi di kertas continuous yang
+           tepi kiri-kanannya dipakai lubang sprocket.
+           Konten dipusatkan (center) di antara margin
+           kiri & kanan itu.
+        ========================================= */
+
         @page {
-            size: 9.5in 5.5in;
-            margin: 0.15in;
+            size: 24.1cm 13.97cm;
+            margin: 0;
         }
+
+        /* =========================================
+           KOREKSI POSISI CETAK (GESER)
+
+           Konten sudah otomatis DITENGAHKAN secara
+           horizontal. Kalau hasil print MASIH geser,
+           ubah 2 angka di bawah ini saja lalu cetak
+           ulang. Naikkan/turunkan sedikit demi sedikit
+           (misal 0.1cm - 0.2cm setiap coba).
+
+           - PRINT_SHIFT_DOWN : geser konten ke BAWAH
+             (mengatasi hasil cetak yang KETINGGIAN)
+           - PRINT_SHIFT_LEFT : geser konten ke KIRI
+             (mengatasi hasil cetak yang KEKANANAN)
+
+           Kalau sebaliknya (kurang tinggi / kurang
+           ke kanan), isi dengan angka negatif,
+           contoh: -0.3cm
+        ========================================= */
+
+        :root {
+            --print-shift-down: 0cm;
+            --print-shift-left: 0cm;
+        }
+
+
+        /* =========================================
+           BODY
+        ========================================= */
 
         body {
-            font-size: 10px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
             color: #000;
             background: #fff;
-            width: 9.2in;
-            line-height: 1.15;
-            padding: 2px;
+            line-height: 1.2;
         }
+
+
+        /* =========================================
+           HALAMAN
+
+           Kertas fisik = 24.1 x 13.97 cm
+           Lebar konten = 21.3cm, ditengahkan dengan
+           margin kiri/kanan +/- 1.4cm (lihat komentar
+           UKURAN KERTAS di atas). Tinggi konten juga
+           dibuat sedikit lebih pendek dari kertas asli
+           agar tidak memicu halaman kosong tambahan
+           akibat pembulatan browser.
+
+           PENTING:
+           Untuk PRINT tidak menggunakan
+           margin: 0 auto.
+        ========================================= */
 
         .page {
-            width: 9.5in;
-            min-height: 5.15in;
-            display: flex;
-            flex-direction: column;
+            width: 21.3cm;
+            height: 13.5cm;
+
+            /* konten ditengahkan (1.4cm kiri/kanan) + koreksi geser manual */
+            margin: calc(0.3cm + var(--print-shift-down)) 0 0 calc(1.4cm - var(--print-shift-left));
+            padding: 0;
+
+            overflow: hidden;
+
+            page-break-after: always;
+            break-after: page;
         }
 
-        /* ================= HEADER ================= */
+        .page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+
+        /* =========================================
+           HEADER
+        ========================================= */
 
         .hdr {
             display: flex;
-            border: 1px solid #000;
-            margin-bottom: 4px;
-        }
-
-        .hdr-left {
-            width: 55%;
-            display: flex;
-            align-items: center;
-            padding: 5px;
-        }
-
-        .hdr-logo img {
-            width: 42px;
-            max-height: 42px;
-            object-fit: contain;
-            display: block;
-            filter: grayscale(100%) contrast(200%);
-        }
-
-        .hdr-store {
-            margin-left: 7px;
-        }
-
-        .hdr-store .sname {
-            font-size: 18px;
-            font-weight: bold;
-            line-height: 1.1;
-        }
-
-        .hdr-store .sdoc {
-            font-size: 14px;
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        .hdr-store .saddr {
-            font-size: 11px;
-            margin-top: 3px;
-            line-height: 1.3;
-        }
-
-        .hdr-right {
-            width: 45%;
-            padding: 5px;
-            font-size: 9px;
-        }
-
-        .hdr-inv {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+
+            padding-bottom: 4px;
+
+            border-bottom: 2px solid #000;
+        }
+
+        .store-name {
+            font-size: 17px;
             font-weight: bold;
-            border-bottom: 1px dashed #000;
-            padding-bottom: 3px;
-            margin-bottom: 3px;
+            letter-spacing: .5px;
         }
 
-        .hdr-inv .inv-num {
-            font-size: 14px;
+        .store-info {
+            font-size: 10px;
+            margin-top: 1px;
         }
 
-        .hdr-inv .pg-info {
-            font-size: 8px;
-        }
-
-        .hdr-rows table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .hdr-rows td {
-            padding: 1px 2px;
-            vertical-align: top;
-            font-size: 14px;
-        }
-
-        .hdr-rows .lbl {
-            width: 72px;
-            white-space: nowrap;
-        }
-
-        .hdr-rows .sep {
-            width: 10px;
-        }
-
-
-        /* ================= TABLE BARANG ================= */
-
-        .tbl-item {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            border: 1px solid #000;
-        }
-
-        .tbl-item th {
-            border: 1px solid #000;
-            background: #fff !important;
-            color: #000 !important;
-            font-size: 9px;
-            font-weight: bold;
-            padding: 3px 2px;
-            text-align: center;
-        }
-
-        .tbl-item td {
-            border-left: 1px solid #000;
-            border-right: 1px solid #000;
-            border-bottom: 1px dashed #555;
-            padding: 3px;
-            font-size: 12px;
-            vertical-align: middle;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: clip;
-        }
-
-        .tbl-item tbody tr:last-child td {
-            border-bottom: 1px solid #000;
-        }
-
-        .tbl-item tbody tr:nth-child(odd),
-        .tbl-item tbody tr:nth-child(even) {
-            background: #fff !important;
-        }
-
-        .tc {
-            text-align: center;
-        }
-
-        .tr {
+        .doc-box {
             text-align: right;
         }
 
-        .al {
-            text-align: left !important;
+        .doc-title {
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+
+            border: 2px solid #000;
+
+            padding: 2px 10px;
+
+            display: inline-block;
         }
 
-        /* ================= FOOTER ================= */
+        .doc-page {
+            font-size: 10px;
+            margin-top: 2px;
+        }
 
-        .footer {
+
+        /* =========================================
+           INFORMASI FAKTUR
+        ========================================= */
+
+        .info {
             display: flex;
-            margin-top: 4px;
-            gap: 4px;
+            gap: 12px;
+            margin: 5px 0;
         }
 
-        .sign-wrap {
-            width: 60%;
-            display: flex;
-            min-height: 78px;
+        .info-box {
+            flex: 1;
+
+            border: 1px solid #000;
+
+            padding: 3px 7px;
         }
 
-        .sign-col {
-            width: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-align: center;
-            padding: 5px;
-            font-size: 9px;
+        .info-box table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .sign-col .slabel {
-			font-size: 14px;
-            text-transform: uppercase;
-        }
+        .info-box td {
+            padding: 0;
+            vertical-align: top;
 
-        .sign-col .sspace {
-            min-height: 38px;
-        }
-
-        .sign-col .sname {
-            border-top: 1px solid #000;
-            padding-top: 2px;
-            font-size: 8px;
-        }
-
-        .sum-wrap {
-            width: 40%;
-        }
-
-        .sum-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 3.5px 7px;
-            font-size: 15.5px;
-        }
-
-        .sum-row:last-child {
-            border-bottom: none;
-        }
-
-        .sum-row.grand {
-            background: #1e1e1e !important;
-            color: #fff !important;
-            font-weight: 900;
-            letter-spacing: 0.3px;
-            padding: 5px 7px;
-            border-bottom: none;
-        }
-
-        .sum-row.disc .slbl,
-        .sum-row.disc .sval {
-            color: #b50000;
-        }
-
-        .sum-row.sisa {
-            font-weight: 800;
             font-size: 11px;
+            line-height: 1.3;
         }
 
-        .slbl,
-        .sval {
+        .info-box .lbl {
+            width: 78px;
             white-space: nowrap;
         }
 
-        .slbl {
-            font-weight: 600;
+        .info-box .sep {
+            width: 9px;
         }
 
-        .sval {
-            font-weight: 700;
+        .info-box .val {
+            font-weight: bold;
         }
 
-        .sum-row.grand .slbl,
-        .sum-row.grand .sval {
-            font-weight: 900;
-            color: #fff;
+        .info-box .addr {
+            font-weight: normal;
         }
 
-        .page-break {
-            page-break-after: always;
+
+        /* =========================================
+           TABEL BARANG
+        ========================================= */
+
+        .items {
+            width: 100%;
+
+            border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        @media print {
+        .items th {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+
+            padding: 3px 4px;
+
+            font-size: 10px;
+            font-weight: bold;
+
+            text-align: left;
+        }
+
+        .items td {
+            padding: 1px 4px;
+
+            height: 0.19in;
+
+            font-size: 11px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: clip;
+
+            border-bottom: 1px dotted #777;
+        }
+
+        .items tr.last td {
+            border-bottom: 1px solid #000;
+        }
+
+        .tc {
+            text-align: center !important;
+        }
+
+        .tr {
+            text-align: right !important;
+        }
+
+
+        /* =========================================
+           CONTINUED
+        ========================================= */
+
+        .continued {
+            text-align: right;
+
+            font-size: 10px;
+            font-style: italic;
+
+            padding-top: 4px;
+        }
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        .footer {
+            display: flex;
+
+            gap: 14px;
+
+            margin-top: 5px;
+        }
+
+        .ft-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .terbilang {
+            border: 1px solid #000;
+
+            padding: 3px 7px;
+
+            font-size: 10px;
+            font-style: italic;
+        }
+
+        .terbilang b {
+            font-style: normal;
+        }
+
+        .note {
+            font-size: 10px;
+            margin-top: 3px;
+        }
+
+        .signs {
+            display: flex;
+
+            justify-content: space-around;
+
+            margin-top: 6px;
+
+            text-align: center;
+
+            font-size: 11px;
+        }
+
+        .sign {
+            width: 1.7in;
+        }
+
+        .sign .space {
+            height: 0.42in;
+        }
+
+        .sign .line {
+            font-size: 10px;
+        }
+
+
+        /* =========================================
+           TOTAL
+        ========================================= */
+
+        .totals {
+            width: 2.9in;
+
+            border-collapse: collapse;
+
+            align-self: flex-start;
+        }
+
+        .totals td {
+            padding: 1px 4px;
+
+            font-size: 11px;
+        }
+
+        .totals .tval {
+            text-align: right;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+        .totals .grand td {
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            padding: 3px 4px;
+        }
+
+
+        /* =========================================
+           PRINT META
+        ========================================= */
+
+        .print-meta {
+            font-size: 8px;
+
+            margin-top: 4px;
+
+            display: flex;
+
+            justify-content: space-between;
+        }
+
+
+        /* =========================================
+           PREVIEW DI LAYAR
+           
+           Preview tetap berada di tengah.
+           Ini hanya untuk layar, bukan print.
+        ========================================= */
+
+        @media screen {
+
             body {
-                width: 9.2in;
-            }
-
-            * {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                background: #e5e7eb;
+                padding: 16px 0;
             }
 
             .page {
-                page-break-inside: avoid;
+                background: #fff;
+
+                width: 21.3cm;
+
+                margin: 0 auto 16px;
+
+                box-shadow: 0 2px 10px rgba(0,0,0,.2);
             }
+
+            .toolbar {
+                text-align: center;
+
+                margin-bottom: 12px;
+            }
+
+            .toolbar button {
+                font-size: 14px;
+
+                padding: 8px 20px;
+
+                cursor: pointer;
+            }
+
         }
+
+
+        /* =========================================
+           PRINT
+
+           Saat print:
+           - tidak ada margin auto
+           - width 20.3 cm (ditengahkan, lihat komentar
+             UKURAN KERTAS di atas)
+           - height 13.5 cm
+        ========================================= */
+
+        @media print {
+
+            .toolbar {
+                display: none;
+            }
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            .page {
+                width: 21.3cm;
+                height: 13.5cm;
+
+                /* konten ditengahkan (1.4cm kiri/kanan) + koreksi geser manual */
+                margin: calc(0.3cm + var(--print-shift-down)) 0 0 calc(1.4cm - var(--print-shift-left));
+                padding: 0;
+
+                overflow: hidden;
+
+                page-break-after: always;
+                break-after: page;
+            }
+
+            .page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
-<?php
-    /*
-        8 baris agar tulisan lebih renggang dan jelas di printer dot matrix.
-    */
-    $items_per_page = 10;
-    $chunks         = array_chunk($data['detail_sales'], $items_per_page);
-    $total_page     = count($chunks);
-    $page           = 1;
 
-    foreach ($chunks as $chunk) {
-        foreach ($data['header_sales'] as $header) {
-            /* bind header */
-        }
+<div class="toolbar">
+
+    <button onclick="window.print()">
+        Cetak (<?php echo $total_page; ?> halaman)
+    </button>
+
+    <div style="font-size:12px;color:#555;margin-top:6px;">
+        Atur printer: paper size "Dot Metrix" (24.1 x 13.97 cm), scale 100%.
+    </div>
+
+</div>
+
+
+<?php
+
+$no = 1;
+
+foreach ($pages as $p => $chunk) {
+
+    $page_no = $p + 1;
+
+    $is_last = $page_no == $total_page;
+
 ?>
 
 <div class="page">
 
+
+    <!-- ===== HEADER ===== -->
+
     <div class="hdr">
 
-        <div class="hdr-left">
-            <div class="hdr-store">
-                <div class="sname"><?php echo company; ?></div>
-                <div class="sdoc">FAKTUR PENJUALAN</div>
-                <div class="saddr">
-                    <?php echo company_address; ?><br>
-                    Telp: <?php echo company_phone; ?>
-                </div>
+        <div>
+
+            <div class="store-name">
+                <?php echo company; ?>
             </div>
+
+            <div class="store-info">
+                <?php echo company_address; ?>
+                &nbsp;|&nbsp;
+                Telp: <?php echo company_phone; ?>
+            </div>
+
         </div>
 
-        <div class="hdr-right">
 
-            <div class="hdr-inv">
-                <span class="inv-num"><?php echo $header->hd_sales_inv; ?></span>
-                <span class="pg-info">Hal <?php echo $page; ?> / <?php echo $total_page; ?></span>
+        <div class="doc-box">
+
+            <div class="doc-title">
+                <?php echo $doc_title; ?>
             </div>
 
-            <div class="hdr-rows">
-                <table>
-                    <tr>
-                        <td class="lbl">Tanggal</td>
-                        <td class="sep">:</td>
-                        <td class="val"><?php echo $header->hd_sales_date; ?></td>
-                    </tr>
-
-                    <tr>
-                        <td class="lbl">Pembayaran</td>
-                        <td class="sep">:</td>
-                        <td class="val"><?php echo $header->payment_name; ?></td>
-                    </tr>
-
-                    <tr>
-                        <td class="lbl">Kepada</td>
-                        <td class="sep">:</td>
-                        <td class="val">
-                            <?php echo $header->customer_name; ?>
-                            <?php
-                                if (!empty($header->customer_phone)) {
-                                    echo ' / ' . $header->customer_phone;
-                                }
-                            ?>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td class="lbl">Alamat</td>
-                        <td class="sep">:</td>
-                        <td class="val">
-                            <?php echo $header->customer_address; ?>
-                        </td>
-                    </tr>
-                </table>
+            <div class="doc-page">
+                Halaman <?php echo $page_no; ?> dari <?php echo $total_page; ?>
             </div>
 
         </div>
 
     </div>
 
-    <!-- ================= TABLE BARANG ================= -->
-    <div class="tbl-wrap">
 
-        <table class="tbl-item">
+    <!-- ===== INFO FAKTUR ===== -->
 
-            <colgroup>
-                <col style="width:5%">
-                <col style="width:8%">
-                <col style="width:13%">
-                <col style="width:39%">
-                <col style="width:17.5%">
-                <col style="width:17.5%">
-            </colgroup>
+    <div class="info">
 
-            <thead>
+
+        <div class="info-box">
+
+            <table>
+
                 <tr>
-                    <th>NO</th>
-                    <th>QTY</th>
-                    <th>SKU</th>
-                    <th class="al">NAMA BARANG</th>
-                    <th>HARGA SAT.</th>
-                    <th>JUMLAH</th>
+                    <td class="lbl">
+                        No. <?php echo $is_invoice ? 'Faktur' : 'Referensi'; ?>
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val">
+                        <?php echo $header->hd_sales_inv; ?>
+                    </td>
                 </tr>
-            </thead>
 
-            <tbody>
 
-                <?php
-                    $no = 1 + (($page - 1) * $items_per_page);
+                <tr>
 
-                    foreach ($chunk as $row) {
-                ?>
-                    <tr>
-                        <td class="tc"><?php echo $no++; ?></td>
-                        <td class="tc"><?php echo $row->dt_sales_qty; ?>x</td>
-                        <td><?php echo $row->product_code; ?></td>
-                        <td><?php echo $row->product_name; ?></td>
-                        <td class="tr"><?php echo number_format($row->dt_sales_price); ?></td>
-                        <td class="tr"><?php echo number_format($row->dt_sales_total); ?></td>
-                    </tr>
+                    <td class="lbl">
+                        Tanggal
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val">
+
+                        <?php echo print_date($header->hd_sales_date); ?>
+
+                        <?php if ($is_invoice && $has_due_date) { ?>
+
+                            &nbsp;
+
+                            <span class="addr">
+                                Jatuh Tempo:
+                            </span>
+
+                            <?php echo print_date($header->hd_sales_due_date); ?>
+
+                        <?php } ?>
+
+                    </td>
+
+                </tr>
+
+
+                <?php if ($is_invoice) { ?>
+
+                <tr>
+
+                    <td class="lbl">
+                        Pembayaran
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val">
+
+                        <?php echo $header->payment_name; ?>
+
+                        <?php echo $header->hd_sales_remaining_debt > 0
+                            ? ' (Kredit)'
+                            : ' (Lunas)'; ?>
+
+                    </td>
+
+                </tr>
+
                 <?php } ?>
 
-                <!-- Baris kosong agar tabel tetap rapi -->
-                <?php for ($i = count($chunk); $i < $items_per_page; $i++) { ?>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                <?php } ?>
 
-            </tbody>
-        </table>
+                <tr>
+
+                    <td class="lbl">
+                        Dibuat Oleh
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val">
+                        <?php echo $header->user_name; ?>
+                    </td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+
+        <div class="info-box">
+
+            <table>
+
+                <tr>
+
+                    <td class="lbl">
+                        Kepada
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val">
+
+                        <?php echo $header->customer_name; ?>
+
+                        <?php echo $header->customer_code != ''
+                            ? '('.$header->customer_code.')'
+                            : ''; ?>
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="lbl">
+                        Alamat
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val addr">
+
+                        <?php echo $customer_address != ''
+                            ? $customer_address
+                            : '-'; ?>
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="lbl">
+                        Telp
+                    </td>
+
+                    <td class="sep">
+                        :
+                    </td>
+
+                    <td class="val addr">
+
+                        <?php echo $header->customer_phone != ''
+                            ? $header->customer_phone
+                            : '-'; ?>
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
 
     </div>
 
-    <?php if ($page == $total_page) { ?>
 
-        <!-- ================= FOOTER ================= -->
+    <!-- ===== TABEL BARANG ===== -->
+
+    <table class="items">
+
+
+        <colgroup>
+
+            <?php if ($is_invoice) { ?>
+
+                <col style="width:5%">
+                <col style="width:13%">
+                <col style="width:34%">
+                <col style="width:7%">
+                <col style="width:8%">
+                <col style="width:12%">
+                <col style="width:9%">
+                <col style="width:12%">
+
+            <?php } else { ?>
+
+                <col style="width:5%">
+                <col style="width:15%">
+                <col style="width:45%">
+                <col style="width:9%">
+                <col style="width:10%">
+                <col style="width:16%">
+
+            <?php } ?>
+
+        </colgroup>
+
+
+        <thead>
+
+            <tr>
+
+                <th class="tc">
+                    NO
+                </th>
+
+                <th>
+                    KODE
+                </th>
+
+                <th>
+                    NAMA BARANG
+                </th>
+
+                <th class="tr">
+                    QTY
+                </th>
+
+                <th>
+                    SATUAN
+                </th>
+
+
+                <?php if ($is_invoice) { ?>
+
+                    <th class="tr">
+                        HARGA
+                    </th>
+
+                    <th class="tr">
+                        DISKON
+                    </th>
+
+                    <th class="tr">
+                        JUMLAH
+                    </th>
+
+                <?php } else { ?>
+
+                    <th>
+                        KETERANGAN
+                    </th>
+
+                <?php } ?>
+
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+
+        <?php
+
+        for ($i = 0; $i < $rows_per_page; $i++) {
+
+            $row = isset($chunk[$i])
+                ? $chunk[$i]
+                : null;
+
+            $cls = $i == $rows_per_page - 1
+                ? ' class="last"'
+                : '';
+
+        ?>
+
+
+            <?php if ($row) { ?>
+
+
+                <tr<?php echo $cls; ?>>
+
+                    <td class="tc">
+                        <?php echo $no++; ?>
+                    </td>
+
+
+                    <td>
+                        <?php echo $row->product_code; ?>
+                    </td>
+
+
+                    <td>
+                        <?php echo $row->product_name; ?>
+                    </td>
+
+
+                    <td class="tr">
+                        <?php echo print_money($row->dt_sales_qty); ?>
+                    </td>
+
+
+                    <td>
+                        <?php echo $row->unit_name; ?>
+                    </td>
+
+
+                    <?php if ($is_invoice) { ?>
+
+
+                        <td class="tr">
+                            <?php echo print_money($row->dt_sales_price); ?>
+                        </td>
+
+
+                        <td class="tr">
+
+                            <?php echo $row->dt_sales_discount > 0
+                                ? print_money($row->dt_sales_discount)
+                                : '-'; ?>
+
+                        </td>
+
+
+                        <td class="tr">
+                            <?php echo print_money($row->dt_sales_total); ?>
+                        </td>
+
+
+                    <?php } else { ?>
+
+
+                        <td>
+                            <?php echo $row->dt_sales_desc; ?>
+                        </td>
+
+
+                    <?php } ?>
+
+
+                </tr>
+
+
+            <?php } else { ?>
+
+
+                <tr<?php echo $cls; ?>>
+
+                    <td colspan="<?php echo $col_count; ?>">
+                        &nbsp;
+                    </td>
+
+                </tr>
+
+
+            <?php } ?>
+
+
+        <?php } ?>
+
+
+        </tbody>
+
+
+    </table>
+
+
+    <?php if (!$is_last) { ?>
+
+
+        <div class="continued">
+            Bersambung ke halaman <?php echo $page_no + 1; ?> ...
+        </div>
+
+
+    <?php } else { ?>
+
+
+        <!-- ===== FOOTER ===== -->
+
         <div class="footer">
 
-            <!-- TANDA TANGAN -->
-            <div class="sign-wrap">
 
-                <div class="sign-col">
-                    <div class="slabel">Penerima</div>
-                    <div class="sspace"></div>
-                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
+            <div class="ft-left">
+
+
+                <?php if ($is_invoice) { ?>
+
+
+                    <div class="terbilang">
+
+                        <b>Terbilang:</b>
+
+                        <?php
+                        echo ucfirst(
+                            trim(
+                                preg_replace(
+                                    '/\s+/',
+                                    ' ',
+                                    print_terbilang($header->hd_sales_total)
+                                )
+                            )
+                        );
+                        ?>
+
+                        rupiah
+
+                    </div>
+
+
+                <?php } ?>
+
+
+                <div class="note">
+
+                    <b>Catatan:</b>
+
+                    <?php
+
+                    echo $note != ''
+                        ? htmlspecialchars($note)
+                        : (
+                            $is_invoice
+                            ? 'Barang yang sudah dibeli tidak dapat ditukar / dikembalikan.'
+                            : 'Harap periksa barang sebelum menandatangani surat jalan.'
+                        );
+
+                    ?>
+
                 </div>
 
-                <div class="sign-col">
-                    <div class="slabel">Hormat Kami</div>
-                    <div class="sspace"></div>
-                    <div class="sname" style="width:80%; text-align:center; margin-left: 10%;"></div>
+
+                <div class="signs">
+
+
+                    <div class="sign">
+
+                        <div>
+                            Penerima
+                        </div>
+
+                        <div class="space">
+                        </div>
+
+                        <div class="line">
+                            ( .............................. )
+                        </div>
+
+                    </div>
+
+
+                    <?php if (!$is_invoice) { ?>
+
+
+                        <div class="sign">
+
+                            <div>
+                                Pengirim
+                            </div>
+
+                            <div class="space">
+                            </div>
+
+                            <div class="line">
+                                ( .............................. )
+                            </div>
+
+                        </div>
+
+
+                    <?php } ?>
+
+
+                    <div class="sign">
+
+                        <div>
+                            Hormat Kami
+                        </div>
+
+                        <div class="space">
+                        </div>
+
+                        <div class="line">
+                            ( .............................. )
+                        </div>
+
+                    </div>
+
+
                 </div>
+
 
             </div>
 
-            <!-- TOTAL -->
-            <div class="sum-wrap">
 
-                <?php
-                    $discount = !empty($header->hd_sales_total_discount)
-                        ? (int)$header->hd_sales_total_discount
-                        : 0;
+            <?php if ($is_invoice) { ?>
 
-                    $ppn = !empty($header->hd_sales_ppn)
-                        ? (int)$header->hd_sales_ppn
-                        : 0;
 
-                    $subtotal = (int)$header->hd_sales_total + $discount - $ppn;
-                ?>
+                <table class="totals">
 
-                <div class="sum-row">
-                    <span class="slbl">Sub Total</span>
-                    <span class="sval">Rp <?php echo number_format($subtotal); ?></span>
-                </div>
 
-                <?php if ($discount > 0) { ?>
-                    <div class="sum-row">
-                        <span class="slbl">Diskon</span>
-                        <span class="sval">Rp <?php echo number_format($discount); ?></span>
-                    </div>
-                <?php } ?>
+                    <tr>
 
-                <?php if ($ppn > 0) { ?>
-                    <div class="sum-row">
-                        <span class="slbl">PPN 11%</span>
-                        <span class="sval">Rp <?php echo number_format($ppn); ?></span>
-                    </div>
-                <?php } ?>
+                        <td>
+                            Sub Total
+                        </td>
 
-                <div class="sum-row grand">
-                    <span class="slbl">TOTAL FAKTUR</span>
-                    <span class="sval">Rp <?php echo number_format($header->hd_sales_total); ?></span>
-                </div>
+                        <td class="tval">
+                            <?php echo print_money($header->hd_sales_sub_total); ?>
+                        </td>
 
-                <?php if (!empty($header->hd_sales_dp) && $header->hd_sales_dp > 0) { ?>
-                    <div class="sum-row">
-                        <span class="slbl">DP / Bayar</span>
-                        <span class="sval">Rp <?php echo number_format($header->hd_sales_dp); ?></span>
-                    </div>
-                <?php } ?>
+                    </tr>
 
-            </div>
+
+                    <?php if ($discount > 0) { ?>
+
+
+                        <tr>
+
+                            <td>
+                                Diskon
+                            </td>
+
+                            <td class="tval">
+                                - <?php echo print_money($discount); ?>
+                            </td>
+
+                        </tr>
+
+
+                    <?php } ?>
+
+
+                    <?php if ($ppn > 0) { ?>
+
+
+                        <tr>
+
+                            <td>
+                                PPN 11%
+                            </td>
+
+                            <td class="tval">
+                                <?php echo print_money($ppn); ?>
+                            </td>
+
+                        </tr>
+
+
+                    <?php } ?>
+
+
+                    <tr class="grand">
+
+                        <td>
+                            TOTAL
+                        </td>
+
+                        <td class="tval">
+                            Rp <?php echo print_money($header->hd_sales_total); ?>
+                        </td>
+
+                    </tr>
+
+
+                    <?php if ($header->hd_sales_remaining_debt > 0) { ?>
+
+
+                        <tr>
+
+                            <td>
+                                DP / Dibayar
+                            </td>
+
+                            <td class="tval">
+                                <?php echo print_money($header->hd_sales_dp); ?>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <b>Sisa Tagihan</b>
+                            </td>
+
+                            <td class="tval">
+                                <?php echo print_money($header->hd_sales_remaining_debt); ?>
+                            </td>
+
+                        </tr>
+
+
+                    <?php } ?>
+
+
+                </table>
+
+
+            <?php } else { ?>
+
+
+                <table class="totals">
+
+
+                    <tr class="grand">
+
+                        <td>
+                            TOTAL QTY
+                        </td>
+
+                        <td class="tval">
+                            <?php echo print_money($total_qty); ?>
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Jumlah Item
+                        </td>
+
+                        <td class="tval">
+                            <?php echo count($items); ?>
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+
+            <?php } ?>
+
 
         </div>
+
 
     <?php } ?>
 
+
+    <div class="print-meta">
+
+        <span>
+            Dicetak:
+            <?php echo date('d-m-Y H:i'); ?>
+            oleh
+            <?php echo isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '-'; ?>
+        </span>
+
+        <span>
+            <?php echo $header->hd_sales_inv; ?>
+        </span>
+
+    </div>
+
+
 </div>
 
-<?php if ($page < $total_page) { ?>
-    <div class="page-break"></div>
+
 <?php } ?>
 
-<?php
-        $page++;
-    }
-?>
+
+<script>
+
+    window.onafterprint = function() {
+        window.close();
+    };
+
+    window.onload = function() {
+        window.print();
+    };
+
+</script>
+
 
 </body>
+
 </html>

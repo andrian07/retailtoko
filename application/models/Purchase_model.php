@@ -21,8 +21,10 @@ class purchase_model extends CI_Model {
             $this->db->where('hd_po_supplier', $supplier_filter_val);
         }
         if($search != null){
+            $this->db->group_start();
             $this->db->where('hd_po_invoice like "%'.$search.'%"');
             $this->db->or_where('supplier_name like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_po.created_at', 'desc');
         $this->db->limit($length);
@@ -44,8 +46,10 @@ class purchase_model extends CI_Model {
             $this->db->where('hd_po_supplier', $supplier_filter_val);
         }
         if($search != null){
+            $this->db->group_start();
             $this->db->where('hd_po_invoice like "%'.$search.'%"');
             $this->db->or_where('supplier_name like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $query = $this->db->get();
         return $query;
@@ -60,8 +64,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_user', 'temp_po.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_po.created_at', 'desc');
         $this->db->limit($length);
@@ -79,8 +85,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_user', 'temp_po.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_po.created_at', 'desc');
         $query = $this->db->get();
@@ -244,8 +252,10 @@ class purchase_model extends CI_Model {
             $this->db->where('hd_purchase_supplier', $supplier_filter_val);
         }
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_supplier.supplier_name like "%'.$search.'%"');
             $this->db->or_where('hd_purchase.hd_purchase_invoice like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_purchase.created_at', 'desc');
         $this->db->limit($length);
@@ -268,8 +278,10 @@ class purchase_model extends CI_Model {
             $this->db->where('hd_purchase_supplier', $supplier_filter_val);
         }
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_supplier.supplier_name like "%'.$search.'%"');
             $this->db->or_where('hd_purchase.hd_purchase_invoice like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $query = $this->db->get();
         return $query;
@@ -325,8 +337,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_user', 'temp_purchase.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_purchase.created_at', 'desc');
         $this->db->limit($length);
@@ -342,11 +356,12 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_product', 'temp_purchase.temp_product_id = ms_product.product_id');
         $this->db->join('ms_unit', 'ms_unit.unit_id = ms_product.product_unit');
         $this->db->join('ms_user', 'temp_purchase.temp_user_id = ms_user.user_id');
-        $this->db->where('ms_product.product_name like "%'.$search.'%"');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_purchase.created_at', 'desc');
         $query = $this->db->get();
@@ -498,8 +513,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_supplier', 'hd_retur_purchase.hd_retur_purchase_supplier_id = ms_supplier.supplier_id');
         $this->db->join('ms_user', 'hd_retur_purchase.created_by = ms_user.user_id');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('hd_retur_purchase.hd_retur_purchase_inv like "%'.$search.'%"');
             $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_retur_purchase.created_at', 'desc');
         $this->db->limit($length);
@@ -515,8 +532,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_supplier', 'hd_retur_purchase.hd_retur_purchase_supplier_id = ms_supplier.supplier_id');
         $this->db->join('ms_user', 'hd_retur_purchase.created_by = ms_user.user_id');
         if($search != null){
+            $this->db->group_start();
             $this->db->where('hd_retur_purchase.hd_retur_purchase_inv like "%'.$search.'%"');
             $this->db->or_where('ms_supplier.supplier_name like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $query = $this->db->get();
         return $query;
@@ -531,8 +550,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_user', 'temp_retur_purchase.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_retur_purchase.created_at', 'desc');
         $this->db->limit($length);
@@ -550,8 +571,10 @@ class purchase_model extends CI_Model {
         $this->db->join('ms_user', 'temp_retur_purchase.temp_user_id = ms_user.user_id');
         $this->db->where('temp_user_id', $user);
         if($search != null){
+            $this->db->group_start();
             $this->db->where('ms_product.product_name like "%'.$search.'%"');
             $this->db->or_where('ms_product.product_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('temp_retur_purchase.created_at', 'desc');
         $query = $this->db->get();
@@ -665,7 +688,7 @@ class purchase_model extends CI_Model {
 
     public function header_retur_purchase($retur_purchase_id)
     {
-        $query = $this->db->query("select * from hd_retur_purchase a, ms_supplier c, ms_user d where a.hd_retur_purchase_supplier_id = c.supplier_id and a.created_by = d.user_id and hd_retur_purchase_id  = '".$retur_purchase_id."'");
+        $query = $this->db->query("select *, a.created_at as trx_created_at from hd_retur_purchase a, ms_supplier c, ms_user d where a.hd_retur_purchase_supplier_id = c.supplier_id and a.created_by = d.user_id and hd_retur_purchase_id  = '".$retur_purchase_id."'");
         $result = $query->result();
         return $result;
     }

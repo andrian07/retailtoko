@@ -88,10 +88,12 @@
 				$this->masterdata_model->save_role($insert);
 				$role_id = $this->db->insert_id();
 
-				for($i = 1; $i<=28 ; $i++){
+				$modules = $this->db->select('module_id')->get('ms_module')->result();
+				foreach($modules as $module){
 					$data_insert_permision = array(
 						'role_id'	       => $role_id,
-						'module_id'        => $i
+						'module_id'        => $module->module_id,
+						'nav_bar'          => 'N'
 					);
 
 					$this->masterdata_model->save_permision($data_insert_permision);
@@ -181,8 +183,8 @@
 					'access_special_price'	=> $access_price_khusus,
 					'access_purchase_price'	=> $access_purchase_price,
 					'access_stock'	       	=> $access_stock,
-					'access_item_supplier'	=> $access_supplier,
-					'access_supplier'	    => $access_item_supplier,
+					'access_item_supplier'	=> $access_item_supplier,
+					'access_supplier'	    => $access_supplier,
 					'access_status'	       	=> $access_status
 
 				);
@@ -373,6 +375,8 @@
 					'user_role'	       	=> $user_role
 				);
 				if($user_id_inp == null){
+					$data_insert['is_active']   = 'Y';
+					$data_insert['user_branch'] = 1;
 					$this->masterdata_model->save_user($data_insert);
 				}else{
 					$this->masterdata_model->edit_user($data_insert, $user_id_inp);

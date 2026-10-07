@@ -9,7 +9,9 @@ class opname_model extends CI_Model {
         $this->db->from('hd_opname');
         $this->db->join('ms_user', 'hd_opname.opname_user = ms_user.user_id');
         if($search != null){
-            $this->db->or_where('hd_opname.opname_code like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('hd_opname.opname_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_opname.opname_id', 'desc');
         $this->db->limit($length);
@@ -24,7 +26,9 @@ class opname_model extends CI_Model {
         $this->db->from('hd_opname');
         $this->db->join('ms_user', 'hd_opname.opname_user = ms_user.user_id');
         if($search != null){
-            $this->db->or_where('hd_opname.opname_code like "%'.$search.'%"');
+            $this->db->group_start();
+            $this->db->where('hd_opname.opname_code like "%'.$search.'%"');
+            $this->db->group_end();
         }
         $this->db->order_by('hd_opname.opname_id', 'desc');
         $query = $this->db->get();
@@ -39,7 +43,7 @@ class opname_model extends CI_Model {
         $this->db->join('ms_user', 'temp_opname.user_id = ms_user.user_id');
         $this->db->where('temp_opname.user_id', $user);
         if($search != null){
-            $this->db->where('ms_product.user_id like "%'.$search.'%"');
+            $this->db->where('(ms_product.product_name like "%'.$search.'%" OR ms_product.product_code like "%'.$search.'%")');
         }
         $this->db->order_by('temp_opname.temp_opname_product_id ', 'desc');
         $this->db->limit($length);
@@ -56,7 +60,7 @@ class opname_model extends CI_Model {
         $this->db->join('ms_user', 'temp_opname.user_id = ms_user.user_id');
         $this->db->where('temp_opname.user_id', $user);
         if($search != null){
-            $this->db->where('ms_product.user_id like "%'.$search.'%"');
+            $this->db->where('(ms_product.product_name like "%'.$search.'%" OR ms_product.product_code like "%'.$search.'%")');
         }
         $this->db->order_by('temp_opname.temp_opname_product_id ', 'desc');
         $query = $this->db->get();
@@ -147,7 +151,7 @@ class opname_model extends CI_Model {
 
     public function get_header_opname($opname_id)
     {
-        $this->db->select('*');
+        $this->db->select('*, hd_opname.created_at as trx_created_at');
         $this->db->from('hd_opname');
         $this->db->join('ms_user', 'hd_opname.opname_user = ms_user.user_id');
         $this->db->where('hd_opname.opname_id', $opname_id);

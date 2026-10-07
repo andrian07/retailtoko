@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Pionir Backoffice</title>
+   <title>CV. Anugrah Harapan Utama</title>
   <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
-  <link rel="icon" href="<?php echo base_url(); ?>assets/logo.png" type="image/x-icon"/>
+  
   <style type="text/css">
     .img-thumbnail {
       padding: .25rem;
@@ -15,6 +15,12 @@
       max-width: 100%;
       height: auto;
     }
+    .pos-brand { display: flex !important; align-items: center; gap: 12px; text-decoration: none; }
+    .pos-brand-icon { width: 42px; height: 42px; border-radius: 11px; background: linear-gradient(145deg, #16a870, #0f8a5f); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,.25); }
+    .pos-brand-text { display: flex; flex-direction: column; line-height: 1.05; color: #fff; }
+    .pos-brand-text b { font-size: 1.3rem; font-weight: 800; letter-spacing: .5px; }
+    .pos-brand-text small { font-size: .78rem; font-weight: 500; opacity: .9; margin-top: 2px; }
+    .sidebar_minimize:not(.sidebar_minimize_hover) .pos-brand-text { display: none; }
   </style>
   <script src="<?php echo base_url(); ?>dist/js/plugin/webfont/webfont.min.js"></script>
   <script>
@@ -43,22 +49,31 @@
   <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/fancy.css" />
   <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/select2.css" />
   <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/jquery-ui.css">
+  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/list-page.css?v=<?php echo @filemtime(FCPATH.'dist/css/list-page.css'); ?>">
+  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/modal-ui.css?v=<?php echo @filemtime(FCPATH.'dist/css/modal-ui.css'); ?>">
+  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/theme-green.css?v=<?php echo @filemtime(FCPATH.'dist/css/theme-green.css'); ?>">
+  <style type="text/css">
+    /* highlight menu sidebar yang sedang dibuka (harus setelah css template) */
+    .sidebar.sidebar-style-2[data-background-color] .nav.nav-secondary > .nav-item.active > a { background: #0f8a5f !important; box-shadow: 0 4px 12px rgba(15,138,95,.35) !important; border-radius: 8px; }
+    .sidebar.sidebar-style-2[data-background-color] .nav.nav-secondary > .nav-item.active > a i,
+    .sidebar.sidebar-style-2[data-background-color] .nav.nav-secondary > .nav-item.active > a p,
+    .sidebar.sidebar-style-2[data-background-color] .nav.nav-secondary > .nav-item.active > a .caret { color: #fff !important; }
+    .sidebar.sidebar-style-2[data-background-color] .nav-collapse li.active > a { background: rgba(52,211,153,.14) !important; border-radius: 8px; }
+    .sidebar.sidebar-style-2[data-background-color] .nav-collapse li.active > a .sub-item { color: #34d399 !important; font-weight: 700; }
+    .sidebar.sidebar-style-2[data-background-color] .nav-collapse li.active > a .sub-item:before { background: #34d399 !important; }
+  </style>
 
 </head>
 <body>
-  <div class="wrapper sidebar_minimize">
+  <div class="wrapper">
     <!-- Sidebar -->
     <div class="sidebar sidebar-style-2" data-background-color="dark">
       <div class="sidebar-logo">
         <!-- Logo Header -->
         <div class="logo-header" data-background-color="dark">
-          <a href="<?php echo base_url(); ?>/Dashboard" class="logo">
-            <img
-            src="<?php echo base_url(); ?>assets/logo.png"
-            alt="navbar brand"
-            class="navbar-brand"
-            height="50"
-            /><h1 style="color:#ffffff; margin-top:10px;">Pionir</h1>
+          <a href="<?php echo base_url(); ?>Dashboard" class="logo pos-brand">
+            <span class="pos-brand-icon"><i class="fas fa-shopping-cart"></i></span>
+            <span class="pos-brand-text"><b>POS</b><small>Point of Sale</small></span>
           </a>
           <div class="nav-toggle">
             <button class="btn btn-toggle toggle-sidebar">
@@ -297,6 +312,57 @@
         </div>
       </div>
     </div>
+    <?php
+      // tentukan menu sidebar yang aktif dari controller/method yang sedang dibuka
+      $nav_class  = strtolower($this->router->fetch_class());
+      $nav_method = strtolower($this->router->fetch_method());
+      $nav_active = $nav_class.'/'.$nav_method;
+      $nav_alias  = array(
+        'dashboard/index'             => 'dashboard',
+        'dashboard/admin'             => 'dashboard',
+        'masterdata/settingproduct'   => 'masterdata/product',
+        'search/index'                => 'search',
+        'purchase/addpo'              => 'purchase/po',
+        'purchase/editpo'             => 'purchase/po',
+        'purchase/addpurchase'        => 'purchase/purchases',
+        'purchase/addreturpurchase'   => 'purchase/returpurchase',
+        'sales/addsales'              => 'sales/salespage',
+        'sales/addretursales'         => 'sales/retursales',
+        'payment/debtpayview'         => 'payment/debt',
+        'payment/receivablepayview'   => 'payment/receivable',
+        'opname/index'                => 'opname',
+        'opname/addopname'            => 'opname',
+      );
+      if(isset($nav_alias[$nav_active])){
+        $nav_active = $nav_alias[$nav_active];
+      }else if(strpos($nav_class, 'report') === 0){
+        $nav_active = 'report';
+      }
+    ?>
+    <script>
+      (function(){
+        var base   = '<?php echo base_url(); ?>'.toLowerCase();
+        var active = '<?php echo $nav_active; ?>';
+        var links  = document.querySelectorAll('.sidebar .nav a[href]');
+        for(var i = 0; i < links.length; i++){
+          var href = links[i].getAttribute('href').toLowerCase().replace(base, '').replace(/^\/+|\/+$/g, '');
+          if(href != active){ continue; }
+
+          var li = links[i].closest('li');
+          li.classList.add('active');
+
+          var collapse = li.closest('.collapse');
+          if(collapse){
+            collapse.classList.add('show');
+            var parent = collapse.closest('li.nav-item');
+            parent.classList.add('active', 'submenu');
+            var toggle = parent.querySelector('a[data-bs-toggle="collapse"]');
+            if(toggle){ toggle.classList.remove('collapsed'); toggle.setAttribute('aria-expanded', 'true'); }
+          }
+          break;
+        }
+      })();
+    </script>
     <!-- End Sidebar -->
 
     <div class="main-panel">
@@ -332,6 +398,13 @@
         >
         <div class="container-fluid">
           <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+            <?php if($data['check_auth']['check_auth_nav'][10]->nav_bar == 'Y'){ ?>
+            <li class="nav-item me-2">
+              <a href="<?php echo base_url(); ?>Sales/pos" class="btn btn-success btn-sm fw-bold">
+                <i class="fas fa-cart-plus me-1"></i> POS
+              </a>
+            </li>
+            <?php } ?>
             <li
             class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none"
             >
@@ -369,121 +442,53 @@
           aria-expanded="false"
           >
           <i class="fa fa-bell"></i>
-          <span class="notification">2</span>
+          <span class="notification" id="notifCount" style="display:none;">0</span>
         </a>
         <ul
         class="dropdown-menu notif-box animated fadeIn"
         aria-labelledby="notifDropdown"
         >
         <li>
-          <div class="dropdown-title">
-            Ada 2 Notiifikasi Terbaru
+          <div class="dropdown-title" id="notifTitle">
+            Tidak ada notifikasi
           </div>
         </li>
         <li>
           <div class="notif-scroll scrollbar-outer">
-            <div class="notif-center">
-              <a href="#">
-                <div class="notif-icon notif-primary">
-                  <i class="fas fa-coins"></i>
-                </div>
-                <div class="notif-content">
-                  <span class="block">Item Di Bawah Stock </span>
-                  <span class="time">4 Item</span>
-                </div>
-              </a>
-              <a href="#">
-                <div class="notif-icon notif-success">
-                  <i class="fas fa-file-invoice"></i>
-                </div>
-                <div class="notif-content">
-                  <span class="block">Tagihan Jatuh Tempo Hari Ini</span>
-                  <span class="time">5 Tagihan</span>
-                </div>
-              </a>
-            </div>
+            <div class="notif-center" id="notifList"></div>
           </div>
         </li>
+        <script>
+          (function(){
+            function esc(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+            function loadStockNotif(){
+              fetch('<?php echo base_url(); ?>Dashboard/notif_stock', {credentials: 'same-origin'})
+                .then(function(r){ return r.json(); })
+                .then(function(res){
+                  var total = res.total || 0;
+                  var badge = document.getElementById('notifCount');
+                  badge.textContent = total;
+                  badge.style.display = total > 0 ? '' : 'none';
+                  document.getElementById('notifTitle').textContent = total > 0 ? ('Ada ' + total + ' item di bawah minimal stock') : 'Tidak ada notifikasi';
+                  var html = '';
+                  (res.items || []).forEach(function(it){
+                    html += '<a href="<?php echo base_url(); ?>Dashboard"><div class="notif-icon notif-danger"><i class="fas fa-box-open"></i></div>' +
+                      '<div class="notif-content"><span class="block">' + esc(it.name) + '</span>' +
+                      '<span class="time">Stok ' + it.stock + ' / Min ' + it.min + '</span></div></a>';
+                  });
+                  if(total > (res.items || []).length){
+                    html += '<a href="<?php echo base_url(); ?>Dashboard"><div class="notif-content"><span class="time">+ ' + (total - res.items.length) + ' item lainnya, lihat di Dashboard</span></div></a>';
+                  }
+                  document.getElementById('notifList').innerHTML = html;
+                })
+                .catch(function(){});
+            }
+            document.addEventListener('DOMContentLoaded', loadStockNotif);
+            setInterval(loadStockNotif, 300000);
+          })();
+        </script>
       </ul>
     </li>
-    <li class="nav-item topbar-icon dropdown hidden-caret">
-      <a
-      class="nav-link"
-      data-bs-toggle="dropdown"
-      href="#"
-      aria-expanded="false"
-      >
-      <i class="fas fa-layer-group"></i>
-    </a>
-    <div class="dropdown-menu quick-actions animated fadeIn">
-      <div class="quick-actions-header">
-        <span class="title mb-1">Quick Actions</span>
-        <span class="subtitle op-7">Shortcuts</span>
-      </div>
-      <div class="quick-actions-scroll scrollbar-outer">
-        <div class="quick-actions-items">
-          <div class="row m-0">
-            <a class="col-6 col-md-4 p-0" href="#">
-              <div class="quick-actions-item">
-                <div class="avatar-item bg-danger rounded-circle">
-                  <i class="far fa-calendar-alt"></i>
-                </div>
-                <span class="text">Calendar</span>
-              </div>
-            </a>
-            <a class="col-6 col-md-4 p-0" href="#">
-              <div class="quick-actions-item">
-                <div
-                class="avatar-item bg-warning rounded-circle"
-                >
-                <i class="fas fa-map"></i>
-              </div>
-              <span class="text">Maps</span>
-            </div>
-          </a>
-          <a class="col-6 col-md-4 p-0" href="#">
-            <div class="quick-actions-item">
-              <div class="avatar-item bg-info rounded-circle">
-                <i class="fas fa-file-excel"></i>
-              </div>
-              <span class="text">Reports</span>
-            </div>
-          </a>
-          <a class="col-6 col-md-4 p-0" href="#">
-            <div class="quick-actions-item">
-              <div
-              class="avatar-item bg-success rounded-circle"
-              >
-              <i class="fas fa-envelope"></i>
-            </div>
-            <span class="text">Emails</span>
-          </div>
-        </a>
-        <a class="col-6 col-md-4 p-0" href="#">
-          <div class="quick-actions-item">
-            <div
-            class="avatar-item bg-primary rounded-circle"
-            >
-            <i class="fas fa-file-invoice-dollar"></i>
-          </div>
-          <span class="text">Invoice</span>
-        </div>
-      </a>
-      <a class="col-6 col-md-4 p-0" href="#">
-        <div class="quick-actions-item">
-          <div
-          class="avatar-item bg-secondary rounded-circle"
-          >
-          <i class="fas fa-credit-card"></i>
-        </div>
-        <span class="text">Payments</span>
-      </div>
-    </a>
-  </div>
-</div>
-</div>
-</div>
-</li>
 
 <li class="nav-item topbar-user dropdown hidden-caret">
   <a

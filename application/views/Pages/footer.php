@@ -56,9 +56,76 @@
 
 <script>
 
+  // bahasa default semua DataTables (kotak cari tanpa label, placeholder "Cari...")
+  $.extend(true, $.fn.dataTable.defaults, {
+    language: {
+      search: '',
+      searchPlaceholder: window.listSearchPlaceholder || 'Cari...',
+      lengthMenu: 'Tampilkan _MENU_ data',
+      info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+      infoEmpty: 'Menampilkan 0 sampai 0 dari 0 data',
+      infoFiltered: '(disaring dari _MAX_ data)',
+      zeroRecords: 'Data tidak ditemukan',
+      emptyTable: 'Belum ada data',
+      processing: 'Memuat...'
+    }
+  });
 
+  // halaman daftar: pindahkan kotak cari DataTables ke deretan tombol di kanan atas kartu
+  $(document).on('init.dt', function (e, settings) {
+    var wrapper = $(settings.nTableWrapper);
+    // hanya tabel utama di badan kartu, bukan tabel di dalam modal
+    var body = wrapper.closest('.list-card > .card-body');
+    if (!body.length || wrapper.closest('.modal').length) { return; }
+    var actions = body.closest('.list-card').find('.list-actions').first();
+    if (actions.length && !actions.find('.dataTables_filter').length) {
+      actions.prepend(wrapper.find('.dataTables_filter'));
+    }
+  });
 
+  // semua modal: tambahkan kotak ikon + subjudul di header (lihat dist/css/modal-ui.css)
+  // bisa diatur manual lewat atribut data-icon="fas fa-..." / data-subtitle="..." pada elemen .modal
+  $(function () {
+    var pageIcon = $('.list-card .list-icon i').first().attr('class') || 'fas fa-edit';
 
+    function modalIcon(title) {
+      var t = title.toLowerCase();
+      if (t.indexOf('hapus') === 0 || t.indexOf('delete') === 0) return 'fas fa-trash-alt';
+      if (t.indexOf('print') === 0 || t.indexOf('cetak') === 0) return 'fas fa-print';
+      if (t.indexOf('filter') >= 0 || t.indexOf('cari') === 0 || t.indexOf('search') >= 0) return 'fas fa-filter';
+      if (t.indexOf('setting') >= 0 || t.indexOf('pengaturan') >= 0 || t.indexOf('akses') >= 0) return 'fas fa-cog';
+      if (t.indexOf('detail') === 0) return 'fas fa-info-circle';
+      return pageIcon;
+    }
+
+    function modalSubtitle(title) {
+      var m;
+      if ((m = title.match(/^tambah\s+(.+)$/i))) return 'Tambahkan ' + m[1].toLowerCase() + ' baru ke dalam sistem.';
+      if ((m = title.match(/^edit\s+(.+)$/i)) || (m = title.match(/^ubah\s+(.+)$/i))) return 'Perbarui data ' + m[1].toLowerCase() + '.';
+      if (/^(print|cetak)/i.test(title)) return 'Pilih jenis dokumen yang akan dicetak.';
+      if (/filter|cari|search/i.test(title)) return 'Atur filter untuk menyaring data.';
+      return '';
+    }
+
+    $('.modal .modal-header').each(function () {
+      var header = $(this);
+      // header dengan desain khusus (mis. modal-header-disc) dibiarkan
+      if ($.trim(this.className) !== 'modal-header' || header.find('.modal-head-main').length) { return; }
+      var titleEl = header.find('.modal-title').first();
+      if (!titleEl.length) { return; }
+
+      var modal = header.closest('.modal');
+      var title = $.trim(titleEl.text());
+      var icon = modal.data('icon') || modalIcon(title);
+      var subtitle = modal.data('subtitle') !== undefined ? modal.data('subtitle') : modalSubtitle(title);
+
+      var main = $('<div class="modal-head-main"><div class="modal-head-icon"><i></i></div><div class="modal-head-text"></div></div>');
+      main.find('.modal-head-icon i').attr('class', icon);
+      titleEl.before(main);
+      main.find('.modal-head-text').append(titleEl);
+      if (subtitle) { main.find('.modal-head-text').append($('<p class="modal-subtitle"></p>').text(subtitle)); }
+    });
+  });
 
   $('#basic-datatables').DataTable({
     order: [[0, 'asc']],

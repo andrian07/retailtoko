@@ -1,8 +1,53 @@
-<?php 
+<?php
 define('DOC_ROOT_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 require DOC_ROOT_PATH . $this->config->item('header');
 ?>
 </div>
+
+<style>
+  /* ===== Komponen gambar produk (modal tambah & edit) ===== */
+  .pimg { width: 100%; }
+  .pimg-label { display: block; font-size: .9rem; font-weight: 700; color: #1f2937; margin-bottom: 6px; }
+  .pimg-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 2px dashed #cfd8e3;
+    border-radius: 14px;
+    background: #f8fafc;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .pimg-preview:hover { border-color: #0f8a5f; background: #f3faf6; }
+  .pimg-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; display: none; }
+  .pimg-preview.has-image { border-style: solid; border-color: #e5e7eb; }
+  .pimg-preview.has-image img { display: block; }
+  .pimg-preview.has-image .pimg-empty { display: none; }
+  .pimg-preview.has-image::after {
+    content: "\f030  Ganti gambar";
+    font-family: 'Font Awesome 5 Solid', 'Public Sans', sans-serif;
+    font-weight: 900;
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 8px; text-align: center; font-size: .8rem;
+    color: #fff; background: rgba(15, 23, 42, .55);
+    opacity: 0; transition: opacity .15s;
+  }
+  .pimg-preview.has-image:hover::after { opacity: 1; }
+  .pimg-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px; color: #6b7280; }
+  .pimg-empty-icon { width: 64px; height: 64px; border-radius: 16px; background: #e3f5ee; color: #0f8a5f; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; margin-bottom: 12px; }
+  .pimg-empty b { color: #374151; font-size: .95rem; }
+  .pimg-empty span { font-size: .8rem; margin-top: 2px; }
+  .pimg-name { font-size: .78rem; color: #6b7280; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1em; }
+  .pimg-actions { display: flex; gap: 8px; margin-top: 6px; }
+  .pimg-btn { height: 40px; border-radius: 10px; font-weight: 700; font-size: .88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #e5e7eb; background: #fff; color: #1f2937; transition: background .15s; }
+  .pimg-select { flex: 1; color: #0f8a5f; border-color: #b7e4cf; background: #f3faf6; }
+  .pimg-select:hover { background: #e3f5ee; }
+  .pimg-remove { width: 44px; color: #dc2626; border-color: #fbd5d5; background: #fff5f5; }
+  .pimg-remove:hover { background: #fee2e2; }
+  .pimg-remove:disabled { opacity: .4; cursor: not-allowed; }
+  .pimg-hint { display: block; font-size: .75rem; color: #9ca3af; margin-top: 6px; }
+</style>
 
 <div class="container">
   <div class="page-inner">
@@ -11,13 +56,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
     </div>
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-left">
-              <div>
-                <h3 class="fw-bold mb-3">Daftar Produk</h3>
-              </div>
-              <div class="ms-md-auto py-2 py-md-0">
+        <?php $this->load->view('Pages/Layout/list_header', array(
+          'list_icon'     => 'fas fa-box',
+          'list_title'    => 'Daftar Produk',
+          'list_subtitle' => 'Kelola data produk, harga, dan stok.',
+        )); ?>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#myModalsearch" type="button">
                   <span class="btn-label"><i class="fas fa-search"></i></span> Filter
                 </button>
@@ -113,14 +156,23 @@ require DOC_ROOT_PATH . $this->config->item('header');
                         <div class="row">
                           <div class="col-md-4 border-right">
                             <div class="form-group form-inline">
-                              <div class="proof">
-                                <div class="imgArea" data-title="">
-                                  <input type="file" name="screenshoot" id="screenshoot" hidden accept="image/*" />
-                                  <i class="fa-solid fa-cloud-arrow-up"></i>
-                                  <h4>upload screenshoot</h4>
-                                  <p>image size must be less than <span>2MB</span></p>
+                              <div class="pimg" id="pimg_add">
+                                <label class="pimg-label">Gambar Produk</label>
+                                <input type="file" name="screenshoot" id="screenshoot" hidden accept="image/*" />
+                                <div class="pimg-preview" title="Klik untuk memilih gambar">
+                                  <img alt="">
+                                  <div class="pimg-empty">
+                                    <div class="pimg-empty-icon"><i class="fas fa-image"></i></div>
+                                    <b>Belum ada gambar</b>
+                                    <span>Klik untuk memilih gambar</span>
+                                  </div>
                                 </div>
-                                <button class="selectImage" type="button">Select Image</button>
+                                <div class="pimg-name"></div>
+                                <div class="pimg-actions">
+                                  <button type="button" class="pimg-btn pimg-select"><i class="fas fa-upload"></i> Pilih Gambar</button>
+                                  <button type="button" class="pimg-btn pimg-remove" title="Hapus gambar"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                                <small class="pimg-hint">JPG, PNG, WEBP &middot; maksimal 2MB</small>
                               </div>
                             </div>
                           </div>
@@ -218,6 +270,20 @@ require DOC_ROOT_PATH . $this->config->item('header');
                            </div>
 
                           <div class="form-group form-inline">
+                            <label for="inlineinput" class="col-md-3 col-form-label">HPP Discount</label>
+                            <div class="col-md-12 p-0">
+                              <input type="number" step="any" min="0" class="form-control input-full" id="product_hpp_discount" name="product_hpp_discount" placeholder="Kosong = pakai HPP">
+                            </div>
+                          </div>
+
+                          <div class="form-group form-inline">
+                            <label for="inlineinput" class="col-md-3 col-form-label">HPP</label>
+                            <div class="col-md-12 p-0">
+                              <input type="number" min="0" class="form-control input-full" id="product_hpp" name="product_hpp" placeholder="HPP" value="0">
+                            </div>
+                          </div>
+
+                          <div class="form-group form-inline">
                             <label for="inlineinput" class="col-md-3 col-form-label">Deskripsi</label>
                             <div class="col-md-12 p-0">
                               <textarea class="form-control" id="product_description" name="product_description" rows="4"></textarea>
@@ -248,19 +314,24 @@ require DOC_ROOT_PATH . $this->config->item('header');
                       <div class="row">
                         <div class="col-md-4 border-right">
                           <div class="form-group form-inline">
-                            <div class="proof">
-                              <div class="imgArea_edit" data-title="">
-                                
-                                <input type="text" name="reset_image" id="reset_image" value="">
-                                <input type="file" name="screenshoot_edit" id="screenshoot_edit" hidden accept="image/*" />
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <h4>upload screenshoot</h4>
-                                <p>image size must be less than <span>2MB</span></p>
-                                <div id="active-image"></div>
+                            <div class="pimg" id="pimg_edit">
+                              <label class="pimg-label">Gambar Produk</label>
+                              <input type="hidden" name="reset_image" id="reset_image" value="">
+                              <input type="file" name="screenshoot_edit" id="screenshoot_edit" hidden accept="image/*" />
+                              <div class="pimg-preview" title="Klik untuk mengganti gambar">
+                                <img alt="">
+                                <div class="pimg-empty">
+                                  <div class="pimg-empty-icon"><i class="fas fa-image"></i></div>
+                                  <b>Belum ada gambar</b>
+                                  <span>Klik untuk memilih gambar</span>
+                                </div>
                               </div>
-                              <button class="selectImage_edit" type="button">Select Image</button>
-                              
-                              <button class="removeImage_edit" type="button" style="margin-top: 10px;padding: 10px 15px;border-radius: 10px;width: 100%;">Hapus Image</button>
+                              <div class="pimg-name"></div>
+                              <div class="pimg-actions">
+                                <button type="button" class="pimg-btn pimg-select"><i class="fas fa-upload"></i> Ganti Gambar</button>
+                                <button type="button" class="pimg-btn pimg-remove" title="Hapus gambar"><i class="fas fa-trash-alt"></i></button>
+                              </div>
+                              <small class="pimg-hint">JPG, PNG, WEBP &middot; maksimal 2MB</small>
                             </div>
                           </div>
 
@@ -368,6 +439,20 @@ require DOC_ROOT_PATH . $this->config->item('header');
                             <label for="inlineinput" class="col-md-3 col-form-label">Min Stok</label>
                             <div class="col-md-12 p-0">
                               <input type="number" class="form-control input-full" id="product_min_stock_edit" name="product_min_stock_edit" placeholder="Min Stock">
+                            </div>
+                          </div>
+
+                          <div class="form-group form-inline">
+                            <label for="inlineinput" class="col-md-3 col-form-label">HPP Discount</label>
+                            <div class="col-md-12 p-0">
+                              <input type="number" step="any" min="0" class="form-control input-full" id="product_hpp_discount_edit" name="product_hpp_discount_edit" placeholder="Kosong = pakai HPP">
+                            </div>
+                          </div>
+
+                          <div class="form-group form-inline">
+                            <label for="inlineinput" class="col-md-3 col-form-label">HPP</label>
+                            <div class="col-md-12 p-0">
+                              <input type="number" min="0" class="form-control input-full" id="product_hpp_edit" name="product_hpp_edit" placeholder="HPP">
                             </div>
                           </div>
 
@@ -675,95 +760,73 @@ require DOC_ROOT_PATH . $this->config->item('footer');
     return fileTypes.includes(file.type);
   }
 
-  let inputHidden = document.querySelector("#screenshoot");
-  let triggerInput = document.querySelector(".selectImage");
-  let imgArea = document.querySelector(".imgArea");
+  // komponen gambar produk (modal tambah & edit)
+  // produk tanpa gambar disimpan sebagai 'default.png' -> ditampilkan sebagai "Belum ada gambar"
+  function productImage(box){
+    var input = box.find('input[type=file]');
+    var preview = box.find('.pimg-preview');
+    var img = preview.find('img');
+    var name = box.find('.pimg-name');
+    var reset = box.find('#reset_image');
 
-  triggerInput.addEventListener("click",function(){
-    inputHidden.click();
-  })
-
-  inputHidden.addEventListener("change",function(e){
-    let image = e.target.files[0];
-    if(!validFileType(image)){
-      alert("invalid file type");
-      return;
+    function showEmpty(){
+      img.removeAttr('src');
+      preview.removeClass('has-image');
+      name.text('');
+      box.find('.pimg-remove').prop('disabled', true);
     }
-    if(image.size > 2097152){
-      alert("image size must be less than 2MB");
-      return;
-    }else{
-      const reader = new FileReader();
-      reader.addEventListener("load",function(){
-        const allImgs = document.querySelectorAll(".imgArea img");
-        allImgs.forEach((img) => {
-          img.remove();
-        })
-        const imgUrl = reader.result;
-        const img = document.createElement("img");
-        img.src = imgUrl;
-        imgArea.appendChild(img);
-        imgArea.classList.add("active");
-        imgArea.dataset.title = image.name;
-      })
-      reader.readAsDataURL(image);
+
+    function showImage(src, fileName){
+      img.off('error').on('error', showEmpty).attr('src', src);
+      preview.addClass('has-image');
+      name.text(fileName || '');
+      box.find('.pimg-remove').prop('disabled', false);
     }
-  })
-  /* END IMAGE UPLOAD */
 
+    box.find('.pimg-select, .pimg-preview').on('click', function(){ input.trigger('click'); });
 
-// Edit Image //
-
-  let inputHidden_edit = document.querySelector("#screenshoot_edit");
-  let triggerInput_edit = document.querySelector(".selectImage_edit");
-  let imgArea_edit = document.querySelector(".imgArea_edit");
-
-  triggerInput_edit.addEventListener("click",function(){
-    inputHidden_edit.click();
-  })
-
-  inputHidden_edit.addEventListener("change",function(e){
-    let image = e.target.files[0];
-    if(!validFileType(image)){
-      alert("invalid file type");
-      return;
-    }
-    if(image.size > 2097152){
-      alert("image size must be less than 2MB");
-      return;
-    }else{
-      const reader = new FileReader();
-      reader.addEventListener("load",function(){
-        const allImgs = document.querySelectorAll(".imgArea_edit img");
-        allImgs.forEach((img) => {
-          img.remove();
-        })
-        const imgUrl = reader.result;
-        const img = document.createElement("img");
-        img.src = imgUrl;
-        imgArea_edit.appendChild(img);
-        imgArea_edit.classList.add("active");
-        imgArea_edit.dataset.title = image.name;
-      })
-      reader.readAsDataURL(image);
-    }
-  })
-
-  const removeImageButton_edit = document.querySelector('.removeImage_edit');
-  if (removeImageButton_edit) {
-    removeImageButton_edit.addEventListener('click', function () {
-      const allImgs = document.querySelectorAll('.imgArea_edit img');
-      allImgs.forEach((img) => img.remove());
-      const defaultImg = document.createElement("img");
-      defaultImg.src = '<?php echo base_url(); ?>assets/products/default.png';
-      imgArea_edit.appendChild(defaultImg);
-      imgArea_edit.classList.add('active');
-      imgArea_edit.dataset.title = 'default.png';
-              $("#reset_image").val(1);
+    input.on('change', function(){
+      var file = this.files[0];
+      if(!file){ return; }
+      if(!validFileType(file)){
+        Swal.fire({ icon: 'error', title: 'Format tidak didukung', text: 'Pilih file gambar (JPG, PNG, WEBP, dll).' });
+        this.value = '';
+        return;
+      }
+      if(file.size > 2097152){
+        Swal.fire({ icon: 'error', title: 'Ukuran terlalu besar', text: 'Ukuran gambar maksimal 2MB.' });
+        this.value = '';
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(){ showImage(reader.result, file.name); };
+      reader.readAsDataURL(file);
+      reset.val('');
     });
+
+    box.find('.pimg-remove').on('click', function(){
+      input.val('');
+      reset.val(1);
+      showEmpty();
+    });
+
+    showEmpty();
+    return {
+      load: function(fileName){
+        input.val('');
+        reset.val('');
+        if(fileName && fileName != 'default.png'){
+          showImage('<?php echo base_url(); ?>assets/products/' + fileName, '');
+        }else{
+          showEmpty();
+        }
+      }
+    };
   }
 
-// End Edit Image //
+  var productImageAdd  = productImage($('#pimg_add'));
+  var productImageEdit = productImage($('#pimg_edit'));
+  /* END IMAGE UPLOAD */
 
 
   $('#exampleModaledit').on('show.bs.modal', function (event) {
@@ -779,7 +842,6 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       data: {id:id},
       success : function(data){
         if (data.code == "200"){
-          document.getElementById("active-image").innerHTML = "";
           let row = data.result[0];
           modal.find('#product_id_edit').val(id)
           modal.find('#product_code_edit').val(row.product_code)
@@ -792,13 +854,13 @@ require DOC_ROOT_PATH . $this->config->item('footer');
           modal.find('#product_tax_edit').val(row.is_ppn)
           modal.find('#product_type_edit').val(row.is_package)
           modal.find('#product_min_stock_edit').val(row.product_min_stock)
+          modal.find('#product_hpp_edit').val(row.product_hpp)
+          modal.find('#product_hpp_discount_edit').val(row.product_hpp_discount)
           modal.find('#product_description_edit').val(row.product_desc)
           modal.find('#product_status_edit').val(row.product_status)
 
 
-          var elem = document.createElement("img");
-          document.getElementById("active-image").appendChild(elem);
-          elem.src = '<?php echo base_url(); ?>assets/products/'+row.product_image;
+          productImageEdit.load(row.product_image);
         } else {
           Swal.fire({
             icon: 'error',

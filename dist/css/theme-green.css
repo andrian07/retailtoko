@@ -1,0 +1,92 @@
+/*
+    Tema hijau untuk semua form & komponen input.
+    Menimpa warna biru bawaan Bootstrap / Kaiadmin / Select2 / jQuery UI / SweetAlert.
+    Dimuat di header.php setelah semua CSS template.
+*/
+
+:root {
+    --app-green: #0f8a5f;
+    --app-green-dark: #0b6b4a;
+    --app-green-soft: #e3f5ee;
+    --app-green-ring: rgba(15, 138, 95, .15);
+}
+
+/* ===== Input fokus ===== */
+.form-control:focus,
+.form-select:focus,
+input[type="text"]:focus.form-control,
+textarea.form-control:focus {
+    border-color: var(--app-green) !important;
+    box-shadow: 0 0 0 3px var(--app-green-ring) !important;
+    outline: none;
+}
+
+/* ===== Checkbox / radio / switch ===== */
+.form-check-input:checked {
+    background-color: var(--app-green) !important;
+    border-color: var(--app-green) !important;
+}
+.form-check-input:focus { border-color: var(--app-green) !important; box-shadow: 0 0 0 3px var(--app-green-ring) !important; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--app-green); }
+
+/* ===== Tombol ===== */
+.btn-primary,
+.btn-success {
+    background: var(--app-green) !important;
+    border-color: var(--app-green) !important;
+    color: #fff !important;
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-success:hover, .btn-success:focus, .btn-success:active {
+    background: var(--app-green-dark) !important;
+    border-color: var(--app-green-dark) !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 3px var(--app-green-ring) !important;
+}
+.btn-primary.btn-border, .btn-outline-primary {
+    background: #fff !important;
+    color: var(--app-green) !important;
+    border-color: var(--app-green) !important;
+}
+.btn-outline-primary:hover { background: var(--app-green) !important; color: #fff !important; }
+
+/* ===== Warna teks / latar "primary" ===== */
+.text-primary { color: var(--app-green) !important; }
+.bg-primary { background-color: var(--app-green) !important; }
+a.text-primary:hover { color: var(--app-green-dark) !important; }
+.badge-primary { background: var(--app-green) !important; }
+
+/* ===== Select2 ===== */
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable,
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--app-green) !important;
+    color: #fff !important;
+}
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--app-green) !important;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field:focus { border-color: var(--app-green) !important; outline: none; }
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background: var(--app-green-soft) !important;
+    border-color: #b7e4cf !important;
+    color: var(--app-green-dark) !important;
+}
+
+/* ===== Autocomplete jQuery UI ===== */
+.ui-autocomplete .ui-menu-item .ui-state-active,
+.ui-autocomplete .ui-menu-item-wrapper.ui-state-active {
+    background: var(--app-green) !important;
+    border-color: var(--app-green) !important;
+    color: #fff !important;
+    margin: 0 !important;
+}
+
+/* ===== Pagination & nav ===== */
+.page-item.active .page-link { background-color: var(--app-green) !important; border-color: var(--app-green) !important; color: #fff !important; }
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link { background-color: var(--app-green) !important; }
+
+/* ===== SweetAlert: tombol konfirmasi ===== */
+.swal2-styled.swal2-confirm { background-color: var(--app-green) !important; }
+.swal2-styled.swal2-confirm:focus { box-shadow: 0 0 0 3px var(--app-green-ring) !important; }

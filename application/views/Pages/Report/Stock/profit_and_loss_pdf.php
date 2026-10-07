@@ -165,8 +165,33 @@ function rupiah($n) {
 
 <div class="spacer"></div><div class="spacer"></div>
 
+<!-- ── Laba per Bulan ── -->
+<div class="section-title">III. TOTAL LABA PER BULAN</div>
+<?php if (empty($d['laba_bulanan'])): ?>
+  <p style="padding:10px; color:#888; font-size:11px;">Tidak ada data pada periode ini.</p>
+<?php else: ?>
+<table class="detail-table">
+  <thead>
+    <tr><th style="width:60%">Bulan</th><th style="width:40%">Laba</th></tr>
+  </thead>
+  <tbody>
+    <?php $grand_bulan = 0; foreach ($d['laba_bulanan'] as $b): $grand_bulan += $b['laba']; ?>
+    <tr>
+      <td><?php echo date('F Y', strtotime($b['bulan'].'-01')); ?></td>
+      <td class="num <?php echo $b['laba'] >= 0 ? 'laba-pos' : 'laba-neg'; ?>"><?php echo rupiah($b['laba']); ?></td>
+    </tr>
+    <?php endforeach; ?>
+  </tbody>
+  <tfoot>
+    <tr><td style="text-align:center">TOTAL</td><td class="num"><?php echo rupiah($grand_bulan); ?></td></tr>
+  </tfoot>
+</table>
+<?php endif; ?>
+
+<div class="spacer"></div><div class="spacer"></div>
+
 <!-- ── Detail per Produk ── -->
-<div class="section-title">III. RINCIAN LABA PER PRODUK</div>
+<div class="section-title">IV. RINCIAN LABA PER PRODUK</div>
 <?php if (empty($d['detail'])): ?>
   <p style="padding:10px; color:#888; font-size:11px;">Tidak ada data penjualan pada periode ini.</p>
 <?php else: ?>

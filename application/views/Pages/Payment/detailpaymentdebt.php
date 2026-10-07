@@ -1,154 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+<?php
+$this->load->view('Pages/Layout/detail_layout');
+$h = $data['header_debt_payment'][0];
 
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/plugins.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/kaiadmin.min.css" />
-  <link rel="stylesheet" href="<?php echo base_url(); ?>dist/css/style.css" />
-  <style type="text/css">
-    .title-detail{
-      text-align: right;
-    }
-    .row {
-      --bs-gutter-x: 0 !important;
-    }
-    body{
-      background: #fff;
-    }
+dt_head('Detail Pembayaran Hutang', 'Informasi lengkap pelunasan hutang ke supplier.', 'fas fa-wallet', array(
+  array('Cetak', 'fas fa-print', 'print', true),
+));
 
-    .fancybox__content, 
-    .fancybox__iframe,
-    #fancybox__iframe_1_0{
-      height: 518px !important;
-    }
+dt_cards(array(
+  dt_company_card(),
+  array('icon' => 'fas fa-truck', 'html' =>
+    '<div class="lbl">Supplier</div><div class="val">'.dt_e($h->supplier_name).'</div>'),
+  array('icon' => 'far fa-credit-card', 'html' =>
+    '<div class="lbl">Metode Pembayaran</div><div class="val">'.dt_e($h->payment_name).'</div>'.
+    '<div class="lbl mt-1">Tanggal</div><div class="val">'.dt_date($h->payment_debt_date).'</div>'),
+  array('icon' => 'fas fa-file-alt', 'highlight' => true, 'html' =>
+    '<div class="lbl">No. Transaksi</div><div class="val">'.dt_e($h->payment_debt_invoice).'</div>'.
+    '<div class="dt-meta"><div><span class="lbl">Status</span>'.dt_status($h->status).'</div></div>'),
+));
 
-    .header-details p{
-      line-height: 10px;
-    }
+$rows = array();
+foreach ($data['detail_debt_payment'] as $r) {
+  $rows[] = array(dt_e($r->hd_purchase_invoice), dt_date($r->hd_purchase_date), dt_rp($r->dt_payment_debt_discount), dt_rp($r->dt_payment_debt_retur), dt_rp($r->dt_payment_debt_nominal));
+}
+dt_table(array(array('No Invoice Pembelian'), array('Tgl'), array('Discount'), array('Potongan Retur'), array('Nominal Bayar')), $rows);
 
-    .header-details{
-      padding-top: 15px;
-      padding-left: 1%;
-    }
-  </style>
-</head>
-<body>
-  <div class="row">
-    <div class="col-md-12 header-detail">
-      <h2>Detail Pembayaran Hutang</h2>
-    </div>
-  </div>
+dt_bottom(
+  false,
+  array(array('Dibuat', $h->user_name, dt_date($h->trx_created_at, 'd-M-Y H:i'))),
+  array(
+    array('Total Pembayaran', dt_rp($h->payment_debt_total_pay), 'fas fa-coins'),
+    array('Total Diskon', dt_rp($h->payment_debt_total_discount), 'fas fa-tag" style="color:#f59e0b'),
+    array('Total Retur', dt_rp($h->payment_debt_total_retur), 'fas fa-undo'),
+    array('Total Nota', dt_rp($h->payment_debt_total_nota), 'fas fa-money-bill-wave', 'grand'),
+  )
+);
 
-  <?php foreach($data['header_debt_payment'] as $row){ ?>
-    <div class="row header-details">
-      <div class="col-md-4">
-        <p class="detail-company"><b><?php echo company ?> </b></p>
-        <p><?php echo company_address ?></p>
-        <p><?php echo company_phone ?></p>
-      </div>
-      <div class="col-md-4">
-        <p class="detail-invoice"><?php echo $row->payment_debt_invoice; ?></p>
-        <p>Supplier: <b><?php echo $row->supplier_name; ?></b></p>
-        <p>Metode Bayar: <b><?php echo $row->payment_name; ?></b></p>
-      </div>
-      <div class="col-md-4">
-        <p>Status: 
-          <b>
-            <?php 
-            if($row->status == 'Success'){
-              echo '<span class="badge badge-primary">Success</span>';
-            }else{
-              echo '<span class="badge badge-danfer">Cancel</span>';
-            }
-            ?>
-          </b>
-        </p>
-        <p>Tanggal: <b><?php $date = date_create($row->payment_debt_date);  echo date_format($date,"d-M-Y"); ?></b></p>
-      </div>
-    </div>
-  <?php } ?>
-
-  <div class="row">
-    <div class="col-md-12"> 
-      <table class="table table-striped mt-3" style="border:none !important; font-weight:500;">
-        <thead>
-          <tr>
-            <th scope="col">No Invoice Pembelian</th>
-            <th scope="col">Tgl</th>
-            <th scope="col">Discount</th>
-            <th scope="col">Potongan Retur</th>
-            <th scope="col">Nominal Bayar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach($data['detail_debt_payment'] as $row){ ?>
-            <tr>
-              <td><?php echo $row->hd_purchase_invoice; ?></td>
-              <td><?php $date = date_create($row->hd_purchase_date);  echo date_format($date,"d-M-Y"); ?></td>
-              <td><?php echo number_format($row->dt_payment_debt_discount); ?></td>
-              <td><?php echo number_format($row->dt_payment_debt_retur); ?></td>
-              <td><?php echo number_format($row->dt_payment_debt_nominal); ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <p style="margin-left: 15px; font-size: 15px;">Logs:</p>
-  <div class="row">
-    <div class="col-md-4">
-      <table class="table table-hover" style="border:none !important;">
-        <tbody>
-          <?php foreach($data['header_debt_payment'] as $row){ ?>
-            <tr>
-              <td scope="col"><b>Action</b></td>
-              <td scope="col"><b>User</b></td>
-              <td scope="col"><b>Created At</b></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Dibuat</b></td>
-              <td scope="col"><b><?php echo $row->user_name; ?></b></td>
-              <td scope="col"><b><?php $date = date_create($row->created_at);  echo date_format($date,"d-M-Y"); ?></b></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="col-md-4">
-
-    </div>
-
-    <div class="col-md-4">
-      <table class="table" style="border:none !important; text-align:right;">
-        <tbody>
-          <?php foreach($data['header_debt_payment'] as $row){ ?>
-            <tr>
-              <td scope="col"><b>Total Pembayaran: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_pay); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Total Diskon: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_discount); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Total Retur: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_retur); ?></td>
-            </tr>
-            <tr>
-              <td scope="col"><b>Total Nota: </b></td>
-              <td scope="col">Rp. <?php echo number_format($row->payment_debt_total_nota); ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</body>
-
-</html>
+dt_foot();

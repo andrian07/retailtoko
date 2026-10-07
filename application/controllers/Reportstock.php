@@ -330,6 +330,7 @@ class Reportstock extends CI_Controller {
         $total_hpp          = $this->reportstock_model->get_total_hpp($start_date, $end_date);
         $total_hpp_retur    = $this->reportstock_model->get_total_hpp_retur($start_date, $end_date);
         $detail             = $this->reportstock_model->get_pl_detail_by_product($start_date, $end_date);
+        $laba_bulanan       = $this->reportstock_model->get_laba_per_bulan($start_date, $end_date);
 
         $penjualan_bersih = $total_sales - $total_retur_sales;
         $hpp_bersih       = $total_hpp   - $total_hpp_retur;
@@ -339,7 +340,7 @@ class Reportstock extends CI_Controller {
             'start_date', 'end_date',
             'total_sales', 'total_retur_sales', 'penjualan_bersih',
             'total_hpp', 'total_hpp_retur', 'hpp_bersih',
-            'laba_kotor', 'detail'
+            'laba_kotor', 'detail', 'laba_bulanan'
         );
 
         $htmlView = $this->load->view('Pages/Report/Stock/profit_and_loss_pdf', $data, true);

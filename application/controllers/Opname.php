@@ -325,7 +325,8 @@ class Opname extends CI_Controller {
 
 		
 					$product_id 	= $row['temp_opname_product_id'];
-					$qty 			= $row['temp_opname_fisik_stock'];
+					// qty kartu stok = selisih opname (bukan stok fisik), arah Plus/Minus ada di $status
+					$qty 			= abs($row['temp_opname_diferent_stock']);
 					$last_stock 	= $row['temp_opname_system_stock'];
 					$new_stock 		= $row['temp_opname_fisik_stock'];
 					$get_last_stock = $this->global_model->get_last_stock($product_id, $warehouse_id);

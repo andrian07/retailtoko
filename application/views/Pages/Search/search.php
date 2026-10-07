@@ -254,6 +254,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
                     <option value="2">Harga Toko</option>
                     <option value="3">Harga Sales</option>
                     <option value="4">Harga Khusus</option>
+                    <option value="5">Harga Hulu</option>
 
                   </select>
 
@@ -735,6 +736,7 @@ function renderSummaryText() {
           case '2': price = parseInt(item.product_sell_price_2) || 0; break;
           case '3': price = parseInt(item.product_sell_price_3) || 0; break;
           case '4': price = parseInt(item.product_sell_price_4) || 0; break;
+          case '5': price = parseInt(item.product_sell_price_5) || 0; break;
           default: price = parseInt(item.product_sell_price_1) || 0;
         }
       } else {

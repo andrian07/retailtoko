@@ -19,7 +19,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
     gap: 8px;
   }
   .po-section-title i {
-    color: #fd7e14;
+    color: #0f8a5f;
     font-size: 0.9rem;
   }
   .card.po-header-card {
@@ -58,8 +58,8 @@ require DOC_ROOT_PATH . $this->config->item('header');
     padding: 24px 28px;
   }
   .input-temp-wrapper-po {
-    background: linear-gradient(135deg, #fff8f0 0%, #fffaf5 100%);
-    border: 1.5px dashed #ffc078;
+    background: linear-gradient(135deg, #f6fcf9 0%, #f6fcf9 100%);
+    border: 1.5px dashed #9fd9bf;
     border-radius: 10px;
     padding: 18px 20px 8px 20px;
     margin-bottom: 20px;
@@ -73,7 +73,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
     justify-content: center;
     padding: 0;
     font-size: 1rem;
-    box-shadow: 0 3px 8px rgba(253,126,20,0.3);
+    box-shadow: 0 3px 8px rgba(15,138,95,0.3);
   }
   .po-summary-card {
     background: linear-gradient(135deg, #f4f6f9 0%, #eaecef 100%);
@@ -120,7 +120,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
   .po-summary-card .summary-row.ppn-row .ppn-check {
     width: 20px;
     height: 20px;
-    accent-color: #fd7e14;
+    accent-color: #0f8a5f;
     cursor: pointer;
     flex-shrink: 0;
   }
@@ -137,7 +137,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
     font-size: 1rem;
     background: #e9ecef;
     border-color: #adb5bd;
-    color: #fd7e14;
+    color: #0f8a5f;
   }
   .po-page-title-bar {
     display: flex;
@@ -148,7 +148,7 @@ require DOC_ROOT_PATH . $this->config->item('header');
   .po-page-title-bar .title-icon {
     width: 42px;
     height: 42px;
-    background: linear-gradient(135deg, #fd7e14, #e8650a);
+    background: linear-gradient(135deg, #0f8a5f, #0b6b4a);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -168,11 +168,11 @@ require DOC_ROOT_PATH . $this->config->item('header');
     font-size: 0.8rem;
   }
   .supplier-highlight-po {
-    border-left: 4px solid #fd7e14;
+    border-left: 4px solid #0f8a5f;
     padding-left: 12px;
   }
   #temp-po-list thead th {
-    background: #fd7e14;
+    background: #0f8a5f;
     color: #fff;
     font-size: 0.78rem;
     text-transform: uppercase;
@@ -726,7 +726,7 @@ require DOC_ROOT_PATH . $this->config->item('footer');
       text: "Apakah Anda Yakin Menghapus Data ?",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
+      confirmButtonColor: '#0f8a5f',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Hapus'
     }).then((result) => {

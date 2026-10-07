@@ -297,6 +297,7 @@ class Reportmaster extends CI_Controller {
 			$sheet->setCellValue('T3', "Toko");
 			$sheet->setCellValue('V3', "Sales");
 			$sheet->setCellValue('X3', "Khusus");
+			$sheet->setCellValue('Z3', "Hulu");
 
 
 			$sheet->setCellValue('R4', "Harga Jual");
@@ -307,6 +308,8 @@ class Reportmaster extends CI_Controller {
 			$sheet->setCellValue('W4', "Harga Diskon");
 			$sheet->setCellValue('X4', "Harga Jual");
 			$sheet->setCellValue('Y4', "Harga Diskon");
+			$sheet->setCellValue('Z4', "Harga Jual");
+			$sheet->setCellValue('AA4', "Harga Diskon");
 
 			$data = $this->reportmaster_model->get_report_product($brand_report, $category_report, $Supplier_report)->result_array();
 			$i = 5;
@@ -349,6 +352,8 @@ class Reportmaster extends CI_Controller {
 				$sheet->setCellValue('W'.$i, $row['product_sell_percentage_3'].'%');
 				$sheet->setCellValue('X'.$i, $row['product_sell_price_4']);
 				$sheet->setCellValue('Y'.$i, $row['product_sell_percentage_4'].'%');
+				$sheet->setCellValue('Z'.$i, $row['product_sell_price_5']);
+				$sheet->setCellValue('AA'.$i, $row['product_sell_percentage_5'].'%');
 				$i++;
 			}
 

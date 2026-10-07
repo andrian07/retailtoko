@@ -9,7 +9,7 @@ class global_model extends CI_Model {
 
     public function check_auth_nav($user_role_id)
     {
-        $query = $this->db->query("select * from ms_role a, ms_role_permision b, ms_module c where a.role_id = b.role_id and b.module_id = c.module_id and a.role_id = '".$user_role_id."'");
+        $query = $this->db->query("select * from ms_role a, ms_role_permision b, ms_module c where a.role_id = b.role_id and b.module_id = c.module_id and a.role_id = '".$user_role_id."' order by c.module_id");
         $result = $query->result();
         return $result;
     }
@@ -236,6 +236,86 @@ class global_model extends CI_Model {
         $this->db->where('ms_note_id ', '1');
         $this->db->update('ms_note');
     }
+
+    // start dashboard
+
+    public function dash_sales_summary($start, $end)
+    {
+        $query = $this->db->query("select coalesce(sum(hd_sales_total), 0) as total, count(*) as trx from hd_sales where hd_sales_status = 'Success' and hd_sales_date between ? and ?", array($start, $end));
+        return $query->row_array();
+    }
+
+    public function dash_sales_item($start, $end)
+    {
+        $query = $this->db->query("select coalesce(sum(b.dt_sales_qty), 0) as qty from hd_sales a join dt_sales b on a.hd_sales_id = b.hd_sales_id where a.hd_sales_status = 'Success' and a.hd_sales_date between ? and ?", array($start, $end));
+        return $query->row_array();
+    }
+
+    public function dash_sales_daily($start, $end)
+    {
+        $query = $this->db->query("select hd_sales_date as tgl, sum(hd_sales_total) as total, count(*) as trx from hd_sales where hd_sales_status = 'Success' and hd_sales_date between ? and ? group by hd_sales_date", array($start, $end));
+        return $query->result_array();
+    }
+
+    public function dash_stock_asset()
+    {
+        $query = $this->db->query("select coalesce(sum(b.stock * a.product_hpp), 0) as asset, coalesce(sum(b.stock), 0) as qty from ms_product a join ms_product_stock b on a.product_id = b.product_id where a.is_active = 'Y'");
+        return $query->row_array();
+    }
+
+    public function dash_last_activity($limit)
+    {
+        $query = $this->db->query("select * from activity_table order by activity_table_id desc limit ".(int) $limit);
+        return $query->result_array();
+    }
+
+    // cari nominal transaksi berdasarkan nomor invoice di deskripsi aktifitas
+    public function dash_invoice_amount($inv)
+    {
+        $query = $this->db->query("
+            select hd_sales_total as amount from hd_sales where hd_sales_inv = ?
+            union all select hd_purchase_grand_total from hd_purchase where hd_purchase_invoice = ?
+            union all select payment_receivable_total_pay from hd_payment_receivable where payment_receivable_invoice = ?
+            union all select payment_debt_total_pay from hd_payment_debt where payment_debt_invoice = ?
+            union all select hd_retur_sales_total from hd_retur_sales where hd_retur_sales_inv = ?
+            union all select hd_retur_purchase_total from hd_retur_purchase where hd_retur_purchase_inv = ?
+            union all select hd_po_grand_total from hd_po where hd_po_invoice = ?
+            limit 1", array($inv, $inv, $inv, $inv, $inv, $inv, $inv));
+        $row = $query->row_array();
+        return $row ? $row['amount'] : null;
+    }
+
+    public function dash_top_product($limit)
+    {
+        $query = $this->db->query("select c.product_id, c.product_code, c.product_name, c.product_image, d.category_name, sum(b.dt_sales_qty) as qty from hd_sales a join dt_sales b on a.hd_sales_id = b.hd_sales_id join ms_product c on b.dt_sales_product_id = c.product_id left join ms_category d on c.product_category = d.category_id where a.hd_sales_status = 'Success' and a.hd_sales_date >= date_sub(curdate(), interval 3 month) group by c.product_id order by qty desc limit ".(int) $limit);
+        return $query->result_array();
+    }
+
+    public function dash_overdue_invoice($limit)
+    {
+        $query = $this->db->query("select hd_sales_id, hd_sales_inv, hd_sales_date, hd_sales_due_date, hd_sales_remaining_debt, datediff(curdate(), hd_sales_due_date) as late_days from hd_sales where hd_sales_status = 'Success' and hd_sales_remaining_debt > 0 and hd_sales_due_date < curdate() order by hd_sales_due_date asc limit ".(int) $limit);
+        return $query->result_array();
+    }
+
+    public function dash_overdue_count()
+    {
+        $query = $this->db->query("select count(*) as total from hd_sales where hd_sales_status = 'Success' and hd_sales_remaining_debt > 0 and hd_sales_due_date < curdate()");
+        return $query->row_array()['total'];
+    }
+
+    public function dash_low_stock($limit)
+    {
+        $query = $this->db->query("select a.product_id, a.product_code, a.product_name, a.product_image, a.product_min_stock, coalesce(sum(b.stock), 0) as stock from ms_product a left join ms_product_stock b on a.product_id = b.product_id where a.is_active = 'Y' and a.product_min_stock > 0 group by a.product_id having stock <= a.product_min_stock order by stock / a.product_min_stock asc limit ".(int) $limit);
+        return $query->result_array();
+    }
+
+    public function dash_low_stock_count()
+    {
+        $query = $this->db->query("select count(*) as total from (select a.product_id from ms_product a left join ms_product_stock b on a.product_id = b.product_id where a.is_active = 'Y' and a.product_min_stock > 0 group by a.product_id having coalesce(sum(b.stock), 0) <= a.product_min_stock) t");
+        return $query->row_array()['total'];
+    }
+
+    // end dashboard
 
     public function search_purchase_inv($keyword, $supplier_id)
     {

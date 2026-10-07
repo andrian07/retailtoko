@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Pionir Backoffice</title>
+   <title>CV. Anugrah Harapan Utama</title>
   <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
-  <link rel="icon" href="<?php echo base_url(); ?>assets/logo.png" type="image/x-icon"/>
   <style type="text/css">
     .img-thumbnail {
       padding: .25rem;
@@ -59,7 +58,7 @@
 
 </head>
 <body>
-  <div class="wrapper sidebar_minimize">
+  <div class="wrapper">
 
     <div class="main-panel">
       <div class="main-header">
